@@ -1,0 +1,317 @@
+<!--  uncomment for use in visualforce page <apex:page
+  docType="html-5.0"
+  applyHtmlTag="false"
+  applyBodyTag="false"
+  showHeader="false"
+  sidebar="false"
+  standardStylesheets="false"
+  title="Unused Title"> -->
+<!-- 
+    Copyright (c) 2021, salesforce.com, inc.
+    All rights reserved.
+    SPDX-License-Identifier: BSD-3-Clause
+    For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+-->
+<html>
+
+<head>
+  <link rel="stylesheet" type="text/css" href="assets/slds-stylesheet.css" media="screen">
+  </link>
+  <link rel="stylesheet" type="text/css" href="assets/ottapp.css" media="screen">
+  </link>
+  <link rel="icon" href="data:;base64,=">
+  <title>BYOC OTT Demo App</title>
+</head>
+
+<body>
+
+  <div class="slds-grid slds-gutters demo-app-body">
+    <div
+      class="slds-col slds-m-top_large slds-m-bottom_xx-large slds-m-left_x-large slds-m-right-small demo-app-setup-panel">
+
+      <div class="slds-text-longform slds-m-top_medium">
+        <h3 class="slds-text-heading_large slds-truncate">Inbound/Outbound Message Demo</h3>
+        <p class="slds-text-body_regular demo-app-desc">Welcome to our interactive demo page, designed to help you test
+          the features of inbound and outbound messaging. To get started, customize the settings in the settings box
+          below, and begin your conversation by texting in the conversation box.</p>
+      </div>
+
+      <div class="slds-m-top_small slds-m-left_xx-small slds-m-right_xx-small slds-p-bottom_small"
+        style="max-width:780px;">
+        <article class="slds-card">
+          <div
+            class="slds-col slds-p-top_small slds-m-bottom_x-small slds-m-left_small slds-m-right_medium demo-app-messaging-panel">
+
+            <article class="slds-card">
+              <article class="slds-card">
+                <div class="slds-card__header slds-grid slds-border_bottom slds-p-bottom_small">
+                  <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                    <div class="slds-media__figure">
+                      <span class="slds-icon_container slds-icon-standard-messaging-conversation" title="Conversation">
+                        <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                          <use xlink:href="/assets/symbols.svg#messaging_conversation"></use>
+                        </svg>
+                        <span class="slds-assistive-text">Conversation</span>
+                      </span>
+                    </div>
+                    <div class="slds-media__body">
+                      <h2 class="slds-card__header-title">
+                        <span>Conversation</span>
+                      </h2>
+                    </div>
+                  </header>
+                </div>
+              </article>
+              <section role="log" class="slds-chat">
+                <ul id="chatList" style="border: solid 1px lightgray;"
+                  class="slds-chat-list slds-scrollable demo-app-message-list slds-c-input-color-border">
+                </ul>
+              </section>
+            </article>
+            <form id="messageForm" enctype="multipart/form-data">
+              <div class="slds-m-top_medium slds-m-bottom_medium slds-m-left_small slds-m-right_small flex-row">
+                <input type="file" id="attachment" name="attachment">
+                <!-- button class="slds-button slds-button_icon slds-button_icon-border slds-button_icon-medium" title="Attach a file">
+                    <svg class="slds-button__icon" aria-hidden="true">
+                      <use xlink:href="/assets/symbols.svg#attach"></use>
+                    </svg>
+                    <span class="slds-assistive-text">Attach a file</span>
+                  </button -->
+              </div>
+              <div class="slds-p-bottom_medium slds-m-left_small slds-m-right_small flex-row">
+                <div class="slds-form-element__control slds-grow demo-app-inbound-message-input">
+                  <input type="text" id="message" name="message" placeholder="Type message…" class="slds-input" />
+                </div>
+                <div class="slds-no-flex">
+                  <button type="submit"
+                    class="slds-button slds-button_brand slds-float_right demo-app-inbound-message-send-btn">Send</button>
+                </div>
+              </div>
+            </form>
+
+          </div>
+        </article>
+
+        <article class="slds-card demo-app123">
+          <article class="slds-card">
+            <div class="slds-card__header slds-grid slds-border_bottom slds-p-bottom_small">
+              <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                <div class="slds-media__figure">
+                  <span class="slds-icon_container slds-icon-standard-events" title="Event Log">
+                    <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                      <use xlink:href="/assets/symbols.svg#events"></use>
+                    </svg>
+                    <span class="slds-assistive-text">Event Log</span>
+                  </span>
+                </div>
+                <div class="slds-media__body">
+                  <h2 class="slds-card__header-title">
+                    <span>Event Log</span>
+                  </h2>
+                </div>
+              </header>
+            </div>
+            <div class="slds-card__body slds-card__body_inner slds-p-bottom--small">
+              <textarea id="eventLog" disabled="" placeholder="Response body"
+                class="slds-textarea event-log"></textarea>
+            </div>
+          </article>
+          <!-- Settings -->
+          <article class="slds-card">
+            <div class="demo-app-setup-msg-banner" id="demo-app-setup-msg-banner">
+              <div class="slds-scoped-notification slds-media slds-media_center slds-theme_success demo-app-setup-msg"
+                role="status">
+                <div class="slds-media__figure">
+                  <span class="slds-icon_container slds-icon-utility-success" title="success">
+                    <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                      <use xlink:href="/assets/symbols.svg#success"></use>
+                    </svg>
+                    <span class="slds-assistive-text">success</span>
+                  </span>
+                </div>
+                <div class="slds-media__body">
+                  <p>Success! Your settings have been updated.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="slds-p-top_x-large slds-p-left_xx-small slds-p-right_small slds-p-bottom_x-large demo-app-setup-form">
+              <article class="slds-card">
+                <div class="slds-card__header slds-grid slds-p-bottom_small">
+                  <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                    <div class="slds-media__figure">
+                      <span class="slds-icon_container slds-icon-standard-settings" title="Settings">
+                        <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                          <use xlink:href="/assets/symbols.svg#settings"></use>
+                        </svg>
+                        <span class="slds-assistive-text">Settings</span>
+                      </span>
+                    </div>
+                    <div class="slds-media__body">
+                      <h2 class="slds-card__header-title">
+                        <span>Settings</span>
+                      </h2>
+                    </div>
+                  </header>
+                </div>
+              </article>
+
+              <form id="settingsForm">
+                <div class="slds-form slds-p-left_small">
+                  <div class="slds-form-element slds-form-element_stacked">
+                    <label class="slds-form-element__label slds-truncate"
+                      for="authorizationContext">ConversationChannelDefinition API Name:</label>
+                    <div class="slds-form-element__control">
+                      <input type="text" id="authorizationContext" name="authorizationContext"
+                        placeholder="Type ConversationChannelDefinition API Name…" class="slds-input" />
+                    </div>
+                  </div>
+                  <div class="slds-form-element slds-form-element_stacked">
+                    <label class="slds-form-element__label slds-truncate" for="channelAddressIdentifier">Channel Address
+                      Identifier:</label>
+                    <div class="slds-form-element__control">
+                      <input type="text" id="channelAddressIdentifier" name="channelAddressIdentifier"
+                        placeholder="Type Channel Address Identifier…" class="slds-input" />
+                    </div>
+                  </div>
+                  <div class="slds-form-element slds-form-element_stacked">
+                    <label class="slds-form-element__label slds-truncate" for="endUserClientIdentifier">End User Client
+                      Identifier:</label>
+                    <div class="slds-form-element__control">
+                      <input type="text" id="endUserClientIdentifier" name="endUserClientIdentifier"
+                        placeholder="Type End User Client Identifier…" class="slds-input" />
+                    </div>
+                  </div>
+                  <div class="slds-form-element slds-form-element_stacked">
+                    <label class="slds-form-element__label slds-truncate" for="customEventTypeField">Event Type Custom
+                      Field API Name:</label>
+                    <div class="slds-form-element__control">
+                      <input type="text" id="customEventTypeField" name="customEventTypeField"
+                        placeholder="Type EventType Custom Field API Name…" class="slds-input" />
+                    </div>
+                  </div>
+                  <div class="slds-form-element slds-form-element_stacked">
+                    <label class="slds-form-element__label slds-truncate" for="customEventPayloadField">Payload Custom
+                      Field API Name:</label>
+                    <div class="slds-form-element__control">
+                      <input type="text" id="customEventPayloadField" name="customEventPayloadField"
+                        placeholder="Type Payload Custom Field API Name…" class="slds-input" />
+                    </div>
+                  </div>
+                  <div class="slds-form-element slds-form-element_stacked">
+                    <div class="slds-form-element__control">
+                      <div class="slds-p-top_small slds-p-bottom_small">
+                        <button type="submit" class="slds-button slds-button_brand slds-float_right">Update</button>
+                      </div>
+                    </div>
+                  </div>
+              </form>
+            </div>
+          </article>
+
+          <!-- API Lab -->
+          <article class="slds-card">
+            <div class="slds-col slds-p-top_small slds-m-bottom_x-small slds-m-left_small slds-m-right_medium"></div>
+            <article class="slds-card">
+              <div class="slds-card__header slds-grid">
+                <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                  <div class="slds-media__figure">
+                    <span class="slds-icon_container slds-icon-standard-picklist-choice" title="API Lab">
+                      <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                        <use xlink:href="/assets/symbols.svg#picklist_choice"></use>
+                      </svg>
+                      <span class="slds-assistive-text">API Lab</span>
+                    </span>
+                  </div>
+                  <div class="slds-media__body">
+                    <h2 class="slds-card__header-title">
+                      <span>API Lab</span>
+                    </h2>
+                  </div>
+                </header>
+              </div>
+            </article>
+
+            <form id="apiLabForm">
+              <div class="slds-form slds-p-left_small">
+                <div class="slds-form-element slds-form-element_stacked">
+                  <div class="slds-grid slds-wrap slds-p-top_small ">
+                    <!-- left panel for input -->
+                    <div class="slds-col slds-size_1-of-2 slds-p-right_x-small grid-item">
+                      <div class="slds-box-input">
+
+                        <div class="slds-form-element slds-form-element_stacked">
+                          <div class="slds-form-element__control">
+                            <label class="slds-form-element__label slds-truncate" for="apiName"><b>API Name</b></label>
+                            <div class="slds-form-element__control">
+                              <select class="slds-select" id="selected-api-name">
+                                <option value="PATCH_REGISTER_CAPABILITIES">PATCH Capabilities</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                        <div id="patchRegisterCapabilitiesAPIContainer">
+                          <div class="slds-form-element slds-form-element_stacked">
+                            <abbr class="slds-required" title="required">* </abbr><label
+                              class="slds-form-element__label" for="channelCapabilities">Register Capabilities (Upload
+                              Payload with a JSON File)</label>
+                            <div class="slds-form-element__control">
+                              <input type="file" id="registerCapabilities" name="registerCapabilities" accept=".json">
+                            </div>
+                            <div class="slds-m-top_small slds-m-bottom_snall flex-row">
+                              <textarea id="capabilitiesPayload" disabled=""
+                                placeholder="Payloads of Channel Capabilities..."
+                                class="slds-textarea textarea-output"></textarea>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="slds-form-element slds-form-element_stacked">
+                          <div class="slds-p-top_small slds-p-bottom_small ">
+                            <button type="submit" class="slds-button slds-button_brand slds-button_stretch"
+                              id="run-selected-api-button">Run</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- right panel for output -->
+                    <div class="slds-col slds-size_1-of-2 slds-p-left_x-small grid-item">
+                      <div class="slds-box">
+                        <!-- render notification here -->
+                        <div class="slds-form-element slds-form-element_stacked">
+                          <div class="slds-form-element__control">
+                            <div id='notification'></div>
+                          </div>
+                        </div>
+
+                        <div class="slds-form-element slds-form-element_stacked">
+                          <label class="slds-form-element__label" for="api-lab-output">Output</label>
+
+                          <div class="slds-form-element__control">
+                            <textarea id="api-lab-output" disabled="" placeholder="Response body"
+                              class="slds-textarea textarea-output"></textarea>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </article>
+      </div>
+
+    </div>
+
+  </div>
+  </div>
+  <script src="https://unpkg.com/axios@0.27.2/dist/axios.min.js"
+    integrity="sha384-vmbbJNC6Li6w5GzrydJ5cd4ttMcLJ/Nl5xgp5saZ5QV8fp7zdsrFDcCasGqOFlaC"
+    crossorigin="anonymous"></script>
+  <!-- uncomment and replace with line below for use in visualforce page <script src="{!$Resource.byo-ott-app}"></script> -->
+  <script src="/assets/ottapp.bundle.js"></script>
+</body>
+
+</html>
+<!-- uncomment for use in visualforce page</apex:page>  -->

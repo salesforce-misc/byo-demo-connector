@@ -1,0 +1,1089 @@
+<!--  uncomment for use in visualforce page <apex:page
+  docType="html-5.0"
+  applyHtmlTag="false"
+  applyBodyTag="false"
+  showHeader="false"
+  sidebar="false"
+  standardStylesheets="false"
+  title="Unused Title"> -->
+<!-- 
+    Copyright (c) 2021, salesforce.com, inc.
+    All rights reserved.
+    SPDX-License-Identifier: BSD-3-Clause
+    For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+-->
+<html 
+    style="background-color: #fafaf9"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink">
+        <head>
+            <title>Demo Phone Simulator</title>
+            <!-- uncomment and replace with line below for use in visualforce page <link rel="stylesheet" type="text/css" href="{!$Resource.slds_stylesheet}" media="screen"/> -->
+            <link rel="stylesheet" type="text/css" href="assets/slds-stylesheet.css" media="screen"></link>
+        </head>
+    
+        <body>
+            <div class="slds-box slds-theme_shade" style="max-width:780px;">
+                <div class="slds-page-header__name slds-m-bottom_medium">
+                    <div class="slds-page-header__name-title">
+                        <span class="slds-page-header__title slds-truncate" title="Remote controller">Phone Simulator</span>
+                        <div class="slds-m-bottom_small">
+                            Select Salesforce User <select id="agent-username-dropdown"></select>
+                        </div>
+                        <span id="demo-title" class="slds-wrap" title="Remote controller">Disconnected</span>
+                    </div>
+                </div>
+                <article class="slds-card">
+                    <div class="slds-card__header slds-grid">
+                      <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                        <div class="slds-media__body">
+                          <h2 class="slds-card__header-title">
+                            <a href="javascript:void(0);" class="slds-card__header-link slds-truncate" title="Accounts">
+                              <span>Capabilities</span>
+                            </a>
+                          </h2>
+                        </div>
+                      </header>
+                    </div>
+                    <div class="slds-grid slds-card__body slds-card__body_inner">
+                        <div class="slds-col">
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                    <div class="slds-checkbox">
+                                        <input type="checkbox" name="options" id="hasMuteCheckbox" checked=""></input>
+                                        <label class="slds-checkbox__label" for="hasMuteCheckbox">
+                                        <span class="slds-checkbox_faux"></span>
+                                        <span class="slds-form-element__label">Let agents mute calls</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                    <div class="slds-checkbox">
+                                        <input type="checkbox" name="options" id="hasRecordCheckbox" checked=""></input>
+                                        <label class="slds-checkbox__label" for="hasRecordCheckbox">
+                                        <span class="slds-checkbox_faux"></span>
+                                        <span class="slds-form-element__label">Let agents record calls</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                    <div class="slds-checkbox">
+                                        <input type="checkbox" name="options" id="hasSwapCheckbox" checked=""></input>
+                                        <label class="slds-checkbox__label" for="hasSwapCheckbox">
+                                            <span class="slds-checkbox_faux"></span>
+                                            <span class="slds-form-element__label">Let agents swap calls</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                    <div class="slds-checkbox">
+                                        <input type="checkbox" name="options" id="hasMergeCheckbox" checked=""></input>
+                                        <label class="slds-checkbox__label" for="hasMergeCheckbox">
+                                            <span class="slds-checkbox_faux"></span>
+                                            <span class="slds-form-element__label">Let agents merge calls</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                    <div class="slds-checkbox">
+                                        <input type="checkbox" name="options" id="hasContactSearchCheckbox" checked=""></input>
+                                        <label class="slds-checkbox__label" for="hasContactSearchCheckbox">
+                                            <span class="slds-checkbox_faux"></span>
+                                            <span class="slds-form-element__label">Support contact search</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                    <div class="slds-checkbox">
+                                        <input type="checkbox" name="options" id="supportsMosCheckbox" checked=""></input>
+                                        <label class="slds-checkbox__label" for="supportsMosCheckbox">
+                                            <span class="slds-checkbox_faux"></span>
+                                            <span class="slds-form-element__label">Support MOS</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                    <div class="slds-checkbox">
+                                        <input type="checkbox" name="options" id="hasTransferToOmniFlowCheckbox" />
+                                        <label class="slds-checkbox__label" for="hasTransferToOmniFlowCheckbox">
+                                            <span class="slds-checkbox_faux"></span>
+                                            <span class="slds-form-element__label">Support Transfer to Omni Flows</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                    <div class="slds-checkbox">
+                                        <input type="checkbox" name="options" id="supportsQueuedAgentStatusCheckbox" />
+                                        <label class="slds-checkbox__label" for="supportsQueuedAgentStatusCheckbox">
+                                            <span class="slds-checkbox_faux"></span>
+                                            <span class="slds-form-element__label">Support Queued Agent Status</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-col">
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                    <div class="slds-checkbox">
+                                        <input type="checkbox" name="options" id="hasAgentAvailabilityCheckbox" checked="" />
+                                        <label class="slds-checkbox__label" for="hasAgentAvailabilityCheckbox">
+                                            <span class="slds-checkbox_faux"></span>
+                                            <span class="slds-form-element__label">Vendor Provides Agent Availability</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                    <div class="slds-checkbox">
+                                        <input type="checkbox" name="options" id="hasQueueWaitTimeCheckbox" checked="" />
+                                        <label class="slds-checkbox__label" for="hasQueueWaitTimeCheckbox">
+                                            <span class="slds-checkbox_faux"></span>
+                                            <span class="slds-form-element__label">Vendor Provides Queue Wait Time</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                    <div class="slds-checkbox">
+                                        <input type="checkbox" name="options" id="hasSupervisorListenInCheckbox" checked="" />
+                                        <label class="slds-checkbox__label" for="hasSupervisorListenInCheckbox">
+                                            <span class="slds-checkbox_faux"></span>
+                                            <span class="slds-form-element__label">Agent can listen in as supervisor</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                    <div class="slds-checkbox">
+                                        <input type="checkbox" name="options" id="hasSupervisorBargeInCheckbox" checked="" />
+                                        <label class="slds-checkbox__label" for="hasSupervisorBargeInCheckbox">
+                                            <span class="slds-checkbox_faux"></span>
+                                            <span class="slds-form-element__label">Agent can barge in as supervisor</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                    <div class="slds-checkbox">
+                                        <input type="checkbox" name="options" id="hasBlindTransferCheckbox" checked="" />
+                                        <label class="slds-checkbox__label" for="hasBlindTransferCheckbox">
+                                            <span class="slds-checkbox_faux"></span>
+                                            <span class="slds-form-element__label">Support Blind Transfers</span>
+                                        </label>
+                                    </div>
+                        </div>
+                        <div class="slds-form-element">
+                            <div class="slds-form-element__control">
+                                <div class="slds-checkbox">
+                                    <input type="checkbox" name="options" id="hasPhoneBookCheckbox" checked=""/>
+                                    <label class="slds-checkbox__label" for="hasPhoneBookCheckbox">
+                                        <span class="slds-checkbox_faux"></span>
+                                        <span class="slds-form-element__label">Support Phone Book</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-form-element">
+                            <div class="slds-form-element__control">
+                                <div class="slds-checkbox">
+                                    <input type="checkbox" name="options" id="canConsultCheckbox" checked=""/>
+                                    <label class="slds-checkbox__label" for="canConsultCheckbox">
+                                        <span class="slds-checkbox_faux"></span>
+                                        <span class="slds-form-element__label">Support Multiparty Consult</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-form-element">
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                    <div class="slds-checkbox">
+                                        <input type="checkbox" name="options" id="hasDebugLoggingCheckbox" checked="" />
+                                        <label class="slds-checkbox__label" for="hasDebugLoggingCheckbox">
+                                            <span class="slds-checkbox_faux"></span>
+                                            <span class="slds-form-element__label" title="When it is checked file logging is enabled, otherwise logs to console">Enable logging</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                    <div class="slds-checkbox">
+                                        <input type="checkbox" name="options" id="hasSignedRecordingUrlCheckbox" />
+                                        <label class="slds-checkbox__label" for="hasSignedRecordingUrlCheckbox">
+                                            <span class="slds-checkbox_faux"></span>
+                                            <span class="slds-form-element__label">Support signed recording URL</span>
+                                        </label>
+                                    </div>
+                                    <div id="signed-recording-url-details">
+                                        <div class="slds-grid">
+                                            <div class="slds-col slds-size_2-of-3">
+                                                <label class="slds-form-element__label" for="voice-id">
+                                                    Signed Recording URL
+                                                </label>
+                                                <div class="slds-form-element__control">
+                                                    <input type="text" id="signed-recording-url" placeholder="" maxlength="1000" required="" class="slds-input"></input>
+                                                </div>
+                                            </div>
+                                            <div class="slds-col slds-size_1-of-3">
+                                                <label class="slds-form-element__label" for="interaction-duration">
+                                                    Recording Duration (Seconds)
+                                                </label>
+                                                <div class="slds-form-element__control">
+                                                    <input type="number" id="signed-recording-duration" placeholder="" required="" class="slds-input"></input>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+                <article class="slds-card">
+                    <div class="slds-card__header slds-grid">
+                      <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                        <div class="slds-media__body">
+                          <h2 class="slds-card__header-title">
+                            <a href="javascript:void(0);" class="slds-card__header-link slds-truncate" title="Accounts">
+                              <span>Agent Settings</span>
+                            </a>
+                          </h2>
+                        </div>
+                      </header>
+                    </div>
+                    <div class="slds-card__body slds-card__body_inner">
+                        <div class="slds-m-bottom_small">
+                            <select id="status-dropdown"></select>
+                        </div>
+                        <div class="slds-form-element">
+                            <div class="slds-form-element">
+                            <div id="agentPhones" class="slds-form-element__control slds-grid slds-container--small  slds-m-top_medium">
+                                <span class="slds-radio">
+                                    <input type="radio" id="softphone" value="softphone" name="default" checked=""></input>
+                                    <label class="slds-radio__label" for="softphone">
+                                    <span class="slds-radio_faux"></span>
+                                    <span class="slds-form-element__label">Soft Phone</span>
+                                  </label>  
+                                </span>
+                                <span class="slds-radio">
+                                    <input type="radio" id="hardphone" value="hardphone" name="default" />
+                                    <label class="slds-radio__label" for="hardphone">
+                                    <span class="slds-radio_faux"></span>
+                                    <span class="slds-form-element__label">Hard Phone</span>
+                                  </label>
+                                </span>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </article>
+                <article class="slds-card">
+                    <div class="slds-card__header slds-grid">
+                      <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                        <div class="slds-media__body">
+                          <h2 class="slds-card__header-title">
+                            <a href="javascript:void(0);" class="slds-card__header-link slds-truncate" title="Accounts">
+                              <span>Call Simulator</span>
+                            </a>
+                          </h2>
+                        </div>
+                      </header>
+                    </div>
+                    <div id="error-span"></div>
+                    <div class="slds-card__body slds-card__body_inner">
+                        <div class="slds-form-element">
+                            <span class="slds-form-element__label">Call initial state: </span> <div class="slds-checkbox">
+                                    <input type="checkbox" name="options" id="callIsRecordingPaused"></input>
+                                    <label class="slds-checkbox__label" for="callIsRecordingPaused">
+                                        <span class="slds-checkbox_faux"></span>
+                                        <span class="slds-form-element__label">recording paused</span>
+                                    </label>
+                                </div>
+                                <div class="slds-checkbox">
+                                    <input type="checkbox" name="options" id="callIsMuted"></input>
+                                    <label class="slds-checkbox__label" for="callIsMuted">
+                                        <span class="slds-checkbox_faux"></span>
+                                        <span class="slds-form-element__label">muted</span>
+                                    </label>
+                                </div>
+                                <div class="slds-checkbox">
+                                    <input type="checkbox" name="options" id="callIsOnHold"></input>
+                                    <label class="slds-checkbox__label" for="callIsOnHold">
+                                        <span class="slds-checkbox_faux"></span>
+                                        <span class="slds-form-element__label">on hold</span>
+                                    </label>
+                                </div>
+                                <div class="slds-checkbox">
+                                    <input type="checkbox" name="options" id="callIsExternalTransfer"></input>
+                                    <label class="slds-checkbox__label" for="callIsExternalTransfer">
+                                        <span class="slds-checkbox_faux"></span>
+                                        <span class="slds-form-element__label">external transfer</span>
+                                    </label>
+                                </div>
+                        </div>
+                        <div class="slds-form-element">
+                            <span class="slds-form-element__label">Add participant contact types: </span> <div class="slds-checkbox">
+                                    <input type="checkbox" name="options" id="agentContactType" checked="true"></input>
+                                    <label class="slds-checkbox__label" for="agentContactType">
+                                        <span class="slds-checkbox_faux"></span>
+                                        <span class="slds-form-element__label">Agent</span>
+                                    </label>
+                                </div>
+                                <div class="slds-checkbox">
+                                    <input type="checkbox" name="options" id="queueContactType" checked="true"></input>
+                                    <label class="slds-checkbox__label" for="queueContactType">
+                                        <span class="slds-checkbox_faux"></span>
+                                        <span class="slds-form-element__label">Queue</span>
+                                    </label>
+                                </div>
+                                <div class="slds-checkbox">
+                                    <input type="checkbox" name="options" id="phoneBookContactType" checked="true"></input>
+                                    <label class="slds-checkbox__label" for="phoneBookContactType">
+                                        <span class="slds-checkbox_faux"></span>
+                                        <span class="slds-form-element__label">Phone Book</span>
+                                    </label>
+                                </div>
+                                <div class="slds-checkbox">
+                                    <input type="checkbox" name="options" id="phoneNumberContactType" checked="true"></input>
+                                    <label class="slds-checkbox__label" for="phoneNumberContactType">
+                                        <span class="slds-checkbox_faux"></span>Phone Number</span>
+                                    </label>
+                                </div>
+                        </div>
+                        <div class="slds-form-element">
+                            <span class="slds-form-element__label">Show/Hide Omni Phone Controls: </span> <div class="slds-checkbox">
+                                    <input type="checkbox" name="options" id="showMuteButton" checked="true"></input>
+                                    <label class="slds-checkbox__label" for="showMuteButton">
+                                        <span class="slds-checkbox_faux"></span>
+                                        <span class="slds-form-element__label">Mute</span>
+                                    </label>
+                                </div>
+                                <div class="slds-checkbox">
+                                    <input type="checkbox" name="options" id="showRecordButton" checked="true"></input>
+                                    <label class="slds-checkbox__label" for="showRecordButton">
+                                        <span class="slds-checkbox_faux"></span>
+                                        <span class="slds-form-element__label">Record</span>
+                                    </label>
+                                </div>
+                                <div class="slds-checkbox">
+                                    <input type="checkbox" name="options" id="showAddCallerButton" checked="true"></input>
+                                    <label class="slds-checkbox__label" for="showAddCallerButton">
+                                        <span class="slds-checkbox_faux"></span>
+                                        <span class="slds-form-element__label">Add Caller</span>
+                                    </label>
+                                </div>
+                                <div class="slds-checkbox">
+                                    <input type="checkbox" name="options" id="showAddBlindTransferButton" checked="true"></input>
+                                    <label class="slds-checkbox__label" for="showAddBlindTransferButton">
+                                        <span class="slds-checkbox_faux"></span>Blind Transfer</span>
+                                    </label>
+                                </div>
+                                <div class="slds-checkbox">
+                                    <input type="checkbox" name="options" id="showMergeButton" checked="true"></input>
+                                    <label class="slds-checkbox__label" for="showMergeButton">
+                                        <span class="slds-checkbox_faux"></span>Merge</span>
+                                    </label>
+                                </div>
+                                <div class="slds-checkbox">
+                                    <input type="checkbox" name="options" id="showSwapButton" checked="true"></input>
+                                    <label class="slds-checkbox__label" for="showSwapButton">
+                                        <span class="slds-checkbox_faux"></span>Swap</span>
+                                    </label>
+                                </div>
+                        </div>
+                        <span class="slds-form-element__label">Enable these Omni Call Controls:</span>
+                        <div class="slds-grid">
+                        <div class="slds-col">
+                        <div class="slds-form-element">
+                            <div class="slds-form-element__control">
+                                <div class="slds-checkbox">
+                                    <input type="checkbox" name="options" id="callHasAccept" checked=""></input>
+                                    <label class="slds-checkbox__label" for="callHasAccept">
+                                        <span class="slds-checkbox_faux"></span>
+                                        <span class="slds-form-element__label">Accept Call</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-form-element">
+                            <div class="slds-form-element__control">
+                                <div class="slds-checkbox">
+                                    <input type="checkbox" name="options" id="callHasDecline" checked=""></input>
+                                    <label class="slds-checkbox__label" for="callHasDecline">
+                                        <span class="slds-checkbox_faux"></span>
+                                        <span class="slds-form-element__label">Decline Call</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-form-element">
+                            <div class="slds-form-element__control">
+                                <div class="slds-checkbox">
+                                    <input type="checkbox" name="options" id="callHasAddParticipant" checked=""></input>
+                                    <label class="slds-checkbox__label" for="callHasAddParticipant">
+                                        <span class="slds-checkbox_faux"></span>
+                                        <span class="slds-form-element__label">Add Participant</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-form-element">
+                            <label class="slds-form-element__label" for="allow-removing-primary-call-participant">Allow Removing Primary Call Participant</label>
+                            <div class="slds-form-element__control">
+                                <div class="slds-select_container">
+                                    <select class="slds-select" id="allow-removing-primary-call-participant">
+                                        <option value="ALWAYS">Always</option>
+                                        <option value="NEVER">Never</option>
+                                        <option value="ALWAYS_EXCEPT_WHEN_ON_HOLD">Always except when on hold</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-col">
+                        <div class="slds-form-element">
+                            <div class="slds-form-element__control">
+                                <div class="slds-checkbox">
+                                    <input type="checkbox" name="options" id="callHasMute" checked=""></input>
+                                    <label class="slds-checkbox__label" for="callHasMute">
+                                    <span class="slds-checkbox_faux"></span>
+                                    <span class="slds-form-element__label">Mute</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-form-element">
+                            <div class="slds-form-element__control">
+                                <div class="slds-checkbox">
+                                    <input type="checkbox" name="options" id="callHasHold" checked=""></input>
+                                    <label class="slds-checkbox__label" for="callHasHold">
+                                    <span class="slds-checkbox_faux"></span>
+                                    <span class="slds-form-element__label">Hold</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-form-element">
+                            <div class="slds-form-element__control">
+                                <div class="slds-checkbox">
+                                    <input type="checkbox" name="options" id="callHasRecord" checked=""></input>
+                                    <label class="slds-checkbox__label" for="callHasRecord">
+                                        <span class="slds-checkbox_faux"></span>
+                                        <span class="slds-form-element__label">Record</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-form-element">
+                            <label class="slds-form-element__label" for="allow-removing-transfer-call-participant">Allow Removing Transfer Call Participant</label>
+                            <div class="slds-form-element__control">
+                                <div class="slds-select_container">
+                                    <select class="slds-select" id="allow-removing-transfer-call-participant">
+                                        <option value="ALWAYS">Always</option>
+                                        <option value="NEVER">Never</option>
+                                        <option value="ALWAYS_EXCEPT_WHEN_ON_HOLD">Always except when on hold</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-col">
+                        <div class="slds-form-element">
+                            <div class="slds-form-element__control">
+                                <div class="slds-checkbox">
+                                    <input type="checkbox" name="options" id="callHasExtensionToggle" checked=""></input>
+                                    <label class="slds-checkbox__label" for="callHasExtensionToggle">
+                                        <span class="slds-checkbox_faux"></span>
+                                        <span class="slds-form-element__label">Extension</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-form-element">
+                            <div class="slds-form-element__control">
+                                <div class="slds-checkbox">
+                                    <input type="checkbox" name="options" id="callHasSwap" checked=""></input>
+                                    <label class="slds-checkbox__label" for="callHasSwap">
+                                        <span class="slds-checkbox_faux"></span>
+                                        <span class="slds-form-element__label">Swap</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-form-element">
+                            <div class="slds-form-element__control">
+                                <div class="slds-checkbox">
+                                    <input type="checkbox" name="options" id="callHasConference" checked=""></input>
+                                    <label class="slds-checkbox__label" for="callHasConference">
+                                        <span class="slds-checkbox_faux"></span>
+                                        <span class="slds-form-element__label">Conference</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
+                    <div class="slds-card__body slds-card__body_inner slds-form-element__control slds-input-has-fixed-addon slds-m-bottom_small">
+                        <input type="text" id="phoneNumber-input" placeholder="Enter a phone number..." aria-labelledby="fixed-text-label fixed-text-addon-pre fixed-text-addon-post" class="slds-input"></input>
+                    </div>
+                    <div class="slds-card__body slds-card__body_inner slds-form-element__control slds-input-has-fixed-addon slds-m-bottom_small">
+                        <button class="slds-button slds-button_outline-brand" id="new-inbound-call">Inbound&nbsp;Call</button>
+                        <button class="slds-button slds-button_outline-brand" id="start-outbound-call">Outbound&nbsp;Call</button>
+                        <button class="slds-button slds-button_outline-brand slds-button" id="add-participant">Add&nbsp;Participant</button>
+                        <button class="slds-button slds-button_outline-brand slds-button" id="request-callback">Callback</button>
+                        <button class="slds-button slds-button_outline-brand slds-button" id="push-dialer">Push Dialer</button>
+                        <button class="slds-button slds-button_outline-brand slds-button" id="progressive-dialer">Progressive Dialer</button>
+                    </div>
+                    <div class="slds-card__body slds-card__body_inner slds-form-element__control slds-input-has-fixed-addon slds-m-bottom_small">
+                        <input type="text" id="additionalFields-input" placeholder="Additional Fields (json string format)" class="slds-input">
+                    </div>
+                    <div id="active-calls-card" class="slds-card__body slds-card__body_inner">
+                        <header class="slds-media slds-m-bottom_x-small slds-media_center slds-has-flexi-truncate">
+                        <div class="slds-media__body">
+                          <h2 class="slds-card__header-title_small">
+                            <a href="javascript:void(0);" class="slds-card__header-link slds-truncate" title="Accounts">
+                              <span class="slds-m-bottom_small slds-card__header-link">Agent Actions</span>
+                            </a>
+                          </h2>
+                        </div>
+                        </header>
+                            <div class="slds-form-element__control slds-input-has-fixed-addon slds-m-bottom_small">
+                                <div class="slds-button-group" role="group">
+                                    <button class="slds-button slds-button_outline-brand" id="participant-types-title">End&nbsp;Call</button>
+                                    <div class="slds-dropdown-trigger slds-dropdown-trigger_click slds-button_last" id="participant-types-options">
+                                        <button class="slds-button slds-button_icon slds-button_icon-brand" aria-haspopup="true" title="Participant Types options" id="participant-types">
+                                            <svg class="slds-button__icon" aria-hidden="true">
+                                                <!-- uncomment and replace with line below for use in visualforce page <use xlink:href="{!$Resource.symbols}#hide"></use> -->
+                                                <use xlink:href="/assets/symbols.svg#down"></use>
+                                            </svg>
+                                            <span class="slds-assistive-text">End Call Participant Types</span>
+                                        </button>
+                                        <div class="slds-dropdown slds-dropdown_right slds-dropdown_actions">
+                                            <ul class="slds-dropdown__list" role="menu">
+                                            <li class="slds-dropdown__item" role="presentation">
+                                                <a id="agent-endcall" href="javascript:void(0);" role="menuitem" tabindex="2">
+                                                    <span class="slds-truncate" title="Participant Type">End&nbsp;Call</span>
+                                                </a>
+                                            </li>
+                                            <li class="slds-dropdown__item" role="presentation">
+                                                <a id="customer-endcall" href="javascript:void(0);" role="menuitem" tabindex="0">
+                                                    <span class="slds-truncate" title="Participant Type">End&nbsp;Customer&nbsp;Leg</span>
+                                                </a>
+                                            </li>
+                                            <li class="slds-dropdown__item" role="presentation">
+                                                <a id="third-party-endcall" href="javascript:void(0);" role="menuitem" tabindex="2">
+                                                    <span class="slds-truncate" title="Participant Type">End&nbsp;Third-Party&nbsp;Leg</span>
+                                                </a>
+                                            </li>
+                                            <li class="slds-dropdown__item" role="presentation">
+                                                <a id="agent-missed-call" href="javascript:void(0);" role="menuitem" tabindex="2">
+                                                    <span class="slds-truncate" title="Participant Type">Missed&nbsp;Call</span>
+                                                </a>
+                                            </li>
+                                            <li class="slds-dropdown__item" role="presentation">
+                                                <a id="call-error" href="javascript:void(0);" role="menuitem" tabindex="2">
+                                                    <span class="slds-truncate" title="Participant Type">Call&nbsp;Error</span>
+                                                </a>
+                                            </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="slds-button slds-button_outline-brand" id="accept-call">Accept&nbsp;Call</button>
+                                <button class="slds-button slds-button_outline-brand" id="decline-call">Decline&nbsp;Call</button>
+                            </div>
+                        <div class="slds-form-element__control slds-input-has-fixed-addon slds-m-bottom_small">
+                            <button class="slds-button slds-button_outline-brand slds-button_stretch" id="mute">Mute</button>
+                            <button class="slds-button slds-button_outline-brand slds-button_stretch" id="unmute">Unmute</button>
+                            <button class="slds-button slds-button_outline-brand slds-button_stretch" id="hold">Hold</button>
+                            <button class="slds-button slds-button_outline-brand slds-button_stretch" id="resume">Resume</button>
+                        </div>
+                        <div class="slds-form-element__control slds-input-has-fixed-addon slds-m-bottom_small">
+                            <button class="slds-button slds-button_outline-brand slds-button_stretch" id="pause-rec">Pause&nbsp;Rec</button>
+                            <button class="slds-button slds-button_outline-brand slds-button_stretch" id="resume-rec">Resume&nbsp;Rec</button>
+                            <button class="slds-button slds-button_outline-brand slds-button_stretch" id="swap">Swap</button>
+                            <button class="slds-button slds-button_outline-brand slds-button_stretch" id="conference">Conference</button>
+                            </div>
+                        <div class="slds-card">
+                            <header class="slds-media slds-m-bottom_x-small slds-media_center slds-has-flexi-truncate">
+                            <div class="slds-media__body">
+                              <h2 class="slds-card__header-title_small">
+                                <a href="javascript:void(0);" class="slds-card__header-link slds-truncate" title="Accounts">
+                                  <span class="slds-m-bottom_small slds-card__header-link">Call Participant Actions</span>
+                                </a>
+                              </h2>
+                            </div>
+                            </header>
+                            <div class="slds-form-element slds-m-bottom_medium">
+                                <div class="slds-form-element__control slds-input-has-fixed-addon slds-m-bottom_small">
+                                    <button class="slds-button slds-button_outline-brand slds-button_stretch" id="connect-call">Customer&nbsp;Joins</button>
+                                    <button class="slds-button slds-button_outline-brand slds-button_stretch" id="customer-hangup">Customer&nbsp;Leaves</button>
+                                    <button class="slds-button slds-button_outline-brand slds-button_stretch" id="connect-participant">Third&nbsp;Party&nbsp;Joins</button>
+                                    <button class="slds-button slds-button_outline-brand slds-button_stretch" id="remove-participant">Third&nbsp;Party&nbsp;Leaves</button>
+                                </div>
+                                <div class="slds-form-element__control slds-input-has-fixed-addon slds-m-bottom_small">
+                                    <button class="slds-button slds-button_outline-brand" id="connect-supervisor">Supervisor&nbsp;Joins</button>
+                                    <button class="slds-button slds-button_outline-brand" id="remove-supervisor">Supervisor&nbsp;Leaves</button>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="slds-card">
+                            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                              <h2 class="slds-card__header-title_small">
+                                <a href="javascript:void(0);" class="slds-card__header-link slds-truncate" title="Accounts">
+                                  <span id="active-call-header" class="slds-m-bottom_small slds-card__header-link"></span>
+                                </a>
+                              </h2>
+                            </header>
+                            <div class="slds-grid"> 
+                                <div class="slds-col slds-size_1-of-2 slds-form-element slds-m-bottom_medium">
+                                    <div class="slds-form-element__control">
+                                        <textarea readonly="true" rows="5" id="active-calls1-text" class="slds-textarea"></textarea>
+                                    </div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-form-element slds-m-bottom_medium">
+                                    <div class="slds-form-element__control">
+                                        <textarea readonly="true" rows="5" id="active-calls2-text" class="slds-textarea"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </article>
+
+                <article class="slds-card">
+                    <div class="slds-card__header slds-grid">
+                      <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                        <div class="slds-media__body">
+                          <h2 class="slds-card__header-title">
+                            <a href="javascript:void(0);" class="slds-card__header-link slds-truncate" title="Accounts">
+                              <span>Call Transcript</span>
+                            </a>
+                          </h2>
+                        </div>
+                      </header>
+                    </div>
+                    <div class="slds-card__body slds-card__body_inner">Simulate a real-time call transcript. Select a speaker and enter or record a statement or question. For example, select Agent and enter “Hello, how can I help you?”. Build out the transcript by switching between speakers. Comments appear in the Conversation component on the Voice Call record.</div>
+                    <div class="slds-card__body slds-card__body_inner">
+                        <div class="slds-form-element">
+                            <label class="slds-form-element__label" for="form-element-01">Voice Call <strong>vendorCallKey</strong> (Not Required for Inbound Calls)</label>
+                            <div class="slds-form-element__control">
+                            <input type="text" id="transcription-vendor-call-key" placeholder="Voice Call vendorCallKey" class="slds-input"></input>
+                            </div>
+                        </div>
+                        <div class="slds-form-element">
+                            <label class="slds-form-element__label" for="form-element-01">Customer Phone Number (Not Required for Inbound Calls)</label>
+                            <div class="slds-form-element__control">
+                            <input type="text" id="transcription-customer-phone-number" placeholder="Customer Phone Number" class="slds-input"></input>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-card__body slds-card__body_inner">
+                        <div class="slds-form-element slds-m-bottom_medium">
+                            <div class="slds-card__body slds-card__body_inner">Speaker</div>
+                            <div class="slds-form-element__control slds-input-has-fixed-addon">
+                                <div class="slds-button-group slds-button_stretch" role="group">
+                                    <button class="slds-button slds-button_brand slds-button_stretch" id="sender-types-title">Customer</button>
+                                    <div class="slds-dropdown-trigger slds-dropdown-trigger_click slds-button_last" id="sender-types-options">
+                                        <button class="slds-button slds-button_icon slds-button_icon-brand" aria-haspopup="true" title="Sender type options" id="sender-types">
+                                            <svg class="slds-button__icon" aria-hidden="true">
+                                                <!-- uncomment and replace with line below for use in visualforce page <use xlink:href="{!$Resource.symbols}#hide"></use> -->
+                                                <use xlink:href="/assets/symbols.svg#down"></use>
+                                            </svg>
+                                            <span class="slds-assistive-text">Sender type options</span>
+                                        </button>
+                                        <div class="slds-dropdown slds-dropdown_right slds-dropdown_actions">
+                                            <ul class="slds-dropdown__list" role="menu">
+                                            <li class="slds-dropdown__item" role="presentation">
+                                                <a id="endUserButton" href="javascript:void(0);" role="menuitem" tabindex="0">
+                                                    <span class="slds-truncate" title="End user">Customer</span>
+                                                </a>
+                                            </li>
+                                            <li class="slds-dropdown__item" role="presentation">
+                                                <a id="supervisorButton" href="javascript:void(0);" role="menuitem" tabindex="1">
+                                                    <span class="slds-truncate" title="Supervisor">Supervisor</span>
+                                                </a>
+                                            </li>
+                                            <li class="slds-dropdown__item" role="presentation">
+                                                <a id="virtualAgentButton" href="javascript:void(0);" role="menuitem" tabindex="2">
+                                                    <span class="slds-truncate" title="End user">Unknown agent</span>
+                                                </a>
+                                            </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="text" id="transcription-text-view" placeholder="Write a message..." aria-labelledby="fixed-text-label fixed-text-addon-pre fixed-text-addon-post" class="slds-input"></input>
+                                <button class="slds-button slds-button_outline-brand slds-button_stretch" id="send-transcription">Add to Transcript</button>
+                            </div>
+                        </div>
+                        <div class="slds-form-element slds-m-bottom_medium slds-align_absolute-center">
+                            <div class="slds-form-element__control slds-input-has-fixed-addon">
+                                <button id="record-button" type="button" class="btn btn-danger">
+                                    <svg class="slds-button__icon" aria-hidden="true">
+                                        <!-- uncomment and replace with line below for use in visualforce page <use xlink:href="{!$Resource.symbols}#hide"></use> -->
+                                        <use xlink:href="/assets/symbols.svg#record"></use>
+                                    </svg>
+                                    <span class="slds-assistive-text">Record a message</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+                <article class="slds-card">
+                    <div class="slds-card__header slds-grid">
+                      <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                        <div class="slds-media__body">
+                          <h2 class="slds-card__header-title">
+                            <a href="javascript:void(0);" class="slds-card__header-link slds-truncate" title="Accounts">
+                              <span>Call Recording</span>
+                            </a>
+                          </h2>
+                        </div>
+                      </header>
+                    </div>
+                    <div class="slds-card__body slds-card__body_inner">Enter the recording details and publish it to the Voice Call record in Salesforce.</div>
+                    <div class="slds-card__body slds-card__body_inner">
+                        <div class="slds-form-element">
+                            <label class="slds-form-element__label" for="voice-id">
+                                Voice Call ID (Not Required for Inbound Calls)
+                            </label>
+                            <div class="slds-form-element__control">
+                                <input type="text" id="voice-id" placeholder="" maxlength="18" required="" class="slds-input"></input>
+                            </div>
+                        </div>
+                        <div class="slds-form-element">
+                            <label class="slds-form-element__label" for="interaction-duration">
+                                Recording Length (Seconds)
+                            </label>
+                            <div class="slds-form-element__control">
+                                <input type="number" id="interaction-duration" placeholder="" required="" class="slds-input"></input>
+                            </div>
+                        </div>
+                        <div class="slds-form-element">
+                            <label class="slds-form-element__label" for="hold-duration">
+                                On-Hold Time (Seconds)
+                            </label>
+                            <div class="slds-form-element__control">
+                                <input type="number" id="hold-duration" placeholder="" required="" class="slds-input"></input>
+                            </div>
+                        </div>
+                        <div class="slds-form-element slds-m-bottom_medium">
+                            <label class="slds-form-element__label" for="recording-link">
+                                Recording URL
+                            </label>
+                            <div class="slds-form-element__control">
+                                <input type="text" id="recording-link" required="" class="slds-input"></input>
+                            </div>
+                        </div>
+                        <button class="slds-button slds-button_outline-brand" id="send-post-call-recording">Publish</button>
+                    </div>
+                </article>
+
+                <article class="slds-card">
+                    <div class="slds-card__header slds-grid">
+                      <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                        <div class="slds-media__body">
+                          <h2 class="slds-card__header-title">
+                            <a href="javascript:void(0);" class="slds-card__header-link slds-truncate" title="Accounts">
+                              <span>Voice Mail</span>
+                            </a>
+                          </h2>
+                        </div>
+                      </header>
+                    </div>
+                    <div class="slds-card__body slds-card__body_inner">Enter  Dialed phone number, Recording details, Transcripts and Caller number for dropping a  Voice Mail.
+                        Voice Mail will be routed by Omni as per routing instructions  configured for the dialed number in contact center details page</div>
+                    <div class="slds-card__body slds-card__body_inner">
+                        <div class="slds-form-element">
+                            <label class="slds-form-element__label" for="voicemail-dialedphone">
+                                Dialed Phone Number
+                            </label>
+                            <div class="slds-form-element__control">
+                                <input type="text" id="voicemail-dialedphone"   placeholder="Enter dialed phone number" required="" class="slds-input"></input>
+                            </div>
+                        </div>
+                        <div class="slds-form-element slds-m-bottom_medium">
+                            <label class="slds-form-element__label" for="voicemail-transcripts">
+                                Transcripts
+                            </label>
+                            <div class="slds-form-element__control slds-m-bottom_small">
+                                <textarea id="voicemail-transcripts" class="slds-textarea" placeholder="Enter transcripts for the voice mail"></textarea>
+                            </div>
+                        </div>
+                        <div class="slds-form-element slds-m-bottom_medium">
+                            <label class="slds-form-element__label" for="voicemail-recording">
+                                Recording URL
+                            </label>
+                            <div class="slds-form-element__control">
+                                <input type="text" id="voicemail-recording" required="" class="slds-input"></input>
+                            </div>
+                        </div>
+                        <div class="slds-form-element slds-m-bottom_medium">
+                            <label class="slds-form-element__label" for="interaction-duration">
+                                Recording Length (Seconds)
+                            </label>
+                            <div class="slds-form-element__control">
+                                <input type="number" id="voicemail-length" placeholder="" required="" class="slds-input"></input>
+                            </div>
+                        </div>
+                         <div class="slds-form-element slds-m-bottom_medium">
+                            <label class="slds-form-element__label" for="voicemail-dialedphone">
+                                Caller Number
+                            </label>
+                            <div class="slds-form-element__control">
+                                <input type="text" id="voicemail-caller"   placeholder="Enter Caller Number" required="" class="slds-input"></input>
+                            </div>
+                        </div>
+                        <button class="slds-button slds-button_outline-brand" id="send-voice-mail">Send Voice Mail</button>
+                    </div>
+                </article>
+                <article class="slds-card">
+                    <div class="slds-card__header slds-grid">
+                      <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                        <div class="slds-media__body">
+                          <h2 class="slds-card__header-title">
+                            <a href="javascript:void(0);" class="slds-card__header-link slds-truncate" title="Accounts">
+                              <span>Messages</span>
+                            </a>
+                          </h2>
+                        </div>
+                      </header>
+                    </div>
+                    <div class="slds-card__body slds-card__body_inner">Communicate with a Lightning bridge component in your org.</div>
+                    <div class="slds-card__body slds-card__body_inner">
+                        <div class="slds-form-element slds-m-bottom_medium">
+                            <label class="slds-form-element__label" for="voice-id">
+                                Send Message
+                            </label>
+                            <div class="slds-form-element__control slds-m-bottom_small">
+                                <textarea id="send-message-text" class="slds-textarea" placeholder="Use the message format provided in the Partner Playbook."></textarea>
+                            </div>
+                            <button class="slds-button slds-button_outline-brand" id="send-message-button">Send</button>
+                        </div>
+                    </div>
+                    <div class="slds-card__body slds-card__body_inner">
+                        <div class="slds-form-element slds-m-bottom_medium">
+                            <label class="slds-form-element__label" for="voice-id">
+                                Received Message
+                            </label>
+                            <div class="slds-form-element__control">
+                                <textarea id="receive-message-text" class="slds-textarea" disabled="true"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+                <article class="slds-card">
+                    <div class="slds-card__header slds-grid">
+                      <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                        <div class="slds-media__body">
+                          <h2 class="slds-card__header-title">
+                            <a href="javascript:void(0);" class="slds-card__header-link slds-truncate" title="Accounts">
+                              <span>Send Realtime Conversation Events</span>
+                            </a>
+                          </h2>
+                        </div>
+                      </header>
+                    </div>
+                    <div class="slds-card__body slds-card__body_inner">Enter service, persist, type, value and score for sending realtime conversation events</div>
+                    <div class="slds-card__body slds-card__body_inner">
+                        <div class="slds-form-element slds-m-bottom_medium">
+                            <label class="slds-form-element__label" for="sendRealtimeConversationEvents-vendor-call-key">Voice Call <strong>vendorCallKey</strong></label>
+                            <div class="slds-form-element__control">
+                                <input type="text" id="sendRealtimeConversationEvents-vendor-call-key" placeholder="Voice Call vendorCallKey" class="slds-input"></input>
+                            </div>
+                        </div>
+                        <div class="slds-form-element slds-m-bottom_medium">
+                            <label class="slds-form-element__label" for="sendRealtimeConversationEvents-service">
+                                Service
+                            </label>
+                            <div class="slds-form-element__control">
+                                <input type="text" id="sendRealtimeConversationEvents-service" required="" class="slds-input"></input>
+                            </div>
+                        </div>
+                        <div class="slds-checkbox slds-m-bottom_medium">
+                            <input type="checkbox" name="options" id="sendRealtimeConversationEvents-persist"></input>
+                            <label class="slds-checkbox__label" for="sendRealtimeConversationEvents-persist">
+                                <span class="slds-checkbox_faux"></span>
+                                <span class="slds-form-element__label">Persist Intelligence Signal</span>
+                            </label>
+                        </div>
+                        <div class="slds-form-element slds-m-bottom_medium">
+                            <label class="slds-form-element__label" for="sendRealtimeConversationEvents-events">
+                                ArrayList of Events (Use below shape and add/update more to the array based on your needs. startTime is set to current time if not provided.)
+                            </label>
+                            <div class="slds-form-element__control slds-m-bottom_small">
+                                <textarea id="sendRealtimeConversationEvents-events" class="slds-textarea" rows="20" placeholder="Use the format provided to set Events payload.">
+[
+  {
+    "type": "IntelligenceSignal__Category",
+    "value": "Hi",
+    "startTime": 1573503300,
+    "score": 10
+  },
+  {
+    "type": "IntelligenceSignal__Category",
+    "value": "Hello",
+    "startTime": 1573503320,
+    "score": 10
+  }
+]
+                                </textarea>
+                            </div>
+                            <button class="slds-button slds-button_outline-brand" id="send-realtime-conversation-events">Send Realtime Conversation Events</button>
+                        </div>
+                    </div>
+                </article>
+                <article class="slds-card">
+                    <div class="slds-card__header slds-grid">
+                      <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                        <div class="slds-media__body">
+                          <h2 class="slds-card__header-title">
+                            <a href="javascript:void(0);" class="slds-card__header-link slds-truncate" title="Accounts">
+                              <span>Login Settings</span>
+                            </a>
+                          </h2>
+                        </div>
+                      </header>
+                    </div>
+                    <div class="slds-card__body slds-card__body_inner">
+                        <div class="slds-form-element slds-m-bottom_medium">
+                            <div class="slds-form-element__control">
+                                <div class="slds-checkbox slds-m-bottom_medium">
+                                    <input type="checkbox" name="options" id="showLoginPageCheckbox"></input>
+                                    <label class="slds-checkbox__label" for="showLoginPageCheckbox">
+                                        <span class="slds-checkbox_faux"></span>
+                                        <span class="slds-form-element__label"><b>Show telephony login screen</b></span>
+                                    </label>
+                                </div>
+                                <div class="slds-form-element__control">
+                                    <span>Show the login screen of your telephony provider in the Omni-Channel utility. If this option isn’t selected, agents use single sign-on to log in. Refresh this page after changing this setting.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-form-element slds-m-bottom_medium">
+                            <div class="slds-button-group" role="group">
+                                <button class="slds-button slds-button_outline-brand" id="softphone-logout">Log out</button>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+                <article class="slds-card">
+                    <div class="slds-card__header slds-grid">
+                      <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                        <div class="slds-media__body">
+                          <h2 class="slds-card__header-title">
+                            <a href="javascript:void(0);" class="slds-card__header-link slds-truncate" title="Accounts">
+                              <span>Errors</span>
+                            </a>
+                          </h2>
+                        </div>
+                      </header>
+                    </div>
+                    <div class="slds-card__body slds-card__body_inner">
+                        <div class="slds-form-element slds-m-bottom_medium">
+                            <div class="slds-form-element__control">
+                                <div class="slds-checkbox">
+                                    <input type="checkbox" name="options" id="throwErrorCheckbox"></input>
+                                    <label class="slds-checkbox__label" for="throwErrorCheckbox">
+                                    <span class="slds-checkbox_faux"></span>
+                                    <span class="slds-form-element__label">Display an error</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="slds-form-element__control slds-m-bottom_small slds-m-top_small">
+                                <textarea id="custom-error-text" class="slds-textarea" placeholder="Custom error label format: <namespace>.<customErrorLabel>"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+                <article class="slds-card">
+                    <div class="slds-card__header slds-grid">
+                      <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                        <div class="slds-media__body">
+                          <h2 class="slds-card__header-title">
+                            <a href="javascript:void(0);" class="slds-card__header-link slds-truncate" title="Accounts">
+                              <span>MOS</span>
+                            </a>
+                          </h2>
+                        </div>
+                      </header>
+                    </div>
+                    <div class="slds-card__body slds-card__body_inner">Update Audio Stats to calculate MOS.</div>
+                    <div class="slds-card__body slds-card__body_inner">
+                        <div class="slds-form-element slds-m-bottom_medium">
+                            <label class="slds-form-element__label" for="voice-id">
+                                Audio Stats
+                            </label>
+                            <div class="slds-form-element__control slds-m-bottom_small">
+                                <textarea id="send-audioStats-text" class="slds-textarea" rows="20" placeholder="Use the AudioStats format provided in the Partner Playbook.">
+{
+    "callId": "{vendorCallKey}",
+    "isAudioStatsCompleted": false,
+    "stats": [{
+            "inputChannelStats": {
+                "packetsCount": 20,
+                "packetsLost": 2,
+                "jitterBufferMillis": 300,
+                "roundTripTimeMillis": 320
+            },
+            "outputChannelStats": {
+                "packetsCount": 30,
+                "packetsLost": 1,
+                "jitterBufferMillis": 270,
+                "roundTripTimeMillis": 370
+            }
+        },
+        {
+            "outputChannelStats": {
+                "packetsCount": 30,
+                "packetsLost": 1,
+                "jitterBufferMillis": 270,
+                "roundTripTimeMillis": 370
+            }
+        }
+    ]
+}
+                                </textarea>
+                            </div>
+                            <button class="slds-button slds-button_outline-brand" id="send-audioStats-button">Send</button>
+                        </div>
+                    </div>
+                </article>
+                    <article class="slds-card">
+                        <div class="slds-card__header">
+                            <h2 class="slds-card__header-title">Callback Requests</h2>
+                        </div>
+                        <div class="slds-card__body slds-card__body_inner">
+                            <button class="slds-button slds-button_outline-brand" id="showTransferView-button">Show Transfer View</button>
+                        </div>
+                    </article>
+            </div>
+            <!-- uncomment and replace with line below for use in visualforce page <script src="{!$Resource.remote_control}"></script> -->
+            <script src="/assets/remote.bundle.js"></script>
+        </body>
+    </html>
+    <!-- uncomment for use in visualforce page</apex:page>  -->

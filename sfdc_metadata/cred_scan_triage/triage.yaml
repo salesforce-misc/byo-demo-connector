@@ -1,0 +1,13 @@
+production_secret: []
+non_production_secret: []
+mock_secret:
+ -
+  id: demo-connector://src/login/index.js_6ef801a9fecf314898c0e7899c3a6b45387da83f
+  justification: This is an example of how to pass username and password for authentication
+ -
+  id: demo-connector://src/server/private.key_c823f13ba5c4eda6e19eea8540fd950461b876ef
+  justification: Used to work with the default public key that we use in local and stm environments
+ -
+  id: demo-connector://ca/cert.key_7ff2e9bf6663ac5a23c24d2e0b400cb0b687972a
+  justification: Used to work with the default public key that we use in local and stm environments
+false_positive: []

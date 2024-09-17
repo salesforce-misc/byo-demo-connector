@@ -1,0 +1,63 @@
+<!-- 
+    Copyright (c) 2021, salesforce.com, inc.
+    All rights reserved.
+    SPDX-License-Identifier: BSD-3-Clause
+    For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+-->
+
+<!-- uncomment for use in visualforce page <apex:page docType="html-5.0" applyHtmlTag="false" applyBodyTag="false" showHeader="false" sidebar="false" standardStylesheets="false" title="Unused Title"> -->
+<html style="background-color: #fafaf9" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <head>
+        <title>Telephony login(Demo)</title>
+        <!-- uncomment and replace with line below for use in visualforce page <link rel="stylesheet" type="text/css" href="{!$Resource.slds_stylesheet}" media="screen"/> -->
+        <link rel="stylesheet" type="text/css" href="assets/slds-stylesheet.css" media="screen"/>
+    </head>
+
+    <body>
+        <div class="slds-m-around_x-large">
+            <div class="slds-align_absolute-center">
+                <!-- uncomment and replace with line below for use in visualforce page <img src="{!$Resource.logo}" alt="Telephony provider logo"/> -->
+                <img src="assets/logo.svg" alt="Telephony provider logo"/>
+            </div>
+            <div class="slds-text-align_center slds-text-title_bold slds-m-top_medium">
+                Log into your telephony provider
+            </div>
+            <div class="slds-form--stacked slds-m-top_medium">
+                <div class="slds-form-element">
+                    <label class="slds-form-element__label" for="stacked-input-id-01">Username</label>
+                    <div class="slds-form-element__control">
+                        <input type="text" id="username" placeholder="Enter username here" class="slds-input"/>
+                    </div>
+                    </div>
+                    <div class="slds-form-element slds-m-top_small">
+                    <label class="slds-form-element__label" for="stacked-input-id-02">Password</label>
+                    <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_right">
+                        <button id="preview" class="slds-button slds-button_icon slds-input__icon slds-input__icon_right" title="Show">
+                            <div id="show-password-container">
+                                <svg class="slds-button__icon slds-icon-text-light" aria-hidden="true">
+                                    <!-- use xlink:href="{!$Resource.symbols}#preview"></use> -->
+                                    <use xlink:href="/assets/symbols.svg#preview"></use>
+                                </svg>
+                                <span class="slds-assistive-text">Show password</span>
+                            </div>
+                            <div id="hide-password-container" style="display: none">
+                                <svg class="slds-button__icon slds-icon-text-light" aria-hidden="true">
+                                    <!-- <use xlink:href="{!$Resource.symbols}#hide"></use> -->
+                                    <use xlink:href="/assets/symbols.svg#hide"></use>
+                                </svg>
+                                <span class="slds-assistive-text">Hide password</span>
+                            </div>
+                        </button>
+                        <input type="password" placeholder="Enter password here" id="password" class="slds-input"/>
+                    </div>
+                </div>
+            </div>
+            <div class="slds-m-top_medium">
+                <button id="submit" class="slds-button slds-button_brand slds-button_stretch">Log In</button>
+            </div>
+        </div>
+        <!-- uncomment and replace with line below for use in visualforce page <script src="{!$Resource.login_page}"></script> -->
+        <script src="/assets/login.bundle.js"></script>
+    </body>
+</html>
+<!-- uncomment for use in visualforce page </apex:page> -->

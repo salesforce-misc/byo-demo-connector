@@ -1,0 +1,69 @@
+.tab-Content-VoiceSimulator .slds-card {
+  padding-bottom: 0.1em;
+}
+
+.slds-box-input {
+  position: relative;
+  border: none;
+  background-color: #fff;
+}
+
+.textarea-output {
+  position: relative;
+  border: none;
+  background-color: #fff;
+  min-height: 200px;
+  max-height: 200px;
+}
+
+.event-log {
+  min-height: 200px;
+}
+
+.health-check-card {
+  max-width: 600px;
+  margin-left: 1rem;
+}
+
+.health-check-icon {
+  width: 32px;
+  height: 32px;
+  display: block;
+}
+
+.slds-card__header {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.health-check-description {
+  background-color: #f3f2f2;
+  border-radius: 4px;
+}
+
+.health-check-description h4 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.slds-accordion__content .slds-text-longform {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.slds-accordion__content .slds-text-longform p {
+  margin-bottom: 0.75rem;
+}
+
+.slds-accordion__content .slds-text-longform ul {
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.slds-accordion__content .slds-text-longform li {
+  margin-bottom: 0.5rem;
+}

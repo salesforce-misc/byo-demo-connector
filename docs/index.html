@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Home</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Home</h1>
+
+    
+
+
+
+    
+
+
+    <h3> </h3>
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+    <section>
+        <article><h1>Service Cloud Voice demo connector</h1>
+<p>The demo connector is a sample application for partner telephony systems that integrate with Salesforce Service Cloud Voice. It demonstrates an optimal Voice implementation based on a group of telephony API mocks. It also includes a voice call simulation tool that you can use to test call actions such as making and answering calls and using phone controls.</p>
+<h2>Document</h2>
+<p>We’ve provided documentation in the <a href="https://github.com/salesforce/demo-scv-connector/tree/master/docs"><code>/docs/</code></a> folder.</p>
+<h2>Installation</h2>
+<h3>Environment setup</h3>
+<p>The developer environment requires <a href="https://nodejs.org/en/download/">Node</a>, <a href="https://docs.npmjs.com/cli/install">NPM</a> and <a href="https://webpack.github.io/docs/webpack-dev-server.html">webpack-dev-server</a>.</p>
+<h3>Installation</h3>
+<h4>Clone this repo</h4>
+<h4>Install npm dependencies</h4>
+<pre class="prettyprint source"><code>$ npm install
+</code></pre>
+<h3>Config Setup</h3>
+<p>Open config.env and set following config values as per Org and Enviroment if needed.</p>
+<ul>
+<li>
+<p>OVERRIDE_VOICECALLID (Optional): If you want to bypass scrt2 to create a voiceCall, pass a voiceCallId, i.e. 0LQxx0000004CIiGAM</p>
+</li>
+<li>
+<p>PRIVATE_KEY: If you have generated your own private/public key pair then replace the private key at /src/server/private.key</p>
+</li>
+</ul>
+<p>Open webpack.config.js and configure the local host web server URL.</p>
+<ul>
+<li>Default value for <code>devServer.host</code> is <code>0.0.0.0</code>, it allows your server to be accessible externally, you can use <code>https://127.0.0.1:8080</code> as the adapter URL without any change in local development, DO NOT use <code>https://localhost:8080</code> as it will give CORS error. If you want to configure to use your own specific URL please see details in <a href="https://webpack.js.org/configuration/dev-server/#devserverhost">the webpack documents</a></li>
+</ul>
+<p>SSL certificate for local HTTPS development</p>
+<ul>
+<li>
+<p>HTTPS is enabled by default in webpack.config.js, if you don't have a SSL certificate in your local server, you will see a warning page in browser with message &quot;Your connection is not private&quot;, and you can choose to preceed to your web server URL.</p>
+</li>
+<li>
+<p>To avoid the warning message from the browser, you can setup a self-signed SSL certificate for you local web server.</p>
+</li>
+</ul>
+<h3>Launch application</h3>
+<pre class="prettyprint source"><code>$ npm start
+</code></pre>
+<p>By default the web server will run in SSL on port 8080.</p>
+<p>Now that your web server is running, you can point your Service Cloud Voice Call Center Adapter URL to the web server URL (i.e. https://example.com:8080)</p>
+<h3>Voice call simulation tool</h3>
+<p>This application also provides a voice call simulation tool that you can use to test call actions such as making and answering calls and using phone controls. When the app is running you can find it by going to this URL {your web server URL}/remote (i.e. https://example.com:8080/remote). You can use this URL to verify the installation succeed.</p>
+<h2>Testing</h2>
+<p>Lint all the source code and run all the unit tests:</p>
+<pre class="prettyprint source"><code>$ npm test
+</code></pre>
+<p>To bundle the source code in the src/ folder into one connector.js file:</p>
+<pre class="prettyprint source"><code>$ gulp bundle
+</code></pre>
+<p>To bundle the source code in the src/ folder into one minified connector_min.js file:</p>
+<pre class="prettyprint source"><code>$ gulp bundle --mode prod
+</code></pre>
+<h2>Contributing and Developing Locally</h2>
+<p>We welcome contributors into our repo. Please read the <a href="https://github.com/salesforce/demo-scv-connector/blob/master/CONTRIBUTING.md">contributing guidelines</a> for more information.</p></article>
+    </section>
+
+
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-connector.html">connector</a></li><li><a href="module-vendor-sdk.html">vendor-sdk</a></li></ul><h3>Classes</h3><ul><li><a href="module-connector.Connector.html">Connector</a></li><li><a href="module-vendor-sdk.Sdk.html">Sdk</a></li><li><a href="module-vendor-sdk-Call.html">Call</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Thu Feb 17 2022 13:03:59 GMT-0700 (Mountain Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

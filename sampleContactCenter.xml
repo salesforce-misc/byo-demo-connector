@@ -1,0 +1,24 @@
+<callCenter>
+    <section sortOrder="0" name="reqGeneralInfo" label="General Information">
+        <item sortOrder="0" name="reqInternalName" label="InternalName">INTERNAL_NAME</item>
+        <item sortOrder="1" name="reqDisplayName" label="Display Name">Display Name</item>
+        <item sortOrder="2" name="reqVendorInfoApiName" label="Conversation Vendor Info Developer Name">namespace__vendorName</item>
+    </section>
+
+    <section sortOrder="1" name="reqHvcc" label="SCV Settings">
+        <item sortOrder="0" name="reqTelephonyIntegrationCertificate" label="Telephony Integration Certificate">CERTIFICATE</item>
+        <item sortOrder="1" name="reqLongDistPrefix" label="Long Distance Prefix">+1</item>
+    </section>
+
+    <section sortOrder="2" name="providerSettings1" label="Button Assignment">
+        <item sortOrder="0" name="custom0" label="custom0">Custom0</item>
+        <item sortOrder="1" name="custom1" label="custom1">Custom1</item>
+        <item sortOrder="2" name="custom2" label="custom2">Custom2</item>
+    </section>
+    <section sortOrder="3" name="providerSettings2" label="Dialing Options">
+        <item sortOrder="0" name="custom0" label="custom0">Custom0</item>
+        <item sortOrder="1" name="custom1" label="custom1">Custom1</item>
+        <item sortOrder="2" name="custom2" label="custom2">Custom2</item>
+    </section>
+</callCenter>
+
