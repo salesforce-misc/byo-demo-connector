@@ -1,0 +1,19 @@
+{
+    "extends": "eslint:recommended",
+    "rules": {
+        "strict": ["warn", "global"],
+        "eqeqeq": [2, "smart"],
+        "no-console": "off",
+        "no-undef": "off"
+    },
+    "env": {
+        "browser": true,
+        "node": true,
+        "es6": true,
+        "jest": true
+    },
+    "parserOptions": {
+        "sourceType": "module",
+        "ecmaVersion": 2018
+    }
+}
