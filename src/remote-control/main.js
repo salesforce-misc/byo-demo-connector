@@ -1067,6 +1067,17 @@ function showCcaasDemoAppTab() {
 }
 
 function setDemoConnectorMode(mode) {
+    //set the mode to server cache so that OTT client apps can also access this information
+    fetch("http://localhost:3030/setOrgMode", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({orgMode : mode }),
+    }).then(response => response.json()).then((data) => {
+        console.log('setOrgMode response: ' + JSON.stringify(data));
+    })
+    
     // connector mode only applicable for ccaas remote. 
     if (!window.location.pathname.startsWith('/ccaas.html')) {
         return false;

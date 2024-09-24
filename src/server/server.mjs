@@ -15,6 +15,7 @@ import { ScrtConnector }  from './scrtConnector.mjs';
 import { Server } from 'socket.io';
 import { initOttApp }  from './ottAppServer.mjs';
 import { agentWorkCache } from './ottAppLib/sfdc-byocc-agentwork-api.mjs';
+import NodeCache from 'node-cache';
 
 customEnv.env();
 const app = express();
@@ -22,6 +23,7 @@ app.use(express.json());
 let onlineUsers = new Map(); // username -> socket.id 
 let userFullNames = new Map(); // username -> FullName
 let connectors = new Set();
+const modeCache = new NodeCache();
 
 const server = app.listen(process.env.SERVER_PORT, () => {
     console.log(`\n====== App listening to ${process.env.SERVER_PORT}. Press Ctrl+C to quit.`);
@@ -171,5 +173,18 @@ app.post('/api/clear-agent-work-cache', (req,res) => {
     } catch (err) {
         console.log(`Error deleting ${workItemId} from agentWorkCache: \n ${err}`);
         res.send({ success: false });
+    }
+});
+
+app.post('/api/setOrgMode', (req, res) => {
+    try {
+        if (req && req.body) {
+            modeCache.set('orgMode', req.body.orgMode);
+            console.log(`Org Mode set to ${req.body.orgMode}`);
+            res.send({ success: true});
+        }
+    } catch (err) {
+        console.log(`Error setting Org mode to cache: ${err}`);
+        res.send({ success: false});
     }
 });

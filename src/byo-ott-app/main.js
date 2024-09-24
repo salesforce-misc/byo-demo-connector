@@ -7,6 +7,7 @@ let output;
 let sfSubject = "Agent";
 let endUserClientName = "End User Client";
 let typingStartedReady = true;
+var orgMode;
 
 window.addEventListener("load", () => {
 
@@ -427,17 +428,47 @@ window.addEventListener("load", () => {
   // Register custom event to retrieve the replied message from an agent in core app
   const evtSource = new EventSource(SERVER_URL + "/replyMessage");
   evtSource.addEventListener("replymsg", (e) => {
-    console.log('\n=============== EventSource - replymsg event:', e.data);
-    let replyObj = JSON.parse(e.data);
-    if (replyObj.type === messagingConstants.EVENT_TYPE.INTERACTION) {
-      appendInboundMessageToChatList(replyObj.replyMessageText, replyObj.attachmentName, replyObj.attachmentUrl, replyObj.payloadField);
-    } else if (replyObj.type === messagingConstants.EVENT_TYPE.ROUTING_REQUESTED) {
-      appendInboundEventToChatList(replyObj.type, replyObj.payloadField);
+    if (!orgMode) {
+      axios({
+        method: "get",
+        url: SERVER_URL + "/getOrgMode"
+      }).then((res) => {
+        if (res && res.data && res.data.orgMode) {
+          orgMode = res.data.orgMode;
+          registerEvents(e);
+        }
+      });
+    } else {
+      registerEvents(e);
     }
   });
 
   if(document.getElementById('healthCheckButton')) {
     document.getElementById('healthCheckButton').addEventListener('click', runHealthCheck);
+  }
+
+  function registerEvents(event) {
+    if (orgMode !== 'VOICE_ONLY') {
+      console.log('\n=============== EventSource - replymsg event:', event.data);
+      let replyObj = JSON.parse(event.data);
+      if (replyObj.type === messagingConstants.EVENT_TYPE.INTERACTION) {
+        switch(replyObj.messageType) {
+          case 'ChoicesMessage':
+            appendChoicesMessageToChatList(replyObj,replyObj.payloadField.string);
+            break;
+          case 'FormMessage':
+            appendFormMessageToChatList(replyObj);
+            break;
+          case 'StaticContentMessage':
+            appendInboundMessageToChatList(replyObj.replyMessageText, replyObj.attachmentName, replyObj.attachmentUrl, replyObj.payloadField);
+            break;
+          default:
+            console.log('Unsupported message type:', replyObj.messageType);
+        }
+      } else if (replyObj.type === messagingConstants.EVENT_TYPE.ROUTING_REQUESTED) {
+        appendInboundEventToChatList(replyObj.type, replyObj.payloadField);
+      }
+    }
   }
 
   function getTestDescription(testName) {
@@ -571,12 +602,26 @@ function initializeAccordion() {
   });
 }
 
-  // get settings from middleware server
+// get settings from middleware server
+if (!orgMode) {
+  axios({
+    method: "get",
+    url: SERVER_URL + "/getOrgMode"
+  }).then((res) => {
+    if (res && res.data && res.data.orgMode) {
+      orgMode = res.data.orgMode;
+      getSettingsForApp();
+    }
+  });
+} else {
+  getSettingsForApp();
+}
+
+function getSettingsForApp() {
   axios({
     method: "get",
     url: SERVER_URL + "/getsettings"
-  })
-    .then((res) => {
+  }).then((res) => {
       if (res.status === 200) {
         // set settings fields with values retrieved from middleware server
         let settings = res.data;
@@ -601,13 +646,17 @@ function initializeAccordion() {
         }
         endUserClientName = settings.endUserClientIdentifier;
 
-        return axios({
-          method: "get",
-          url: SERVER_URL + "/getConversationChannelDefinitions",
-        });
+        // Ensuring the demo connector runs gracefully even if the .env is not present
+        if (!settings.authorizationContext) {
+          return null;
+        } else {
+          return axios({
+            method: "get",
+            url: SERVER_URL + "/getConversationChannelDefinitions",
+          });
+        }
       }
-    })
-    .then((ccdResponse) => {
+    }).then((ccdResponse) => {
       if (ccdResponse && ccdResponse.status && ccdResponse.status === 200) {
         let ccdData = ccdResponse.data;
 
@@ -635,9 +684,7 @@ function initializeAccordion() {
     .catch((err) => {
         throw err;
     });
-
-    chatList = document.getElementById('chatList');
-});
+}
 
 function appendOutboundMessageToChatList(message, originalFileName, fileName) {
   if (originalFileName && fileName) {
