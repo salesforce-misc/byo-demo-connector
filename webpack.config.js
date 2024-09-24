@@ -39,8 +39,8 @@ module.exports = {
                 {from: /^\/$/, to: 'app_debug.html'},
                 {from: /^\/remote/, to: 'remote.html'},
                 {from: /^\/login/, to: 'login.html'},
-                {from: /^\/ottapp/, to: 'ottapp.html'},
-                {from: /^\/ccaas/, to: 'ccaas.html'}
+                {from: /^\/ccaas/, to: 'ccaas.html'},
+                {from: /^\/ottapp/, to: 'ottapp.html'}
             ]
         }
     },

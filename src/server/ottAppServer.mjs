@@ -357,6 +357,18 @@ export async function initOttApp(expressApp) {
 
     res.send('Connected to PubSub and Subscribed to the Interaction event.');
   });
+
+  expressApp.post('/setOrgMode', async (_req, res) => {
+    settingsCache.set('orgMode', _req.body.orgMode);
+    console.log("OTT SERVER settingsCache.set('orgMode') : " + _req.body.orgMode);
+    res.send({success:true});
+  });
+
+  expressApp.get('/getOrgMode', async (_req, res) => {
+    console.log("OTT SERVER settingsCache.get('orgMode') : " + settingsCache.get('orgMode'));
+    res.send({orgMode:settingsCache.get('orgMode')});
+  });
+  
   // ========== Endpoint definitions end. ==========
 
   // Calling PubSub API in fetchAndCacheCCDValues() function to prevent race conditions
