@@ -2,6 +2,7 @@ import axios from 'axios';
 import {getAccessToken} from './sfdc-auth.mjs';
 import { v4 as uuidv4} from 'uuid';
 import { settingsCache } from '../ottAppServer.mjs';
+import { getTimeStampForLoglines } from '../util.mjs';
 
 // Get config metadata from .env
 const {
@@ -9,15 +10,15 @@ const {
   SF_ORG_ID,
   SF_AUTHORIZATION_CONTEXT
 } = process.env;
-const IS_OTT = process.env.IS_OTT === "true";
+const IS_LOCAL_CONFIG = process.env.IS_LOCAL_CONFIG === "true";
 
 const acknowledgementEndpoint = '/api/v1/acknowledgement';
 const appType = 'custom';
 const role = 'EndUser';
 
 export async function sendAcknowledgement(conversationIdentifier, conversationEntryIdentifier, acknowledgementType) {    
-  let orgId = IS_OTT ? SF_ORG_ID : settingsCache.get("orgId");
-  let authorizationContext = IS_OTT ? SF_AUTHORIZATION_CONTEXT : settingsCache.get("authorizationContext");
+  let orgId = IS_LOCAL_CONFIG ? SF_ORG_ID : settingsCache.get("orgId");
+  let authorizationContext = IS_LOCAL_CONFIG ? SF_AUTHORIZATION_CONTEXT : settingsCache.get("authorizationContext");
   const accessToken = await getAccessToken();
 
   let senderData = {
@@ -41,20 +42,20 @@ export async function sendAcknowledgement(conversationIdentifier, conversationEn
 
   jsonData = JSON.stringify(jsonData);
 
-  console.log(`\n====== preparing jsonData to send acknowledgement request: `, jsonData);
+  console.log(getTimeStampForLoglines() + `preparing jsonData to send acknowledgement request: `, jsonData);
 
   const requestHeader = getRequestHeader(accessToken, orgId, authorizationContext);
   const responseData = await axios.post(
-    (IS_OTT ? SF_SCRT_INSTANCE_URL : settingsCache.get("scrtUrl")) + acknowledgementEndpoint,
+    (IS_LOCAL_CONFIG ? SF_SCRT_INSTANCE_URL : settingsCache.get("scrtUrl")) + acknowledgementEndpoint,
     jsonData,
     requestHeader
   ).then(function (response) {    
-    console.log(`\n====== acknowledgement request completed successfully  `, response.data);
+    console.log(getTimeStampForLoglines() + `acknowledgement request completed successfully  `, response.data);
     return response.data;
   })
   .catch(function (error) {
     let responseData = error.response.data;
-    console.log(`\n====== acknowledgement request Failed: `, responseData);
+    console.log(getTimeStampForLoglines() + `acknowledgement request Failed: `, responseData);
     return error;
   });
 

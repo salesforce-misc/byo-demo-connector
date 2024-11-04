@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 //import { v4: uuidv4 } from "uuid";
 import axios from 'axios';
 import { settingsCache } from '../ottAppServer.mjs';
+import { getTimeStampForLoglines } from '../util.mjs';
 
 // Import dotenv that loads the config metadata from .env
 //require('dotenv').config();
@@ -14,7 +15,7 @@ const {
   SF_SUBJECT, // OTT-needed
   SF_AUTH_ENDPOINT
 } = process.env;
-const IS_OTT = process.env.IS_OTT === "true"
+const IS_LOCAL_CONFIG = process.env.IS_LOCAL_CONFIG === "true"
 let cachedAccessToken;
 
 /**
@@ -41,7 +42,7 @@ function generateJWT(payload, expiresIn, privateKey) {
 export async function getAccessToken(refresh) {
   if (refresh || !cachedAccessToken) {
     // TODO: The console logs will be refactored in next story W-13133225
-    console.log(`\n====== Obtain a new access token.`);
+    console.log(getTimeStampForLoglines() + `Obtain a new access token.`);
     // Obtain a new access token.
     const consumerKey = SF_CONSUMER_KEY;
     const privateKey = SF_PRIVATE_KEY.replace(/\\n/g, '\n');
@@ -50,7 +51,7 @@ export async function getAccessToken(refresh) {
     if (!privateKey || privateKey.length < 50) {
       return null;}
     const aud = SF_AUDIENCE;
-    let sub = IS_OTT ? SF_SUBJECT : settingsCache.get("userName"); // read from .env if it's ott
+    let sub = IS_LOCAL_CONFIG ? SF_SUBJECT : settingsCache.get("userName"); // read from .env if it's ott
 
     // wait until critical data are retrieved from core
     if (!sub) {
@@ -70,7 +71,7 @@ export async function getAccessToken(refresh) {
     cachedAccessToken = response.data.access_token;
   }
 
-  console.log(`\n====== cachedAccessToken: ${cachedAccessToken}.`);
+  console.log(getTimeStampForLoglines() + `cachedAccessToken: ${cachedAccessToken}.`);
   return cachedAccessToken;
 }
 

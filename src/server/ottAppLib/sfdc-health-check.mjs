@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { getAccessToken } from './sfdc-auto-populate-access-token.mjs';
 import { getConversationChannelDefinitions } from './sfdc-auto-populate.mjs';
+import { getTimeStampForLoglines } from '../util.mjs';
 
 const {
     SF_INSTANCE_URL,
@@ -16,13 +17,13 @@ const {
  * @returns {Object} An object containing isValid (boolean) and reason (string) properties.
  */
 export async function validateCCDFieldsOnPlatformEvent() {
-    console.log("\n====== Start validateCCDFieldsOnPlatformEvent");
+    console.log(getTimeStampForLoglines() + "Start validateCCDFieldsOnPlatformEvent");
 
     try {
         const ccdData = await getConversationChannelDefinitions();
 
         if (!ccdData || !ccdData.records || ccdData.records.length === 0) {
-            console.log("No records found in the CCD data");
+            console.log(getTimeStampForLoglines() + "No records found in the CCD data");
             return { isValid: false, reason: "No Conversation Channel Definition records found. Please check your CCD configuration." };
         }
 
@@ -61,7 +62,7 @@ async function validateFields(customEventPayloadField, customEventTypeField, cus
 
     try {
         const response = await axios.get(customPlatformEventDescribe, requestHeader);
-        console.log("\n====== validateCCDFieldsOnPlatformEvent request completed successfully");
+        console.log(getTimeStampForLoglines() + "validateCCDFieldsOnPlatformEvent request completed successfully");
         
         const fields = response.data.fields;
         const hasPayloadField = fields.some(field => field.name === customEventPayloadField);
@@ -80,7 +81,7 @@ async function validateFields(customEventPayloadField, customEventTypeField, cus
 
         return true;
     } catch (error) {
-        console.log("\n====== validateCCDFieldsOnPlatformEvent request Failed: ", error.response?.data || error.message);
+        console.log(getTimeStampForLoglines() + "validateCCDFieldsOnPlatformEvent request Failed: ", error.response?.data || error.message);
         throw error;
     }
 }
@@ -92,7 +93,7 @@ async function validateFields(customEventPayloadField, customEventTypeField, cus
  * @returns {Object} An object containing isValid (boolean) and reason (string) properties.
  */
 export async function validateConversationVendorInfo(pageType) {
-    console.log("\n====== Start validateConversationVendorInfo");
+    console.log(getTimeStampForLoglines() + "Start validateConversationVendorInfo");
 
     try {
         const accessToken = await getAccessToken();
@@ -108,7 +109,7 @@ export async function validateConversationVendorInfo(pageType) {
         const ccdData = response.data;
 
         if (!ccdData || !ccdData.records || ccdData.records.length === 0) {
-            console.log("No records found in the CCD data");
+            console.log(getTimeStampForLoglines() + "No records found in the CCD data");
             return { isValid: false, reason: "No Conversation Channel Definition records found. Please check your CCD configuration." };
         }
 
@@ -153,7 +154,7 @@ function validateVendorType(actualType, expectedType, pageName) {
  * @returns {Object} An object containing isValid (boolean) and reason (string) properties.
  */
 export async function validateContactCenterChannelForCustomType() {
-    console.log("\n====== Start validateContactCenterChannelForCustomType");
+    console.log(getTimeStampForLoglines() + "Start validateContactCenterChannelForCustomType");
 
     const accessToken = await getAccessToken();
     const requestHeader = getValidateCCDRequestHeader(accessToken);
@@ -166,7 +167,7 @@ export async function validateContactCenterChannelForCustomType() {
         const messagingChannelResponse = await axios.get(messagingChannelUrl, requestHeader);
         
         if (messagingChannelResponse.data.totalSize === 0) {
-            console.log('No MessagingChannel records found with Custom type and specified ChannelAddressIdentifier.');
+            console.log(getTimeStampForLoglines() + 'No MessagingChannel records found with Custom type and specified ChannelAddressIdentifier.');
             return { 
                 isValid: false, 
                 reason: `No matching MessagingChannel found for ChannelAddressIdentifier: ${CHANNEL_ADDRESS_IDENTIFIER} and MessageType: Custom` 
@@ -184,10 +185,10 @@ export async function validateContactCenterChannelForCustomType() {
         const totalCount = contactCenterChannelResponse.data.records[0].totalCount;
 
         if (totalCount > 0) {
-            console.log('ChannelId exists in the ContactCenterChannel records. Validation successful.');
+            console.log(getTimeStampForLoglines() + 'ChannelId exists in the ContactCenterChannel records. Validation successful.');
             return { isValid: true, reason: `Matching ContactCenterChannel found for MessagingChannel ID: ${messagingChannelId}` };
         } else {
-            console.log('ChannelId does not exist in the ContactCenterChannel records. Validation failed.');
+            console.log(getTimeStampForLoglines() + 'ChannelId does not exist in the ContactCenterChannel records. Validation failed.');
             return { 
                 isValid: false, 
                 reason: `No matching ContactCenterChannel found for MessagingChannel ID: ${messagingChannelId}. Please check your Contact Center Channel configuration.` 
@@ -224,7 +225,7 @@ function getValidateCCDRequestHeader(accessToken) {
  * @returns {Object} An object containing isValid (boolean) and reason (string) properties.
  */
 export async function validateSCRT2PermissionsForPlatformEvent() {
-    console.log("\n====== Start validateSCRT2PermissionsForPlatformEvent");
+    console.log(getTimeStampForLoglines() + "Start validateSCRT2PermissionsForPlatformEvent");
 
     const accessToken = await getAccessToken();
     const requestHeader = getValidateCCDRequestHeader(accessToken);
@@ -237,7 +238,7 @@ export async function validateSCRT2PermissionsForPlatformEvent() {
         const permissionSetResponse = await axios.get(permissionSetUrl, requestHeader);
 
         if (permissionSetResponse.data.totalSize === 0) {
-            console.log('No PermissionSet record found for sfdc_scrt2.');
+            console.log(getTimeStampForLoglines() + 'No PermissionSet record found for sfdc_scrt2.');
             return { isValid: false, reason: 'sfdc_scrt2 PermissionSet not found. Please check if the SCRT2 Permission Set is properly configured.' };
         }
 
@@ -246,7 +247,7 @@ export async function validateSCRT2PermissionsForPlatformEvent() {
         // Step 2: Get the SObjectType (Platform Event name) from CCD
         const ccdData = await getConversationChannelDefinitions();
         if (!ccdData || !ccdData.records || ccdData.records.length === 0) {
-            console.log("No records found in the CCD data");
+            console.log(getTimeStampForLoglines() + "No records found in the CCD data");
             return { isValid: false, reason: "No Conversation Channel Definition records found. Please check your CCD configuration." };
         }
         const platformEventName = ccdData.records[0].CustomPlatformEvent;
@@ -261,7 +262,7 @@ export async function validateSCRT2PermissionsForPlatformEvent() {
         const objectPermissionsResponse = await axios.get(objectPermissionsUrl, requestHeader);
 
         if (objectPermissionsResponse.data.totalSize === 0) {
-            console.log('No ObjectPermissions record found for the specified criteria.');
+            console.log(getTimeStampForLoglines() + 'No ObjectPermissions record found for the specified criteria.');
             return { 
                 isValid: false, 
                 reason: `No matching ObjectPermissions found for PermissionSet: sfdc_scrt2 and SObjectType: ${platformEventName}. Please check the permission assignments.` 
@@ -271,10 +272,10 @@ export async function validateSCRT2PermissionsForPlatformEvent() {
         const permissions = objectPermissionsResponse.data.records[0];
 
         if (permissions.PermissionsRead && permissions.PermissionsCreate) {
-            console.log('SCRT2 integration user permset is correctly assigned to the platform event.');
+            console.log(getTimeStampForLoglines() + 'SCRT2 integration user permset is correctly assigned to the platform event.');
             return { isValid: true, reason: 'Required permissions (Read and Create) are set correctly for the SCRT2 integration user on the platform event.' };
         } else {
-            console.log('SCRT2 integration user permset is not correctly assigned to the platform event.');
+            console.log(getTimeStampForLoglines() + 'SCRT2 integration user permset is not correctly assigned to the platform event.');
             return { 
                 isValid: false, 
                 reason: `PermissionsRead and/or PermissionsCreate are not set to true for the SCRT2 integration user on the platform event. Current permissions - Read: ${permissions.PermissionsRead}, Create: ${permissions.PermissionsCreate}` 

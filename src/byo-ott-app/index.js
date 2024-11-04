@@ -13,14 +13,18 @@ export function initializeBYOOTTAppController(connector) {
             try {
                 switch (event.data.type) {
                     case Constants.GET_AGENT_CONFIG: {
-                        const { agentConfig, agentId, userPresenceStatuses } = connector.sdk.state;
-                        connector.sdk.messageUser(event.fromUsername,  Constants.AGENT_CONFIG, 
-                            {
-                                type: Constants.AGENT_CONFIG,
-                                value: agentConfig,
-                                userPresenceStatuses,
-                                from: `${document.referrer} as ${agentId}` 
-                            })
+                        const { agentConfig, contactCenterChannels, agentId, userPresenceStatuses, isSCVMultipartyAllowed } = connector.sdk.state;
+                        connector.sdk.messageUser(event.fromUsername, 
+                                                  Constants.AGENT_CONFIG,
+                                                 {
+                                                    type: Constants.AGENT_CONFIG,
+                                                    value: agentConfig,
+                                                    userPresenceStatuses,
+                                                    contactCenterChannels,
+                                                    referrer: `${document.referrer}`,
+                                                    agentId,
+                                                    isSCVMultipartyAllowed
+                                                 })
                     }
                     break;
                     case Constants.SET_AGENT_CONFIG: {

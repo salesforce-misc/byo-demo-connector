@@ -8,6 +8,7 @@ import certifi from 'certifi';
 import {getAccessToken} from './sfdc-auth.mjs';
 import {fileURLToPath} from 'url';
 import { settingsCache } from '../ottAppServer.mjs';
+import { getTimeStampForLoglines } from '../util.mjs';
 
 // Import dotenv that loads the config metadata from .env
 //require('dotenv').config();
@@ -19,13 +20,13 @@ const {
   SF_INSTANCE_URL,
   SF_ORG_ID
 } = process.env;
-const IS_OTT = process.env.IS_OTT === "true";
+const IS_LOCAL_CONFIG = process.env.IS_LOCAL_CONFIG === "true";
 /**
  * Connects to the Pub/Sub API and returns a gRPC client.
  * @returns a gRPC client
  */
 export async function connectToPubSubApi() {
-  console.log('\n====== Start connectToPubSubApi()');
+  console.log(getTimeStampForLoglines() + 'Start connectToPubSubApi()');
 
   // Read certificates
   const rootCert = fs.readFileSync(certifi);
@@ -49,8 +50,8 @@ export async function connectToPubSubApi() {
   const metaCallback = (_params, callback) => {
     const meta = new grpc.Metadata();
     meta.add('accesstoken', accessToken);
-    meta.add('instanceurl', IS_OTT ? SF_INSTANCE_URL : settingsCache.get("instanceUrl"));
-    meta.add('tenantid', IS_OTT ? SF_ORG_ID : settingsCache.get("orgId"));
+    meta.add('instanceurl', IS_LOCAL_CONFIG ? SF_INSTANCE_URL : settingsCache.get("instanceUrl"));
+    meta.add('tenantid', IS_LOCAL_CONFIG ? SF_ORG_ID : settingsCache.get("orgId"));
     callback(null, meta);
   };
   const callCreds =
@@ -63,7 +64,7 @@ export async function connectToPubSubApi() {
   // Return pub/sub gRPC client
   const client = new sfdcPackage.PubSub(SF_PUB_SUB_ENDPOINT, combCreds);
 
-  console.log('\n====== Pub/Sub API client is ready to connect');
+  console.log(getTimeStampForLoglines() + 'Pub/Sub API client is ready to connect');
 
   return client;
 }
@@ -76,11 +77,11 @@ export async function connectToPubSubApi() {
  */
 export async function getEventSchema(client, topicName) {
   return new Promise((resolve, reject) => {
-    console.log(`\n====== start getEventSchema()`);
+    console.log(getTimeStampForLoglines() + `start getEventSchema()`);
     client.GetTopic({ topicName }, (err, response) => {
       if (err) {
         // Handle error
-        console.log(`\n====== getEventSchema error: `, err);
+        console.log(getTimeStampForLoglines() + `getEventSchema error: `, err);
         reject(err);
       } else {
         // Get the schema information
@@ -88,7 +89,7 @@ export async function getEventSchema(client, topicName) {
         client.GetSchema({ schemaId }, (error, res) => {
           if (error) {
             // Handle error
-            console.log(`\n====== client.GetSchema error: `, err);
+            console.log(getTimeStampForLoglines() + `client.GetSchema error: `, err);
             reject(err);
           } else {
 
@@ -111,7 +112,7 @@ export async function getEventSchema(client, topicName) {
             // TODO: Will remove second param: {registry: {'long': longType}}, if we don't need the block of code above
             const schemaType = avro.parse(res.schemaJson, {registry: {'long': longType}});
 
-            console.log(`\n====== Topic schema loaded: ${topicName}`, schemaType);
+            console.log(getTimeStampForLoglines() + `Topic schema loaded: ${topicName}`, schemaType);
             resolve({
               id: schemaId,
               type: schemaType
@@ -141,22 +142,22 @@ function subscribeWithBasicHandlers(client, topicName, schema) {
     numRequested: SF_PUB_SUB_EVENT_RECEIVE_LIMIT
   };
   subscription.write(subscribeRequest);
-  console.log(
-    `\n====== Subscribe request sent for ${subscribeRequest.numRequested} events from ${topicName}...`
+  console.log(getTimeStampForLoglines() + 
+    `Subscribe request sent for ${subscribeRequest.numRequested} events from ${topicName}...`
   );
 
   // Listen to new events.
   subscription.on('data', (data) => {
     if (data.events) {
       const latestReplayId = data.latestReplayId.readBigUInt64BE();
-      console.log(
-        `\n====== Received ${data.events.length} events, latest replay ID: ${latestReplayId}`
+      console.log(getTimeStampForLoglines() + 
+        `Received ${data.events.length} events, latest replay ID: ${latestReplayId}`
       );
       const parsedEvents = data.events.map((event) =>
         parseEvent(schema, event)
       );
-      console.log(
-        '\n====== gRPC event payloads: ',
+      console.log(getTimeStampForLoglines() + 
+        'gRPC event payloads: ',
         JSON.stringify(parsedEvents, null, 2)
       );
     } else {
@@ -164,14 +165,14 @@ function subscribeWithBasicHandlers(client, topicName, schema) {
     }
   });
   subscription.on('end', () => {
-    console.log('\n====== gRPC stream ended');
+    console.log(getTimeStampForLoglines() + 'gRPC stream ended');
   });
   subscription.on('error', (err) => {
     // TODO: Handle errors
     console.error('gRPC stream error: ', JSON.stringify(err));
   });
   subscription.on('status', (status) => {
-    console.log('\n====== gRPC stream status: ', status);
+    console.log(getTimeStampForLoglines() + 'gRPC stream status: ', status);
   });
 }
 
@@ -191,8 +192,8 @@ function subscribeWithBasicHandlers(client, topicName, schema) {
     numRequested: SF_PUB_SUB_EVENT_RECEIVE_LIMIT
   };
   subscription.write(subscribeRequest);
-  console.log(
-    `\n====== Subscribe request sent for ${subscribeRequest.numRequested} events from ${topicName}...`
+  console.log(getTimeStampForLoglines() + 
+    `Subscribe request sent for ${subscribeRequest.numRequested} events from ${topicName}...`
   );
 
   return subscription;
@@ -241,7 +242,7 @@ async function publish(client, topicName, schema, payload) {
  * @returns {Object} a parsed Salesforce platform event
  */
 export function parseEvent(schema, event) {
-  console.log('\n====== parseEvent: ', schema, event, event.event.payload);
+  console.log(getTimeStampForLoglines() + 'parseEvent: ', schema, event, event.event.payload);
   const replayId = event.replayId.readBigUInt64BE().toString();
   const payload = schema.type.fromBuffer(event.event.payload);
 

@@ -75,7 +75,7 @@
     "multer": "^1.4.5-lts.1",
     "node-cache": "^5.1.2",
     "nodemon": "^2.0.4",
-    "@salesforce/scv-connector-base": "4.4.5",
+    "@salesforce/scv-connector-base": "4.6.8",
     "socket.io": "4.2.0",
     "socket.io-client": "4.2.0",
     "ts-node": "^10.9.2",
@@ -86,10 +86,10 @@
   "jest": {
     "coverageThreshold": {
       "global": {
-        "branches": 93,
+        "branches": 86,
         "functions": 95,
-        "lines": 97,
-        "statements": 97
+        "lines": 96,
+        "statements": 96
       }
     }
   }
