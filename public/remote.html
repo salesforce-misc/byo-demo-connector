@@ -19,7 +19,7 @@
         <head>
             <title>Demo Phone Simulator</title>
             <!-- uncomment and replace with line below for use in visualforce page <link rel="stylesheet" type="text/css" href="{!$Resource.slds_stylesheet}" media="screen"/> -->
-            <link rel="stylesheet" type="text/css" href="assets/slds-stylesheet.css" media="screen"></link>
+            <link rel="stylesheet" type="text/css" href="/Assets/slds-stylesheet.css" media="screen"></link>
         </head>
     
         <body>
@@ -208,7 +208,7 @@
                                     <input type="checkbox" name="options" id="canConsultCheckbox" checked=""/>
                                     <label class="slds-checkbox__label" for="canConsultCheckbox">
                                         <span class="slds-checkbox_faux"></span>
-                                        <span class="slds-form-element__label">Support Multiparty Consult</span>
+                                        <span class="slds-form-element__label">Support multi-party consult calls</span>
                                     </label>
                                 </div>
                             </div>
@@ -221,6 +221,39 @@
                                         <label class="slds-checkbox__label" for="hasDebugLoggingCheckbox">
                                             <span class="slds-checkbox_faux"></span>
                                             <span class="slds-form-element__label" title="When it is checked file logging is enabled, otherwise logs to console">Enable logging</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                    <div class="slds-checkbox">
+                                        <input type="checkbox" name="options" id="isDialPadDisabled" checked=""></input>
+                                        <label class="slds-checkbox__label" for="isDialPadDisabled">
+                                            <span class="slds-checkbox_faux"></span>
+                                            <span class="slds-form-element__label">Disable Dial Pad</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                    <div class="slds-checkbox">
+                                        <input type="checkbox" name="options" id="isPhoneBookDisabled" checked=""></input>
+                                        <label class="slds-checkbox__label" for="isPhoneBookDisabled">
+                                            <span class="slds-checkbox_faux"></span>
+                                            <span class="slds-form-element__label">Disable Phone Book</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                    <div class="slds-checkbox">
+                                        <input type="checkbox" name="options" id="isHidSupported"></input>
+                                        <label class="slds-checkbox__label" for="isHidSupported">
+                                            <span class="slds-checkbox_faux"></span>
+                                            <span class="slds-form-element__label">Support HID</span>
                                         </label>
                                     </div>
                                 </div>
@@ -575,7 +608,7 @@
                                         <button class="slds-button slds-button_icon slds-button_icon-brand" aria-haspopup="true" title="Participant Types options" id="participant-types">
                                             <svg class="slds-button__icon" aria-hidden="true">
                                                 <!-- uncomment and replace with line below for use in visualforce page <use xlink:href="{!$Resource.symbols}#hide"></use> -->
-                                                <use xlink:href="/assets/symbols.svg#down"></use>
+                                                <use xlink:href="/Assets/symbols.svg#down"></use>
                                             </svg>
                                             <span class="slds-assistive-text">End Call Participant Types</span>
                                         </button>
@@ -650,6 +683,34 @@
 
                         </div>
                         <div class="slds-card">
+                            <header class="slds-media slds-m-bottom_x-small slds-media_center slds-has-flexi-truncate">
+                                <div class="slds-media__body">
+                                    <h2 class="slds-card__header-title_small">
+                                        <a href="javascript:void(0);" class="slds-card__header-link slds-truncate" title="SoftphoneControl">
+                                            <span class="slds-m-bottom_small slds-card__header-link">Softphone Control Actions</span>
+                                        </a>
+                                    </h2>
+                                </div>
+                            </header>
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                    <div class="slds-checkbox">
+                                        <input type="checkbox" name="options" id="endCallDisabled"></input>
+                                        <label class="slds-checkbox__label" for="endCallDisabled">
+                                            <span class="slds-checkbox_faux"></span>
+                                            <span class="slds-form-element__label">Disable end call button</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slds-form-element slds-m-bottom_medium">
+                                <div class="slds-form-element__control slds-input-has-fixed-addon slds-m-bottom_small">
+                                    <button class="slds-button slds-button_outline-brand slds-button_stretch" id="update-call">Update Softphone Controls</button>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="slds-card">
                             <header class="slds-media slds-media_center slds-has-flexi-truncate">
                               <h2 class="slds-card__header-title_small">
                                 <a href="javascript:void(0);" class="slds-card__header-link slds-truncate" title="Accounts">
@@ -711,7 +772,7 @@
                                         <button class="slds-button slds-button_icon slds-button_icon-brand" aria-haspopup="true" title="Sender type options" id="sender-types">
                                             <svg class="slds-button__icon" aria-hidden="true">
                                                 <!-- uncomment and replace with line below for use in visualforce page <use xlink:href="{!$Resource.symbols}#hide"></use> -->
-                                                <use xlink:href="/assets/symbols.svg#down"></use>
+                                                <use xlink:href="/Assets/symbols.svg#down"></use>
                                             </svg>
                                             <span class="slds-assistive-text">Sender type options</span>
                                         </button>
@@ -745,7 +806,7 @@
                                 <button id="record-button" type="button" class="btn btn-danger">
                                     <svg class="slds-button__icon" aria-hidden="true">
                                         <!-- uncomment and replace with line below for use in visualforce page <use xlink:href="{!$Resource.symbols}#hide"></use> -->
-                                        <use xlink:href="/assets/symbols.svg#record"></use>
+                                        <use xlink:href="/Assets/symbols.svg#record"></use>
                                     </svg>
                                     <span class="slds-assistive-text">Record a message</span>
                                 </button>
@@ -1083,7 +1144,7 @@
                     </article>
             </div>
             <!-- uncomment and replace with line below for use in visualforce page <script src="{!$Resource.remote_control}"></script> -->
-            <script src="/assets/remote.bundle.js"></script>
+            <script src=/assets/remote.bundle.js"></script>
         </body>
     </html>
     <!-- uncomment for use in visualforce page</apex:page>  -->
