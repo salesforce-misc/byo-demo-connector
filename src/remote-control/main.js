@@ -7,7 +7,7 @@
 
 import Constants from '../common/constants';
 import { io } from "socket.io-client";
-
+const MAX_PARTICIPANTS_INDEX = 6;
 const showLoginPageCheckbox = document.getElementById('showLoginPageCheckbox');
 const throwErrorCheckbox = document.getElementById('throwErrorCheckbox');
 const customErrorTextArea = document.getElementById('custom-error-text');
@@ -50,9 +50,7 @@ const showAddBlindTransferButton = document.getElementById('showAddBlindTransfer
 const phoneNumberInput = document.getElementById('phoneNumber-input');
 const startOutboundCallButton = document.getElementById('start-outbound-call');
 const startInboundCallButton = document.getElementById('new-inbound-call');
-const connectCallButton = document.getElementById('connect-call');
 const customerHangupButton = document.getElementById('customer-hangup');
-const connectParticipantButton = document.getElementById('connect-participant');
 const connectSupervisorButton = document.getElementById('connect-supervisor');
 const acceptCallButton = document.getElementById('accept-call');
 const declineCallButton = document.getElementById('decline-call');
@@ -75,7 +73,6 @@ const pauseRecButton = document.getElementById('pause-rec');
 const resumeRecButton = document.getElementById('resume-rec');
 const swapButton = document.getElementById('swap');
 const conferenceButton = document.getElementById('conference');
-const removeParticipantButton = document.getElementById('remove-participant');
 const removeSupervisorButton = document.getElementById('remove-supervisor');
 const softphoneLogoutButton = document.getElementById('softphone-logout');
 const transcriptionVendorCallKey = document.getElementById('transcription-vendor-call-key');
@@ -96,16 +93,14 @@ const sendMessageButton = document.getElementById('send-message-button');
 const sendRealtimeConversationEventsButton = document.getElementById('send-realtime-conversation-events');
 const sendMessageTextArea = document.getElementById('send-message-text');
 const receiveMessageTextArea = document.getElementById('receive-message-text');
-const activeCalls1TextArea = document.getElementById('active-calls1-text');
-const activeCalls2TextArea = document.getElementById('active-calls2-text');
 const interactionDurationInput = document.getElementById('interaction-duration');
 const holdDurationInput = document.getElementById('hold-duration');
 const voiceCallIdInput =  document.getElementById('voice-id');
-const activeCallHeader =  document.getElementById('active-call-header');
 const activeCallsCard =  document.getElementById('active-calls-card');
 const agentMissedCallButton =  document.getElementById('agent-missed-call');
 const callErrorButton =  document.getElementById('call-error');
 const demoTitle = document.getElementById('demo-title');
+const agentName = document.getElementById('agent-name');
 const errorSpan = document.getElementById('error-span');
 const sendAudioStatsButton = document.getElementById('send-audioStats-button');
 const sendAudioStatsTextArea = document.getElementById('send-audioStats-text');
@@ -136,10 +131,45 @@ const endACWButton = document.getElementById('end-acw');
 const acwAgentWorkField = document.getElementById('acwAgentWorkId');
 const acwWorkItemField = document.getElementById('acwWorkItemId');
 const retrySubscribeButton = document.getElementById('retrySubscribe');
-
+const multipartyAllowedCheckbox = document.getElementById('isSCVMultipartyAllowed');
+const isDialPadDisabled = document.getElementById('isDialPadDisabled');
+const isPhoneBookDisabled = document.getElementById('isPhoneBookDisabled');
+const agentCall = { callAttributes: { participantType: Constants.PARTICIPANT_TYPE.AGENT }};
 const call = { callAttributes: { participantType: Constants.PARTICIPANT_TYPE.INITIAL_CALLER }};
 const thirdPartyCall = { callAttributes: { participantType: Constants.PARTICIPANT_TYPE.THIRD_PARTY }};
+const endCallDisabledCheckbox = document.getElementById('endCallDisabled');
+const updateSoftphoneControlsButton = document.getElementById('update-call');
+const isHidSupported = document.getElementById('isHidSupported');
 signedRecordingDetails.style.display = "none";
+
+function getCallId(i) {
+    return document.getElementById(`button-group${i}`).getAttribute(`data-call-id`);
+}
+
+for (let i = 0; i <= MAX_PARTICIPANTS_INDEX; i++) {
+    document.getElementById(`connect-participant${i}`).addEventListener('click', function() {
+        if (i===0) {
+            connectCall();
+        } else {
+            connectParticipant(getCallId(i));
+        }
+    });
+    document.getElementById(`remove-participant${i}`).addEventListener('click', function() {
+        removeParticipant(getCallId(i));
+    });
+    document.getElementById(`mute-participant${i}`).addEventListener('click', function() {
+        muteCall(getCallId(i));
+    });
+    document.getElementById(`hold-participant${i}`).addEventListener('click', function() {
+        holdCall(getCallId(i));
+    });
+    document.getElementById(`unmute-participant${i}`).addEventListener('click', function() {
+        unmuteCall(getCallId(i));
+    });
+    document.getElementById(`resume-participant${i}`).addEventListener('click', function() {
+        resumeCall(getCallId(i));
+    });
+}
 
 function setContactTypes() {
     sendMessageToConnector({
@@ -182,7 +212,8 @@ function getCallInfo(callType) {
         removeParticipantVariant: getRemovingParticipantSettings(callType),
         showMergeButton : showMergeButton.checked,
         showSwapButton : showSwapButton.checked,
-        additionalFields: additionalFieldsInput.value
+        additionalFields: additionalFieldsInput.value,
+        endCallDisabled: endCallDisabledCheckbox.checked
     }
 }
 
@@ -202,6 +233,15 @@ function updateActiveCalls() {
         type: Constants.GET_ACTIVE_CALLS
     });
 }
+
+function updateCallInfo(genericUpdate) {
+    sendMessageToConnector({
+        type: Constants.CALL_INFO_UPDATED,
+        callInfo: getCallInfo(Constants.CALL_TYPE.OUTBOUND),
+        update: typeof genericUpdate === "boolean" ? !genericUpdate : true
+    });
+}
+
 let senderType = Constants.SENDER_TYPE.END_USER;
 let endCallParticipantType = Constants.PARTICIPANT_TYPE.AGENT;
 let phoneNumber;
@@ -222,7 +262,7 @@ socket.on('connectors', payload => {
 });
 
 socket.on('connect', () => {
-    socket.emit('join', { 
+    socket.emit('join', {
         connectionType : "remote_control",
         remoteId : remoteControlIdentifier,
         userAgent : window.navigator.userAgent
@@ -312,7 +352,9 @@ function handleMessageFromConnector(event) {
             case Constants.NEW_TYPE:
             break;
             case Constants.AGENT_CONFIG: {
-                demoTitle.innerText = `Connected to ${event.data.from}`;
+                demoTitle.innerText = `Connected to ${event.data.referrer} as ${event.data.agentId}`;
+                agentName.innerText = `Agent (${event.data.agentId})`;
+                multipartyAllowedCheckbox.checked = event.data.isSCVMultipartyAllowed;
                 if(event.data.value.selectedPhone.type  === 'DESK_PHONE') {
                     hardphoneRadio.checked = true;
                     softphoneRadio.checked = false;
@@ -338,7 +380,8 @@ function handleMessageFromConnector(event) {
             }
             break;
             case Constants.CAPABILITIES: {
-                demoTitle.innerText = `Connected to ${event.data.from}`;
+                demoTitle.innerText = `Connected to ${event.data.referrer} as ${event.data.agentId}`;
+                agentName.innerText = `Agent (${event.data.agentId})`;
                 hasMuteCheckbox.checked = event.data.value.hasMute;
                 hasRecordCheckbox.checked = event.data.value.hasRecord;
                 hasSwapCheckbox.checked = event.data.value.hasSwap;
@@ -357,6 +400,8 @@ function handleMessageFromConnector(event) {
                 supportsQueuedAgentStatusCheckbox.checked = event.data.value.hasPendingStatusChange;
                 signedRecordingUrl.value = event.data.value.signedRecordingUrl ? event.data.value.signedRecordingUrl : '';
                 signedRecordingDuration.value = event.data.value.signedRecordingDuration ? event.data.value.signedRecordingDuration : '';
+                isDialPadDisabled.checked = event.data.value.isDialPadDisabled;
+                isPhoneBookDisabled.checked = event.data.value.isPhoneBookDisabled;
                 toggleSignedRecordingUrlElements();
             }
             break;
@@ -375,7 +420,6 @@ function handleMessageFromConnector(event) {
         }
     }
 }
-//});
 
 function populateSalesforceUsersDropDown(usernames) {
     // clearout existing options
@@ -420,28 +464,40 @@ function showError(error) {
 }
 
 function prettyPrintCalls(activeCalls) {
+    const isMultipartyAllowed = document.getElementById('isSCVMultipartyAllowed').checked;
     activeCallsCard.style.display = "none";
-    activeCalls1TextArea.style.display = "none";
-    activeCalls2TextArea.style.display = "none";
-    activeCallHeader.style.display = "none";
+    for (let i = 0; i <= MAX_PARTICIPANTS_INDEX; i++) {
+        document.getElementById(`active-calls-text${i}`).style.display = "none";
+        document.getElementById(`active-calls-header${i}`).style.display = "none";
+        document.getElementById(`button-group${i}`).style.display = "none";
+        document.getElementById(`button-group${i}`).setAttribute(`data-call-id`, null);
+        document.getElementById(`hold-participant${i}`).style.display = isMultipartyAllowed ? 'none' : 'block';
+        document.getElementById(`resume-participant${i}`).style.display = isMultipartyAllowed ? 'none' : 'block';
+    }
     addParticipantButton.disabled = true;
     connectSupervisorButton.style.display = "none";
     removeSupervisorButton.style.display = "none";
+    swapButton.style.display = isMultipartyAllowed ? 'none' : 'block';
+    
     if (Array.isArray(activeCalls) && activeCalls.length > 0){
         if (hasSupervisorListenInCheckbox.checked) {
             connectSupervisorButton.style.display = "block";
             removeSupervisorButton.style.display = "block";
         }
-        activeCallsCard.style.display = "block";
-        activeCallHeader.style.display = "block";
         addParticipantButton.disabled = false;
+        activeCallsCard.style.display = "block";
         acceptCallButton.disabled = softphoneRadio.checked;
         declineCallButton.disabled = softphoneRadio.checked;
-        activeCallHeader.innerHTML = `Active Calls&nbsp;&nbsp;&nbsp;<span style="color:green;border-style:groove;}">&nbsp;${activeCalls[0].state}&nbsp;</span>`;
-        activeCalls.forEach((call,index) => {
-            const elem = index === 0 ? activeCalls1TextArea : activeCalls2TextArea;
+        addParticipantButton.disabled = activeCalls.length === MAX_PARTICIPANTS_INDEX; 
+        activeCalls.forEach((call,i) => {
+            document.getElementById(`active-calls-header${i}`).style.display = "block";
+            document.getElementById(`button-group${i}`).style.display = "block";
+            document.getElementById(`active-calls-header${i}`).innerHTML = `Call Participant&nbsp;${(call.contact && call.contact.name) || call.phoneNumber}&nbsp;</span>(${call.callAttributes.participantType})&nbsp;&nbsp;<span style="color:green;float:right;border-style:groove;}">&nbsp;${call.state}`;
+            document.getElementById(`button-group${i}`).setAttribute(`data-call-id`, call.callId);
+            
+            const elem = document.getElementById(`active-calls-text${i}`)
             elem.style.display = "block";
-            elem.value = `Call ${call.state} to ${call.callAttributes.participantType}:\n`;
+            elem.value = `Call #${i} ${call.state} to ${call.callAttributes.participantType}:\n`;
             Object.keys(call).forEach(key => {
                 elem.value += `${key}: ${JSON.stringify(call[key], null, 2)}\n`;
             })
@@ -461,6 +517,7 @@ function switchAgentInRemote() {
 
 function connectToConnector() {
     updateActiveCalls();
+    updateCallInfo(true);
     if (getActiveCallsIntervalID) {
         clearInterval(getActiveCallsIntervalID);
     }
@@ -503,12 +560,15 @@ hasSwapCheckbox.addEventListener('change', setCapabilities);
 hasSignedRecordingUrlCheckbox.addEventListener('change', setCapabilities);
 signedRecordingUrl.addEventListener('change', setCapabilities);
 signedRecordingDuration.addEventListener('change', setCapabilities);
+isDialPadDisabled.addEventListener('change', setCapabilities);
+isPhoneBookDisabled.addEventListener('change', setCapabilities);
+isHidSupported.addEventListener('change', setCapabilities);
 supportsQueuedAgentStatusCheckbox.addEventListener('change', setCapabilities);
 hardphoneRadio.addEventListener('change', setAgentConfig);
 softphoneRadio.addEventListener('change', setAgentConfig);
+multipartyAllowedCheckbox.addEventListener('change', setAgentConfig);
 startOutboundCallButton.addEventListener('click', startOutboundCall);
 startInboundCallButton.addEventListener('click', startInboundCall);
-connectCallButton.addEventListener('click', connectCall);
 customerHangupButton.addEventListener('click', customerHangup);
 acceptCallButton.addEventListener('click', acceptCall);
 declineCallButton.addEventListener('click', declineCall);
@@ -528,8 +588,6 @@ sendPostCallRecordingButton.addEventListener('click', sendPostCallRecording);
 sendVoiceMailButton.addEventListener('click', sendVoiceMail);
 sendMessageButton.addEventListener('click', sendMessage);
 sendRealtimeConversationEventsButton.addEventListener('click', sendRealtimeConversationEvents);
-connectParticipantButton.addEventListener('click', connectParticipant);
-removeParticipantButton.addEventListener('click', removeParticipant);
 connectSupervisorButton.addEventListener('click', connectSupervisor);
 removeSupervisorButton.addEventListener('click', removeSupervisor);
 senderTypeButton.addEventListener('click', showSenderTypeOptions);
@@ -558,7 +616,12 @@ showTransferViewButton.addEventListener('click', sendShowTransferViewEvent);
 salesforceAgentDropDown.addEventListener('change', switchAgentInRemote);
 startACWButton.addEventListener('click', startACW);
 endACWButton.addEventListener('click', endACW);
-retrySubscribeButton.addEventListener('click', retrySubscribe);
+retrySubscribeButton.addEventListener('click', retrySubscribe)
+updateSoftphoneControlsButton.addEventListener('click', updateSoftphoneControls);
+showMuteButton.addEventListener('click', updateCallInfo);
+callHasMute.addEventListener('click', updateCallInfo);
+showRecordButton.addEventListener('click', updateCallInfo);
+callHasRecord.addEventListener('click', updateCallInfo);
 
 function showLoginChanged() {
     sendMessageToConnector({
@@ -613,7 +676,10 @@ function setCapabilities() {
             signedRecordingUrl: signedRecordingUrl.value,
             signedRecordingDuration: signedRecordingDuration.value,
             hasTransferToOmniFlow: hasTransferToOmniFlowCheckbox.checked,
-            hasPendingStatusChange: supportsQueuedAgentStatusCheckbox.checked
+            hasPendingStatusChange: supportsQueuedAgentStatusCheckbox.checked,
+            isDialPadDisabled: isDialPadDisabled.checked,
+            isPhoneBookDisabled: isPhoneBookDisabled.checked,
+            isHidSupported: isHidSupported.checked
         }
     });
 }
@@ -627,17 +693,21 @@ function startOutboundCall() {
     });
 }
 
-function connectParticipant() {
+function connectParticipant(callId) {
+    const call = { callId };
     sendMessageToConnector({
         type: Constants.CONNECT_PARTICIPANT,
-        callInfo: getCallInfo(Constants.CALL_TYPE.ADD_PARTICIPANT)
+        callInfo: getCallInfo(Constants.CALL_TYPE.ADD_PARTICIPANT),
+        call
     });
 }
 
-function removeParticipant() {
+function removeParticipant(callId) {
+    const call = { callId };
     sendMessageToConnector({
         type: Constants.REMOVE_PARTICIPANT,
-        participantType: Constants.PARTICIPANT_TYPE.THIRD_PARTY
+        participantType: Constants.PARTICIPANT_TYPE.THIRD_PARTY,
+        call
     });
 }
 
@@ -776,6 +846,24 @@ function unmute() {
     });
 }
 
+function muteCall(callId) {
+    const call = { callId };
+    sendMessageToConnector({
+        type: Constants.HARDPHONE_EVENT,
+        eventType: Constants.VOICE_EVENT_TYPE.MUTE_TOGGLE,
+        payload: { isMuted: true, call }
+    });
+}
+
+function unmuteCall(callId) {
+    const call = { callId };
+    sendMessageToConnector({
+        type: Constants.HARDPHONE_EVENT,
+        eventType: Constants.VOICE_EVENT_TYPE.MUTE_TOGGLE,
+        payload: { isMuted: false, call }
+    });
+}
+
 function hold() {
     sendMessageToConnector({
         type: Constants.HARDPHONE_EVENT,
@@ -792,11 +880,30 @@ function resume() {
     });
 }
 
+function holdCall(callId) {
+    const call = { callId };
+    sendMessageToConnector({
+        type: Constants.HARDPHONE_EVENT,
+        eventType: Constants.VOICE_EVENT_TYPE.HOLD_TOGGLE,
+        payload: { call, isCustomerOnHold: true }
+    });
+}
+
+function resumeCall(callId) {
+    const call = { callId };
+    sendMessageToConnector({
+        type: Constants.HARDPHONE_EVENT,
+        eventType: Constants.VOICE_EVENT_TYPE.HOLD_TOGGLE,
+        payload: { call, isCustomerOnHold: false }
+    });
+}
+
+//TODO: Support for pause/resume other calls (i.e. Consult call)
 function resumeRec() {
     sendMessageToConnector({
         type: Constants.HARDPHONE_EVENT,
         eventType: Constants.VOICE_EVENT_TYPE.RECORDING_TOGGLE,
-        payload: { call, isRecordingPaused: false }
+        payload: { call: agentCall, isRecordingPaused: false }
     });
 }
 
@@ -804,7 +911,7 @@ function pauseRec() {
     sendMessageToConnector({
         type: Constants.HARDPHONE_EVENT,
         eventType: Constants.VOICE_EVENT_TYPE.RECORDING_TOGGLE,
-        payload: { call, isRecordingPaused: true }
+        payload: { call: agentCall, isRecordingPaused: true }
     });
 }
 
@@ -979,6 +1086,18 @@ function sendVoiceMail(){
     }
 }
 
+/**
+ * Method to send the message for call updated. This is triggered when update softphone controls
+ * button is clicked
+ */
+function updateSoftphoneControls() {
+    sendMessageToConnector({
+        type: Constants.CALL_UPDATED,
+        eventType: Constants.VOICE_EVENT_TYPE.CALL_UPDATED,
+        payload: getCallInfo()
+    });
+}
+
 function sendMessage() {
     const message = sendMessageTextArea.value;
     sendMessageToConnector({
@@ -1067,6 +1186,17 @@ function showCcaasDemoAppTab() {
 }
 
 function setDemoConnectorMode(mode) {
+    //set the mode to server cache so that OTT client apps can also access this information
+    fetch("http://localhost:3030/setOrgMode", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({orgMode : mode }),
+    }).then(response => response.json()).then((data) => {
+        console.log('setOrgMode response: ' + JSON.stringify(data));
+    })
+
     // connector mode only applicable for ccaas remote. 
     if (!window.location.pathname.startsWith('/ccaas.html')) {
         return false;

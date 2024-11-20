@@ -7,6 +7,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { agentWork } from './sfdc-byocc-agentwork-api.mjs';
 import { settingsCache } from '../ottAppServer.mjs';
+import { getTimeStampForLoglines } from '../util.mjs';
 
 // Import dotenv that loads the config metadata from .env
 //require('dotenv').config();
@@ -15,7 +16,7 @@ import { settingsCache } from '../ottAppServer.mjs';
 const {
   SF_SCRT_INSTANCE_URL // OTT-needed
 } = process.env;
-const IS_OTT = process.env.IS_OTT === "true";
+const IS_LOCAL_CONFIG = process.env.IS_LOCAL_CONFIG === "true";
 /**
  * Sends a SF inbound message to Salesforce via the BYOC REST API.
  *
@@ -31,7 +32,10 @@ export async function sendSFInboundMessageInteraction(orgId, authorizationContex
   let message = req.body.message;
   let attachment = req.file;
   let timestamp = req.body.timestamp;
-  console.log(`\n====== Start sendSFInboundMessageInteraction().\nmessage="${message}"\nattachment=${attachment}\ntimestamp=${timestamp}`);
+  let messageType = req.body.messageType;
+  let optionIdentifier = req.body.optionIdentifier;
+  let inReplyToMessageId = req.body.inReplyToMessageId;
+  console.log(getTimeStampForLoglines() + `Start sendSFInboundMessageInteraction().\nmessage="${message}"\nattachment=${attachment}\ntimestamp=${timestamp}\nmessageType=${messageType}`);
 
   // Send 'TypingStoppedIndicator' request before send the message in order to remove typing indicator if any
   sendSFInboundTypingIndicatorInteraction(orgId, authorizationContext, channelAddressIdentifier, endUserClientIdentifier, 'TypingStoppedIndicator');
@@ -47,7 +51,14 @@ export async function sendSFInboundMessageInteraction(orgId, authorizationContex
   const __rootdir = __dirname + '/../../../';
 
   if (attachment === undefined) {
-    jsonData = getSFInboundTextMessageFormData(entryId, channelAddressIdentifier, endUserClientIdentifier, message);
+    // Handling according to the messageType
+    if (messageType == "ChoicesResponseMessage") {
+      jsonData = getSFInboundChoiceResponseMessageFormData(entryId, channelAddressIdentifier, endUserClientIdentifier, optionIdentifier, inReplyToMessageId);
+    } else if (messageType == "FormResponseMessage") {
+      // TODO: Handle FormResponseMessage
+    } else {
+      jsonData = getSFInboundTextMessageFormData(entryId, channelAddressIdentifier, endUserClientIdentifier, message);
+    }
     interactionType = 'EntryInteraction';
   } else {
     // attachment.path value is something like: uploads/8b8ad9de6dfbef745dc0c0d4a3c89796
@@ -61,7 +72,7 @@ export async function sendSFInboundMessageInteraction(orgId, authorizationContex
   const requestHeader = getInboundMessageRequestHeader(accessToken, orgId, authorizationContext);
 
   const responseData = await axios.post(
-    (IS_OTT ? SF_SCRT_INSTANCE_URL : settingsCache.get("scrtUrl")) + '/api/v1/interactions',
+    (IS_LOCAL_CONFIG ? SF_SCRT_INSTANCE_URL : settingsCache.get("scrtUrl")) + '/api/v1/interactions',
     formData,
     requestHeader
   ).then(function (response) {
@@ -80,12 +91,12 @@ export async function sendSFInboundMessageInteraction(orgId, authorizationContex
       let oldName = __rootdir + attachment.path;
       let newName = __rootdir + 'uploads/' + fileName;
       fs.rename(oldName, newName, () => {
-        console.log(`\n====== File rename success from "${oldName}" to "${newName}"`);
+        console.log(getTimeStampForLoglines() + `File rename success from "${oldName}" to "${newName}"`);
       });
     }
 
     fs.recipientUserName
-    console.log(`\n====== sendSFInboundMessageInteraction() success for interactionType "${interactionType}": `, response.data);
+    console.log(getTimeStampForLoglines() + `sendSFInboundMessageInteraction() success for interactionType "${interactionType}": `, response.data);
     checkAndCreateAgentWork(orgId, authorizationContext, routingOwner, response.data, autoCreateAgentWork);
 
     return response.data;
@@ -99,7 +110,7 @@ export async function sendSFInboundMessageInteraction(orgId, authorizationContex
       let responseData = error.response.data;
       sendSFInboundMessageDeliveryFailedInteraction(entryId, interactionType, orgId, authorizationContext, channelAddressIdentifier, endUserClientIdentifier, responseData.code);
 
-      console.log(`\n====== sendSFInboundMessageInteraction() error for interactionType "${interactionType}": `, responseData);
+      console.log(getTimeStampForLoglines() + `sendSFInboundMessageInteraction() error for interactionType "${interactionType}": `, responseData);
       return error;
     });
 
@@ -116,7 +127,7 @@ export async function sendSFInboundMessageInteraction(orgId, authorizationContex
  * @returns {object} result object from interaction service with successful status or error code
  */
 export async function sendSFInboundTypingIndicatorInteraction(orgId, authorizationContext, channelAddressIdentifier, endUserClientIdentifier, entryType) {
-  console.log(`\n====== Start sendSFInboundTypingIndicatorInteraction() with entryType: ${entryType}.`);
+  console.log(getTimeStampForLoglines() + `Start sendSFInboundTypingIndicatorInteraction() with entryType: ${entryType}.`);
   const accessToken = await getAccessToken();
   let jsonData = getSFInboundTypingIndicatorFormData(channelAddressIdentifier, endUserClientIdentifier, entryType);
 
@@ -126,12 +137,12 @@ export async function sendSFInboundTypingIndicatorInteraction(orgId, authorizati
   formData.append('json', JSON.stringify(jsonData), { contentType: 'application/json' });
 
   const responseData = await axios.post(
-    (IS_OTT ? SF_SCRT_INSTANCE_URL : settingsCache.get("scrtUrl")) + '/api/v1/interactions',
+    (IS_LOCAL_CONFIG ? SF_SCRT_INSTANCE_URL : settingsCache.get("scrtUrl")) + '/api/v1/interactions',
     formData,
     requestHeader
   ).then(function (response) {
     if (response && response.data) {
-      console.log('\n====== sendSFInboundTypingIndicatorInteraction() success: ', response.data);
+      console.log(getTimeStampForLoglines() + 'sendSFInboundTypingIndicatorInteraction() success: ', response.data);
     }
 
     return response;
@@ -139,7 +150,7 @@ export async function sendSFInboundTypingIndicatorInteraction(orgId, authorizati
     .catch(function (error) {
       if (error && error.response && error.response.data) {
         let responseData = error.response.data;
-        console.log('\n====== sendSFInboundTypingIndicatorInteraction() error: ', responseData);
+        console.log(getTimeStampForLoglines() + 'sendSFInboundTypingIndicatorInteraction() error: ', responseData);
       }
 
       return error;
@@ -159,7 +170,7 @@ export async function sendSFInboundTypingIndicatorInteraction(orgId, authorizati
  * @returns {object} result object from interaction service with successful status or error code
  */
 async function sendSFInboundMessageDeliveryFailedInteraction(entryId, interactionType, orgId, authorizationContext, channelAddressIdentifier, endUserClientIdentifier, errorCode) {
-  console.log(`\n====== Start sendSFInboundMessageDeliveryFailedInteraction() for interactionType: "${interactionType}" and entryId: "${entryId}".`);
+  console.log(getTimeStampForLoglines() + `Start sendSFInboundMessageDeliveryFailedInteraction() for interactionType: "${interactionType}" and entryId: "${entryId}".`);
   const accessToken = await getAccessToken();
   let jsonData = getSFInboundMessageDeliveryFailedFormData(entryId, channelAddressIdentifier, endUserClientIdentifier, errorCode);
 
@@ -169,16 +180,16 @@ async function sendSFInboundMessageDeliveryFailedInteraction(entryId, interactio
   formData.append('json', JSON.stringify(jsonData), { contentType: 'application/json' });
 
   const responseData = await axios.post(
-    (IS_OTT ? SF_SCRT_INSTANCE_URL : settingsCache.get("scrtUrl")) + '/api/v1/interactions',
+    (IS_LOCAL_CONFIG ? SF_SCRT_INSTANCE_URL : settingsCache.get("scrtUrl")) + '/api/v1/interactions',
     formData,
     requestHeader
   ).then(function (response) {
-    console.log('\n====== sendSFInboundMessageDeliveryFailedInteraction() success: ', response.data);
+    console.log(getTimeStampForLoglines() + 'sendSFInboundMessageDeliveryFailedInteraction() success: ', response.data);
     return response.data;
   })
     .catch(function (error) {
       if (error && error.response && error.response.data) {
-        console.log('\n====== sendSFInboundMessageDeliveryFailedInteraction() error: ', error.response.data);
+        console.log(getTimeStampForLoglines() + 'sendSFInboundMessageDeliveryFailedInteraction() error: ', error.response.data);
       }
 
       return error;
@@ -203,6 +214,33 @@ function getSFInboundTextMessageFormData(entryId, channelAddressIdentifier, endU
           "staticContent": {
             "formatType": "Text",
             "text": message
+          }
+        }
+      }
+    }]
+  };
+}
+
+function getSFInboundChoiceResponseMessageFormData(entryId, channelAddressIdentifier, endUserClientIdentifier, optionIdentifier, inReplyToMessageId) {
+  return {
+    "to": channelAddressIdentifier,
+    "from": endUserClientIdentifier,
+    "interactions": [{
+      "timestamp": 1688190840000,
+      "interactionType": "EntryInteraction",
+      "payload": {
+        "id": entryId,
+        "entryType": "Message",
+        "abstractMessage": {
+          "messageType": "ChoicesResponseMessage",
+          "id": entryId, 
+          "inReplyToMessageId": inReplyToMessageId,
+          "choicesResponse": {
+            "formatType": "Selections",
+            "selectedOptions": [{
+                "optionIdentifier": optionIdentifier
+              }
+            ]
           }
         }
       }
@@ -292,9 +330,9 @@ function append_object_to_FormData(formData, obj, key) {
 function deleteUploadedTempFile(filePath) {
   fs.unlink(filePath, function (err) {
     if (err) {
-      console.log('\n====== File delete error: ', err);
+      console.log(getTimeStampForLoglines() + 'File delete error: ', err);
     } else {
-      console.log('\n====== The file was deleted successfully');
+      console.log(getTimeStampForLoglines() + 'The file was deleted successfully');
     }
   });
 }
@@ -311,21 +349,21 @@ function checkAndCreateAgentWork(orgId, authorizationContext, routingOwner, inte
   if (interactionResponseData.conversationIdentifier !== null) {
     conversationIdentifier = interactionResponseData.conversationIdentifier;
     settingsCache.set("conversationIdentifier", conversationIdentifier);
-    console.log("\n====== setting conversationIdentifier into cache!")
+    console.log(getTimeStampForLoglines() + "setting conversationIdentifier into cache!")
   }
 
   if (autoCreateAgentWork !== 'true') {
-    console.log("\n======= agentwork will not be called as AUTO_CREATE_AGENT_WORK flag is set to false");
+    console.log(getTimeStampForLoglines() + "agentwork will not be called as AUTO_CREATE_AGENT_WORK flag is set to false");
     return;
   }
 
-  console.log("\n======= routingOwner:", routingOwner);
+  console.log(getTimeStampForLoglines() + "routingOwner:", routingOwner);
   if (routingOwner !== "Partner") {
-    console.log("\n====== agentwork will not be called as routingOwner is not Partner");
+    console.log(getTimeStampForLoglines() + "agentwork will not be called as routingOwner is not Partner");
     return;
   }
 
-  console.log(`\n======= workItemId:"${workItemId}"\n======= conversationIdentifier:"${conversationIdentifier}"`);
+  console.log(getTimeStampForLoglines() + `workItemId:"${workItemId}"\n======= conversationIdentifier:"${conversationIdentifier}"`);
   if (workItemId !== null && conversationIdentifier !== null) {
     agentWork(orgId, authorizationContext, conversationIdentifier, workItemId);
   }

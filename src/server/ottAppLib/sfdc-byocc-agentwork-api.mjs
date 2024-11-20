@@ -3,6 +3,7 @@ import {getAccessToken} from './sfdc-auth.mjs';
 import NodeCache from "node-cache" ;
 import { v4 as uuidv4} from 'uuid';
 import { settingsCache } from '../ottAppServer.mjs';
+import { getTimeStampForLoglines } from '../util.mjs';
 
 // Get config metadata from .env
 const {
@@ -10,9 +11,10 @@ const {
   USER_ID, //OTT-needed
   CAPACITY_WEIGHT
 } = process.env;
-const IS_OTT = process.env.IS_OTT === "true";
+const IS_LOCAL_CONFIG = process.env.IS_LOCAL_CONFIG === "true";
 // AgentWorkCache will store mapping of workItemId and agentWorkId
 const agentWorkCache = new NodeCache();
+const responseCache = new NodeCache();
 
 const agentWorkApiUrl = '/api/v1/agentWork';
 const routingCorrelationId = "123";
@@ -26,25 +28,26 @@ const routingType = "Initial";
  * @param {string} workItemId: Id of workItems like (MessagingSession, ..)
  * @returns {object} result object from interaction service with successful status or error code
  */
-export async function agentWork(orgId, authorizationContext, conversationIdentifier, workItemId) {
+export async function agentWork(orgId, authorizationContext, conversationIdentifier, workItemId, agentActionVisibilities) {
   // Agentwork creation should happen only one time so if it exist don't call this api
   // We are storing it in agentWorkCache and validating against it
   if (agentWorkCache.get(workItemId)){
     // If agentWork was already created once then you don't need to call this funciton to create agentwork again
-    console.log(`\n====== Agentwork was already creaed for this workItem: "${workItemId}" - AgentWorkId: "${agentWorkCache.get(workItemId)}"`);
+    console.log(getTimeStampForLoglines() + `Agentwork was already creaed for this workItem: "${workItemId}" - AgentWorkId: "${agentWorkCache.get(workItemId)}"`);
     return;
   }
   
-  console.log(`\n====== Start agentWork\nconversationIdentifier="${conversationIdentifier}"\nworkItemId="${workItemId}"`);
+  console.log(getTimeStampForLoglines() + `Start agentWork\nconversationIdentifier="${conversationIdentifier}"\nworkItemId="${workItemId}"`);
   
   const accessToken = await getAccessToken();
   let jsonData = {};
 
-  jsonData = getAgentWorkData(workItemId, conversationIdentifier, IS_OTT ? USER_ID : settingsCache.get("userId"));
+  jsonData = getAgentWorkData(workItemId, conversationIdentifier, IS_LOCAL_CONFIG ? USER_ID : settingsCache.get("userId"), agentActionVisibilities);
   jsonData = JSON.stringify(jsonData);
+  console.log(getTimeStampForLoglines() + `agentWork request payload: "${jsonData}"`);
   const requestHeader = getAgentWorkRequestHeader(accessToken, orgId, authorizationContext);
   const responseData = await axios.post(
-    (IS_OTT ? SF_SCRT_INSTANCE_URL : settingsCache.get("scrtUrl")) + agentWorkApiUrl,
+    (IS_LOCAL_CONFIG ? SF_SCRT_INSTANCE_URL : settingsCache.get("scrtUrl")) + agentWorkApiUrl,
     jsonData,
     requestHeader
   ).then(function (response) {
@@ -52,23 +55,24 @@ export async function agentWork(orgId, authorizationContext, conversationIdentif
       agentWorkCache.set(workItemId, response.data.agentWorkId);
     }
     
-    console.log(`\n====== agentWork request completed successfully  `, response.data);
+    console.log(getTimeStampForLoglines() + `agentWork request completed successfully  `, response.data);
     return response.data;
   })
   .catch(function (error) {
-
     let responseData = error.response.data;
-
-    console.log(`\n====== agentWork request Failed: `, responseData);
-    return error;
+    console.log(getTimeStampForLoglines() + `agentWork request Failed: `, responseData);
+    responseCache.set("message", responseData.message);
+    responseCache.set("code", responseData.code);
+    return responseData;
   });
 
   return responseData;
 }
 
-function getAgentWorkData(workItemId, conversationIdentifier, userId) {
+function getAgentWorkData(workItemId, conversationIdentifier, userId, agentActionVisibilities) {
+  let agentWorkData = {};
   if (conversationIdentifier) {
-    return {
+    agentWorkData = {
       "userId": userId,
       "workItemId": workItemId,
       "capacityWeight": CAPACITY_WEIGHT,
@@ -79,11 +83,20 @@ function getAgentWorkData(workItemId, conversationIdentifier, userId) {
       }    
     };
   } else {
-    return {
+    agentWorkData = {
       "userId": userId,
       "workItemId": workItemId,
     };    
   }
+
+  if (agentActionVisibilities) {
+    let agentActionVisibilitiesObj = JSON.parse(agentActionVisibilities);
+    if (agentActionVisibilitiesObj.length > 0) {
+      agentWorkData.agentActionVisibilities = agentActionVisibilitiesObj;
+    }
+  }
+
+  return agentWorkData;
 }
 
 function getAgentWorkRequestHeader(accessToken, orgId, authorizationContext) {
@@ -97,6 +110,11 @@ function getAgentWorkRequestHeader(accessToken, orgId, authorizationContext) {
       "RequestId": uuidv4()
     }
   };
+}
+
+// Function to get a value from the cache
+export function getResponseCache(key) {
+  return responseCache.get(key);
 }
 
 export { agentWorkCache };

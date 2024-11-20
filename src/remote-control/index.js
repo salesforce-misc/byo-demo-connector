@@ -6,12 +6,14 @@
  */
 
 import Constants from '../common/constants'
-import { ACWInfo, Contact, publishEvent, publishError } from '@salesforce/scv-connector-base';
+import { ACWInfo, Contact, publishEvent, publishError, CallResult, PhoneCall, CallInfo } from '@salesforce/scv-connector-base';
 
 export function  initializeRemoteController(connector) {
     connector.sdk.eventEmitter.on('event', async (event) => {
         if (event && event.data) {
             try {
+                let call;
+                let callResult;
                 switch (event.data.type) {
                     case Constants.LOGIN_SUBMIT: {
                         connector.sdk.subsystemLoginResult(event.data.success);
@@ -28,7 +30,7 @@ export function  initializeRemoteController(connector) {
                     }
                     break;
                     case Constants.GET_AGENT_CONFIG: {
-                        const { agentConfig, contactCenterChannels, agentId, userPresenceStatuses } = connector.sdk.state;
+                        const { agentConfig, contactCenterChannels, agentId, userPresenceStatuses, isSCVMultipartyAllowed } = connector.sdk.state;
                         connector.sdk.messageUser(event.fromUsername, 
                                                   Constants.AGENT_CONFIG,
                                                  {
@@ -36,7 +38,9 @@ export function  initializeRemoteController(connector) {
                                                     value: agentConfig,
                                                     userPresenceStatuses,
                                                     contactCenterChannels,
-                                                    from: `${document.referrer} as ${agentId}` 
+                                                    referrer: `${document.referrer}`,
+                                                    agentId,
+                                                    isSCVMultipartyAllowed
                                                  })
                     }
                     break;
@@ -47,12 +51,16 @@ export function  initializeRemoteController(connector) {
                                                  {
                                                     type: Constants.CAPABILITIES,
                                                     value: capabilities,
-                                                    from: `${document.referrer} as ${agentId}`
+                                                    referrer: `${document.referrer}`,
+                                                    agentId: agentId
                                                  })
                     }
                         break;
+                    case Constants.CALL_INFO_UPDATED:
+                        connector.sdk.updateCallInfoObj(event);
+                    break;
                     case Constants.GET_ACTIVE_CALLS: {
-                        connector.sdk.messageUser(event.fromUsername, 
+                        connector.sdk.messageUser(event.fromUsername,
                                                  Constants.ACTIVE_CALLS,
                                                  {
                                                     type: Constants.ACTIVE_CALLS,
@@ -98,12 +106,15 @@ export function  initializeRemoteController(connector) {
                             hasQueueWaitTime: event.data.value.hasQueueWaitTime,
                             hasTransferToOmniFlow: event.data.value.hasTransferToOmniFlow,
                             hasPendingStatusChange: event.data.value.hasPendingStatusChange,
-                            canConsult: event.data.value.canConsult
+                            canConsult: event.data.value.canConsult,
+                            isDialPadDisabled: event.data.value.isDialPadDisabled,
+                            isPhoneBookDisabled: event.data.value.isPhoneBookDisabled,
+                            isHidSupported: event.data.value.isHidSupported
                         });
                     }
                     break;
                     case Constants.SET_CONTACT_TYPES: {
-                        connector.sdk.updateContactTypes(event.data.contactTypes)
+                        connector.sdk.updateContactTypes(event.data.contactTypes);
                     }
                     break;
                     case Constants.START_OUTBOUND_CALL: {
@@ -115,7 +126,7 @@ export function  initializeRemoteController(connector) {
                         await connector.sdk.startInboundCall(event.data.phoneNumber, event.data.callInfo);
                     break;
                     case Constants.CONNECT_PARTICIPANT: {
-                        connector.sdk.connectParticipant(event.data.callInfo);
+                        connector.sdk.connectParticipant(null, null, event.data.call);
                     }
                     break;
                     case Constants.SET_AGENT_STATUS: {
@@ -128,7 +139,7 @@ export function  initializeRemoteController(connector) {
                     break;
                     case Constants.REMOVE_PARTICIPANT:
                     case Constants.END_CALL: {
-                        connector.sdk.removeParticipant(event.data.participantType);
+                        connector.sdk.removeParticipant(event.data.participantType, event.data.call);
                     }
                     break;
                     case Constants.REMOVE_SUPERVISOR: {
@@ -140,7 +151,12 @@ export function  initializeRemoteController(connector) {
                     }
                     break;
                     case Constants.AGENT_HANGUP: {
-                        connector.sdk.hangup(event.data.reason, event.data.agentErrorStatus);
+                        const { isSCVMultipartyAllowed } = connector.sdk.state;
+                        if ( isSCVMultipartyAllowed ) {
+                            connector.sdk.initiateHangupMultiParty(event.data.reason, event.data.agentErrorStatus);
+                        } else {
+                            connector.sdk.hangup(event.data.reason, event.data.agentErrorStatus);
+                        }
                     }
                     break;
                     case Constants.SOFTPHONE_LOGOUT: {
@@ -230,9 +246,9 @@ export function  initializeRemoteController(connector) {
                         switch (eventType) {
                             case Constants.VOICE_EVENT_TYPE.MUTE_TOGGLE: {
                                 if (payload.isMuted) {
-                                    result = await connector.sdk.mute();
+                                    result = await connector.sdk.mute(payload.call);
                                 } else {
-                                    result = await connector.sdk.unmute();
+                                    result = await connector.sdk.unmute(payload.call);
                                 }
                             }
                             break;
@@ -245,10 +261,11 @@ export function  initializeRemoteController(connector) {
                             }
                             break;
                             case Constants.VOICE_EVENT_TYPE.RECORDING_TOGGLE: {
+                                //TODO: pass call to pauseRecording/resumeRecording
                                 if (payload.isRecordingPaused) {
-                                    result = await connector.sdk.pauseRecording(payload);
+                                    result = await connector.sdk.pauseRecording(payload.call);
                                 } else {
-                                    result = await connector.sdk.resumeRecording(payload);
+                                    result = await connector.sdk.resumeRecording(payload.call);
                                 }
                             }
                             break;
@@ -272,6 +289,15 @@ export function  initializeRemoteController(connector) {
                     case Constants.SHARED_EVENT_TYPE.AFTER_CONVERSATION_WORK_ENDED:
                         publishEvent({eventType: event.data.type, payload: new ACWInfo(event.data.acwInfo)});
                     break;
+                    case Constants.CALL_UPDATED:
+                        call = new PhoneCall({
+                            callInfo: new CallInfo(event.data.payload)
+                        })
+                        callResult = new CallResult({call});
+                        publishEvent({
+                            eventType: event.data.eventType, payload: callResult
+                        });
+                        break;
                     default:
                         publishEvent({eventType: event.data.type});
                     break;

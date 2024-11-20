@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { parseString } from 'xml2js';
 import { promisify } from 'util';
+import { getTimeStampForLoglines } from '../util.mjs';
 
 const parseXml = promisify(parseString);
 
@@ -19,7 +20,7 @@ const {
 export async function getAccessToken() {
 
   if (!SF_INSTANCE_URL || !SF_SUBJECT || !SF_PASSWORD || !API_VERSION) {
-    throw new Error('Missing required environment variables');
+    return null;
   }
 
   // Construct te SOAP API URL and SOAP envelope
@@ -44,10 +45,10 @@ export async function getAccessToken() {
         result['soapenv:Envelope']['soapenv:Body'][0]['loginResponse']) {
       return result['soapenv:Envelope']['soapenv:Body'][0]['loginResponse'][0]['result'][0]['sessionId'][0];
     } else {
-      throw new Error('Unexpected response structure from Salesforce');
+      console.error(getTimeStampForLoglines() + 'Unexpected response structure from Salesforce');
     }
   } catch (error) {
-    console.error('Error getting Salesforce access token');
-    throw error;
+    console.error(getTimeStampForLoglines() + 'Error getting Salesforce access token');
+    return null;
   }
 }

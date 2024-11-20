@@ -7,62 +7,63 @@ import {sendPatchRegisterCapabilitiesAPIRequest} from'./sfdc-byocc-patch-registe
 import { v4 as uuidv4} from 'uuid';
 import { agentWork } from './sfdc-byocc-agentwork-api.mjs';
 import { settingsCache } from '../ottAppServer.mjs';
+import { getTimeStampForLoglines } from '../util.mjs';
 
 // Get config metadata from .env
 const {
   SF_ORG_ID,
   SF_AUTHORIZATION_CONTEXT
 } = process.env;
-const IS_OTT = process.env.IS_OTT === "true";
+const IS_LOCAL_CONFIG = process.env.IS_LOCAL_CONFIG === "true";
 
 export async function sendRunApiLabRequest(req) {
   
   let responseData = {};
   const accessToken = await getAccessToken();
-  const requestHeader = getRequestHeader(accessToken, IS_OTT ? SF_ORG_ID : settingsCache.get("orgId"), IS_OTT ? SF_AUTHORIZATION_CONTEXT : settingsCache.get("authorizationContext"));
+  const requestHeader = getRequestHeader(accessToken, IS_LOCAL_CONFIG ? SF_ORG_ID : settingsCache.get("orgId"), IS_LOCAL_CONFIG ? SF_AUTHORIZATION_CONTEXT : settingsCache.get("authorizationContext"));
 
-  console.log("\n====== Request body: ", req.body);
-  console.log("\n====== Request header: ", requestHeader);
+  console.log(getTimeStampForLoglines() + "Request body: ", req.body);
+  console.log(getTimeStampForLoglines() + "Request header: ", requestHeader);
 
-  if (!IS_OTT && !(accessToken && settingsCache.get("orgId") && settingsCache.get("authorizationContext") && settingsCache.get("scrtUrl"))) {
-    console.log("======[Warn]  Please check if the user is in a Contact Center,  refresh your (1) Salesforce App and then (2)demo connector page to retrieve critical contact center data to start sending route request.======")
+  if (!IS_LOCAL_CONFIG && !(accessToken && settingsCache.get("orgId") && settingsCache.get("authorizationContext") && settingsCache.get("scrtUrl"))) {
+    console.log(getTimeStampForLoglines() + "[Warn]  Please check if the user is in a Contact Center,  refresh your (1) Salesforce App and then (2)demo connector page to retrieve critical contact center data to start sending route request.")
   } else {
     // run request base on the apiName in the request;
     switch (req.body.apiName){
       case "CONSENT": {
-        console.log('\n====== Sending consent API patch request...');
+        console.log(getTimeStampForLoglines() + 'Sending consent API patch request...');
         responseData = await sendConsentAPIRequest(req, requestHeader);
-        console.log('\n====== Consent API patch request sent.');
+        console.log(getTimeStampForLoglines() + 'Consent API patch request sent.');
         break;
       }
       case "POST_ROUTE": {
-        console.log('\n====== Sending route API post request...');
+        console.log(getTimeStampForLoglines() + 'Sending route API post request...');
         responseData = await sendPostRouteAPIRequest(req, requestHeader);
-        console.log('\n====== Route API post request sent.');
+        console.log(getTimeStampForLoglines() + 'Route API post request sent.');
         break;
       }
       case "DELETE_ROUTE": {
-        console.log('\n====== Sending route API delete request...');
+        console.log(getTimeStampForLoglines() + 'Sending route API delete request...');
         responseData = await sendDeleteRouteAPIRequest(req, requestHeader);
-        console.log('\n====== Route API delete request sent.');
+        console.log(getTimeStampForLoglines() + 'Route API delete request sent.');
         break;
       }
       case "POST_ROUTING_RESULT": {
-        console.log('\n====== Sending Routing Result API post request...');
+        console.log(getTimeStampForLoglines() + 'Sending Routing Result API post request...');
         responseData = await sendPostRoutingResultAPIRequest(req, requestHeader);
-        console.log('\n====== Routing Result API post request sent.');
+        console.log(getTimeStampForLoglines() + 'Routing Result API post request sent.');
         break;
       }
       case 'PATCH_REGISTER_CAPABILITIES': {
-        console.log('\n====== Sending Register Capabilities API patch request...');
+        console.log(getTimeStampForLoglines() + 'Sending Register Capabilities API patch request...');
         responseData = await sendPatchRegisterCapabilitiesAPIRequest(req, requestHeader);
-        console.log('\n====== Register Capabilities API patch request was sent.');
+        console.log(getTimeStampForLoglines() + 'Register Capabilities API patch request was sent.');
         break;
       }
       case "POST_AGENT_WORK": {
-        console.log('\n====== Sending Agent Work API post request...');
-        responseData = await agentWork( SF_ORG_ID, SF_AUTHORIZATION_CONTEXT, req.body.conversationIdentifier, req.body.workItemId);
-        console.log('\n====== Agent Work API post request sent.');
+        console.log(getTimeStampForLoglines() + 'Sending Agent Work API post request...');
+        responseData = await agentWork( SF_ORG_ID, SF_AUTHORIZATION_CONTEXT, req.body.conversationIdentifier, req.body.workItemId, req.body.agentActionVisibilities);
+        console.log(getTimeStampForLoglines() + 'Agent Work API post request sent.');
         break;
       }
     }

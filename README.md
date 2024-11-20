@@ -9,7 +9,6 @@ The demo app is a sample application for both "Partner Telephony Systems" that i
 We’ve provided documentation for Salesforce Service Cloud Voice connector APIs in the [`/docs/`](https://github.com/salesforce/demo-scv-connector/tree/master/docs) folder.
 
 ## Installation
-
 ### Environment setup
 The developer environment requires [Node](https://nodejs.org/en/download/), [NPM](https://docs.npmjs.com/cli/install) and [webpack-dev-server](https://webpack.github.io/docs/webpack-dev-server.html). 
 

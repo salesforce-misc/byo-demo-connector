@@ -12,6 +12,7 @@
 /** @module connector **/
 import { Constants, VendorConnector, TelephonyConnector } from '@salesforce/scv-connector-base';
 import { Sdk } from './vendor-sdk';
+import {hidDeviceHandler} from "../hid/hidDeviceHandler";
 
 /** 
  * Class representing a Service Cloud Voice Demo Telephony Connector
@@ -57,15 +58,17 @@ export class PhoneConnector extends TelephonyConnector {
     }
     /**
      * Called when call is muted from the sfdc call controls
+     * @param {PhoneCall} call
      */
-    mute() {
-        return this.sdk.mute();
+    mute(call) {
+        return this.sdk.mute(call);
     }
     /**
      * Called when call is unmuted from the sfdc call controls
+     * @param {PhoneCall} call
      */
-    unmute() {
-        return this.sdk.unmute()
+    unmute(call) {
+        return this.sdk.unmute(call)
     }
     /**
      * Called when customer/third party call is put on hold by the agent
@@ -154,6 +157,11 @@ export class PhoneConnector extends TelephonyConnector {
     * Used to set the agent config, including the selected phone type and number
     */
     setAgentConfig(config) {
+        //pass HID device information selected by an Agent and call the handler
+        if(config.hidDevice !== undefined) {
+            //TODO: Currently just getting called from here, if need arises we can expose it as a separate method
+            hidDeviceHandler(config, this.sdk);
+        }
         return this.sdk.setAgentConfig(config);
     }
      /**
