@@ -26,7 +26,10 @@ customEnv.env();
 
 // Get config metadata from .env
 const {
-  PORT,
+  SF_AUTHORIZATION_CONTEXT,
+  SF_PUB_SUB_TOPIC_NAME,
+  SF_PUB_SUB_CUSTOM_EVENT_PAYLOAD_FIELD,
+  SF_PUB_SUB_CUSTOM_EVENT_TYPE_FIELD,
   SF_ORG_ID,
   CHANNEL_ADDRESS_IDENTIFIER,
   END_USER_CLIENT_IDENTIFIER,
@@ -35,7 +38,8 @@ const {
   AUTO_CREATE_AGENT_WORK,
   SF_INSTANCE_URL,
   SF_SCRT_INSTANCE_URL,
-  API_VERSION
+  API_VERSION,
+  IS_OTT
 } = process.env;
 
 const IS_LOCAL_CONFIG = process.env.IS_LOCAL_CONFIG === "true";
@@ -45,70 +49,77 @@ export const settingsCache = new NodeCache();
 export const convEntryIdsCache = new NodeCache();
 
 // Set the following non-dynamical data below from .env to the settingsCache:
+settingsCache.set("authorizationContext", SF_AUTHORIZATION_CONTEXT);
+settingsCache.set("customPlatformEvent", SF_PUB_SUB_TOPIC_NAME);
+settingsCache.set("customEventPayloadField", SF_PUB_SUB_CUSTOM_EVENT_PAYLOAD_FIELD);
+settingsCache.set("customEventTypeField", SF_PUB_SUB_CUSTOM_EVENT_TYPE_FIELD);
 settingsCache.set("channelAddressIdentifier", CHANNEL_ADDRESS_IDENTIFIER);
 settingsCache.set("endUserClientIdentifier", END_USER_CLIENT_IDENTIFIER);
 settingsCache.set("autoCreateAgentWork", AUTO_CREATE_AGENT_WORK);
 settingsCache.set("orgId", SF_ORG_ID);
-settingsCache.set("instanceUrl", SF_INSTANCE_URL)
-settingsCache.set("scrtUrl", SF_SCRT_INSTANCE_URL)
+settingsCache.set("instanceUrl", SF_INSTANCE_URL);
+settingsCache.set("scrtUrl", SF_SCRT_INSTANCE_URL);
 settingsCache.set("userId", USER_ID);
-settingsCache.set("userName", SF_SUBJECT)
+settingsCache.set("userName", SF_SUBJECT);
+settingsCache.set("IS_OTT", IS_OTT);
 
 // function to dynamically fetch conversation channel definition values and set in the settingsCache
 async function fetchAndCacheCCDValues() {
   try {
-    // Set the following dynamically fetched CCD data below to the settingsCache:
-    //    - devName
-    //    - routingOwner
-    //    - consentOwner
-    //    - custom event
-    //    - custom event payload field
-    //    - custom event type field
-    //    - partner support BYO inbound acknowledgements
-    //    - partner support BYO typing indicators
-    //    - salesforce setup supports BYO inbound acknowledgements
-    //    - salesforce setup supports BYO typing indicators
-    const ccdData = await getConversationChannelDefinitions();
-    if(ccdData && ccdData.records && ccdData.records.length  > 0){
-      const ccdDataRecord = ccdData.records[0];
-      settingsCache.set("authorizationContext", ccdDataRecord.DeveloperName);
-      settingsCache.set("customPlatformEvent", `/event/${ccdDataRecord.CustomPlatformEvent}`);
-      settingsCache.set("customEventPayloadField", ccdDataRecord.CustomEventPayloadField);
-      settingsCache.set("customEventTypeField", ccdDataRecord.CustomEventTypeField);
-      settingsCache.set("routingOwner", ccdDataRecord.RoutingOwner);
-      settingsCache.set("consentOwner", ccdDataRecord.ConsentOwner);
-      settingsCache.set("isInboundReceiptsPartnerEnabled", ccdDataRecord.IsInboundReceiptsEnabled);
-      settingsCache.set("isTypingIndicatorPartnerEnabled", !ccdDataRecord.IsTypingIndicatorDisabled);
+    const isOTT = settingsCache.get("IS_OTT") === 'true';
 
-      if (ccdDataRecord.Id) {
-        settingsCache.set("ccdId", ccdDataRecord.Id);
-        const cmcData = await getCustomMsgChannel(ccdDataRecord.Id);
-        if (cmcData && cmcData.records && cmcData.records.length > 0) {
-          const cmcDataRecord = cmcData.records[0];
-          settingsCache.set("isInboundReceiptsSalesforceEnabled", cmcDataRecord.HasInboundReceipts);
-          settingsCache.set("isTypingIndicatorSalesforceEnabled", cmcDataRecord.HasTypingIndicator);
-        } else {
-          // set CMC default values
-          settingsCache.set("isInboundReceiptsSalesforceEnabled", false);
-          settingsCache.set("isTypingIndicatorSalesforceEnabled", true);
+    if (!isOTT) {
+      // Set the following dynamically fetched CCD data below to the settingsCache:
+      //    - devName
+      //    - routingOwner
+      //    - consentOwner
+      //    - custom event
+      //    - custom event payload field
+      //    - custom event type field
+      //    - partner support BYO inbound acknowledgements
+      //    - partner support BYO typing indicators
+      //    - salesforce setup supports BYO inbound acknowledgements
+      //    - salesforce setup supports BYO typing indicators
+      const ccdData = await getConversationChannelDefinitions();
+      if(ccdData && ccdData.records && ccdData.records.length  > 0){
+        const ccdDataRecord = ccdData.records[0];
+        settingsCache.set("authorizationContext", ccdDataRecord.DeveloperName);
+        settingsCache.set("customPlatformEvent", `/event/${ccdDataRecord.CustomPlatformEvent}`);
+        settingsCache.set("customEventPayloadField", ccdDataRecord.CustomEventPayloadField);
+        settingsCache.set("customEventTypeField", ccdDataRecord.CustomEventTypeField);
+        settingsCache.set("routingOwner", ccdDataRecord.RoutingOwner);
+        settingsCache.set("consentOwner", ccdDataRecord.ConsentOwner);
+        settingsCache.set("isInboundReceiptsPartnerEnabled", ccdDataRecord.IsInboundReceiptsEnabled);
+        settingsCache.set("isTypingIndicatorPartnerEnabled", !ccdDataRecord.IsTypingIndicatorDisabled);
+  
+        if (ccdDataRecord.Id) {
+          settingsCache.set("ccdId", ccdDataRecord.Id);
+          const cmcData = await getCustomMsgChannel(ccdDataRecord.Id);
+          if (cmcData && cmcData.records && cmcData.records.length > 0) {
+            const cmcDataRecord = cmcData.records[0];
+            settingsCache.set("isInboundReceiptsSalesforceEnabled", cmcDataRecord.HasInboundReceipts);
+            settingsCache.set("isTypingIndicatorSalesforceEnabled", cmcDataRecord.HasTypingIndicator);
+          } else {
+            // set CMC default values
+            settingsCache.set("isInboundReceiptsSalesforceEnabled", false);
+            settingsCache.set("isTypingIndicatorSalesforceEnabled", true);
+          }
         }
+  
+        console.log(getTimeStampForLoglines() + 'CCD values cached successfully');
+      } else {
+        console.log(getTimeStampForLoglines() + "No records found in the CCD data");
       }
-
-      console.log(getTimeStampForLoglines() + 'CCD values cached successfully');
-
-      // Calling the PubSub API after getting the ccd fields and custom platform event
-      console.log(getTimeStampForLoglines() + `connectToPubSubApi() `);
-      let sfdcPubSubClient = await connectToPubSubApi();
-      subscribeToSfInteractionEvent(sfdcPubSubClient);
-    } else {
-      console.log(getTimeStampForLoglines() + "No records found in the CCD data");
     }
+
+    // Calling the PubSub API after getting the ccd fields and custom platform event
+    console.log(getTimeStampForLoglines() + `connectToPubSubApi() `);
+    let sfdcPubSubClient = await connectToPubSubApi();
+    subscribeToSfInteractionEvent(sfdcPubSubClient);    
   } catch (error) {
     console.error('Error fetching CCD values:', error);
   }
 }
-
-const port = PORT || 3000;
 
 export async function initOttApp(expressApp) {
 
@@ -326,22 +337,26 @@ export async function initOttApp(expressApp) {
       authorizationContext: settingsCache.get("authorizationContext"),
       channelAddressIdentifier: CHANNEL_ADDRESS_IDENTIFIER,
       endUserClientIdentifier: END_USER_CLIENT_IDENTIFIER,
+      customPlatformEvent: settingsCache.get("customPlatformEvent"),
       customEventPayloadField: settingsCache.get("customEventPayloadField"),
+      customEventTypeField: settingsCache.get("customEventTypeField"),
       sfSubject: settingsCache.get("userName"),
       routingOwner: settingsCache.get("routingOwner"),
-      customEventTypeField: settingsCache.get("customEventTypeField"),
       autoCreateAgentWork : AUTO_CREATE_AGENT_WORK,
       userId : settingsCache.get("userId"),
+      isOTT : IS_OTT
     };
 
     let authorizationContext = settingsCache.get("authorizationContext");
     let channelAddressIdentifier = settingsCache.get("channelAddressIdentifier");
     let endUserClientIdentifier = settingsCache.get("endUserClientIdentifier");
+    let customPlatformEvent = settingsCache.get("customPlatformEvent");
     let customEventPayloadField = settingsCache.get("customEventPayloadField");
-    let routingOwner = settingsCache.get("routingOwner");
     let customEventTypeField = settingsCache.get("customEventTypeField");
+    let routingOwner = settingsCache.get("routingOwner");
     let autoCreateAgentWork = settingsCache.get("autoCreateAgentWork");
     let userId = settingsCache.get("userId");
+    let isOTT = settingsCache.get("isOTT");
 
     if (authorizationContext) {
       responseData.authorizationContext = authorizationContext;
@@ -352,14 +367,17 @@ export async function initOttApp(expressApp) {
     if (endUserClientIdentifier) {
       responseData.endUserClientIdentifier = endUserClientIdentifier;
     }
+    if (customPlatformEvent) {
+      responseData.customPlatformEvent = customPlatformEvent;
+    }    
     if (customEventPayloadField) {
       responseData.customEventPayloadField = customEventPayloadField;
     }
-    if (routingOwner) {
-      responseData.routingOwner = routingOwner;
-    }
     if (customEventTypeField) {
       responseData.customEventTypeField = customEventTypeField;
+    }
+    if (routingOwner) {
+      responseData.routingOwner = routingOwner;
     }
     if (autoCreateAgentWork != null) {
       responseData.autoCreateAgentWork = autoCreateAgentWork;
@@ -367,6 +385,9 @@ export async function initOttApp(expressApp) {
     if (userId){
       responseData.userId = userId;
     }
+    if (isOTT){
+      responseData.isOTT = isOTT;
+    }   
     
     res.json(responseData);
   });
