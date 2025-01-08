@@ -682,7 +682,7 @@ function getSettingsForApp() {
         document.getElementById("customEventPayloadField").value = settings.customEventPayloadField;
         document.getElementById("customEventTypeField").value = settings.customEventTypeField;
         if (document.getElementById("customPlatformEvent")) {
-          document.getElementById("customPlatformEvent").value = settings.customPlatformEvent;
+          document.getElementById("customPlatformEvent").value = settings.customPlatformEvent.split('/')[2];
         }
         if (document.getElementById("userId")) {
           document.getElementById("userId").value = settings.userId;
@@ -697,8 +697,11 @@ function getSettingsForApp() {
         }
         endUserClientName = settings.endUserClientIdentifier;
 
-        // Ensuring the demo connector runs gracefully even if the .env is not present
-        if (!settings.authorizationContext) {
+        const isOTT = settings.isOTT === 'true';
+        
+        // Ensuring the demo connector runs gracefully even if the .env is not present for CCaaS
+        // Skip /getConversationChannelDefinitions call for OTT
+        if (isOTT || !settings.authorizationContext) {
           return null;
         } else {
           return axios({
@@ -764,7 +767,7 @@ function getSettingsForApp() {
           console.log("No records found in the CCD data");
         }
       } else {
-        console.log("Invalid CCD response");
+        console.log("Invalid CCD response or skip fetching CCD data");
       }
     })
     .catch((err) => {
