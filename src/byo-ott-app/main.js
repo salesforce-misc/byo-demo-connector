@@ -41,7 +41,7 @@ window.addEventListener("load", () => {
 
     axios({
       method: "post",
-      url: SERVER_URL + "/sendsettings",
+      url: "/api/sendsettings",
       data: formData
     }).then((res) => {
       if (res.status === 200) {
@@ -88,7 +88,7 @@ window.addEventListener("load", () => {
     // submit the request to middleware server
     axios({
       method: "post",
-      url: SERVER_URL + "/sendmessage",
+      url: "/api/sendmessage",
       data: formData
     })
       .then((res) => {
@@ -248,7 +248,7 @@ window.addEventListener("load", () => {
 
       const response = await axios({
         method: "post",
-        url: SERVER_URL + "/apiLab",
+        url: "/api/apiLab",
         data: formData
       });
 
@@ -458,7 +458,7 @@ window.addEventListener("load", () => {
       // submit the request to middleware server
       axios({
         method: "post",
-        url: SERVER_URL + "/sendmessage",
+        url: "/api/sendmessage",
         data: formData
       })
         .then((res) => {
@@ -555,7 +555,7 @@ window.addEventListener("load", () => {
     if (!orgMode) {
       axios({
         method: "get",
-        url: SERVER_URL + "/getOrgMode"
+        url: "/api/getOrgMode"
       }).then((res) => {
         if (res && res.data && res.data.orgMode) {
           orgMode = res.data.orgMode;
@@ -570,7 +570,7 @@ window.addEventListener("load", () => {
   if(document.getElementById('healthCheckButton')) {
     axios({
       method: "get",
-      url: SERVER_URL + "/getOrgMode"
+      url: "/api/getOrgMode"
     }).then((res) => {
       if (res && res.data && res.data.orgMode !== 'VOICE_ONLY') {
         // show healthTab
@@ -698,7 +698,7 @@ async function runHealthCheck() {
       const pageType = currentPath.includes('ccaas') ? 'ccaas' : 
                        currentPath.includes('ottapp') ? 'ott' : 'unknown';
 
-      const response = await axios.get(`${SERVER_URL}/runAllValidationTests`, { params: { pageType } });
+      const response = await axios.get(`/api/runAllValidationTests`, { params: { pageType } });
       
       if (response.data.success) {
           displayResults(response.data.results);
@@ -771,7 +771,7 @@ function initializeAccordion() {
 if (!orgMode) {
   axios({
     method: "get",
-    url: SERVER_URL + "/getOrgMode"
+    url: "/api/getOrgMode"
   }).then((res) => {
     if (res && res.data && res.data.orgMode) {
       orgMode = res.data.orgMode;
@@ -785,7 +785,7 @@ if (!orgMode) {
 function getSettingsForApp() {
   axios({
     method: "get",
-    url: SERVER_URL + "/getsettings"
+    url: "/api/getsettings"
   }).then((res) => {
       if (res.status === 200) {
         // set settings fields with values retrieved from middleware server
@@ -817,7 +817,7 @@ function getSettingsForApp() {
         } else {
           return axios({
             method: "get",
-            url: SERVER_URL + "/getConversationChannelDefinitions",
+            url: "/api/getConversationChannelDefinitions",
           });
         }
       }
@@ -844,13 +844,13 @@ function getSettingsForApp() {
 
           axios({
             method: "get",
-            url: SERVER_URL + "/getApiVersion"
+            url: "/api/getApiVersion"
           }).then((res) => {
             const apiVersion = res.data;
             if (ccdDataRecord.Id && apiVersion && apiVersion >= 63.0) {
               axios({
                 method: "post",
-                url: SERVER_URL + "/getCustomMsgChannels",
+                url: "/api/getCustomMsgChannels",
                 data: {'ccdId': ccdDataRecord.Id}
               }).then((cmcRes) => {
                 let hasCmcRecord = false;
@@ -974,7 +974,7 @@ async function handleAckEvent(data) {
   // submit the request to middleware server
   await axios({
     method: "get",
-    url: SERVER_URL + "/convEntryIds"
+    url: "/api/convEntryIds"
   }).then((res) => {
     convEntryIds = res.data;
     console.log('---------- convEntryIds array: ' + convEntryIds + ' -----------------');
@@ -1241,7 +1241,7 @@ function handleButtonClick(event) {
   // Send the message to the server
   axios({
     method: "post",
-    url: SERVER_URL + "/sendmessage",
+    url: "/api/sendmessage",
     data: formData
   })
     .then((res) => {
