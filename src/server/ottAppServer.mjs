@@ -174,6 +174,7 @@ export async function initOttApp(expressApp) {
             // fields value from UI
             "apiName": req.body.apiName,
             "conversationIdentifier": req.body.conversationIdentifier,
+            "cancelReason":req.body.cancelReason
           }
           break;
         case 'POST_ROUTING_RESULT':
@@ -181,6 +182,7 @@ export async function initOttApp(expressApp) {
             // fields value from UI
             "apiName": req.body.apiName,
             "conversationIdentifier": req.body.conversationIdentifier,
+            "routingType": req.body.routingType,
             "workItemId":req.body.workItemId,
             "success": req.body.success,
             "externallyRouted": req.body.externallyRouted,
