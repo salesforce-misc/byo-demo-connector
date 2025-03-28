@@ -159,6 +159,7 @@ window.addEventListener("load", () => {
           formData = {
             "apiName": document.getElementById("selected-api-name").value,
             "conversationIdentifier": document.getElementById("ConversationIdForDelete").value,
+            "cancelReason":document.getElementById("CancelReasonForDelete").value
           }
           break;
         case 'POST_ROUTING_RESULT':
@@ -166,6 +167,7 @@ window.addEventListener("load", () => {
             formData = {
               "apiName": document.getElementById("selected-api-name").value,
               "conversationIdentifier": document.getElementById("conversationIdForPostRoutingResult").value,
+              "routingType": document.getElementById("routingTypeForPostRoutingResult").value,
               "workItemId": document.getElementById("workItemIdForPostRoutingResult").value,
               "success": document.getElementById("successCheckbox").checked,
               "externallyRouted": document.getElementById("externallyRoutedCheckbox").checked,
@@ -175,6 +177,7 @@ window.addEventListener("load", () => {
             formData = {
               "apiName": document.getElementById("selected-api-name").value,
               "conversationIdentifier": document.getElementById("conversationIdForPostRoutingResult").value,
+              "routingType": document.getElementById("routingTypeForPostRoutingResult").value,
               "workItemId": document.getElementById("workItemIdForPostRoutingResult").value,
               "success": document.getElementById("successCheckbox").checked,
               "externallyRouted": document.getElementById("externallyRoutedCheckbox").checked,
@@ -384,6 +387,8 @@ window.addEventListener("load", () => {
   const capacityPercentageContainer = document.getElementById("capacityPercentageContainer");
   const transferAction = document.getElementById("transferAction");
   const transferActionVisibility = document.getElementById("transferActionVisibility");
+  const conferenceAction = document.getElementById("conferenceAction");
+  const conferenceActionVisibility = document.getElementById("conferenceActionVisibility");
   const capacityWeightContainer = document.getElementById("capacityWeightContainer");
 
   if (interactionRequestDropDown) {
@@ -409,6 +414,12 @@ window.addEventListener("load", () => {
   if (transferAction && transferActionVisibility) {
     transferAction.addEventListener("change", (event) => {
       transferActionVisibility.disabled = !event.target.checked;
+    });
+  }
+
+  if (conferenceAction && conferenceActionVisibility) {
+    conferenceAction.addEventListener("change", (event) => {
+      conferenceActionVisibility.disabled = !event.target.checked;
     });
   }
 
@@ -550,7 +561,9 @@ window.addEventListener("load", () => {
   }
 
   // Register custom event to retrieve the replied message from an agent in core app
-  const evtSource = new EventSource(SERVER_URL + "/replyMessage");
+  //let eventSourceUrl = "" + window.location.origin + "/replyMessage";
+  let eventSourceUrl = SERVER_URL + "/replyMessage";
+  const evtSource = new EventSource(eventSourceUrl);
   evtSource.addEventListener("replymsg", (e) => {
     if (!orgMode) {
       axios({
@@ -588,6 +601,13 @@ window.addEventListener("load", () => {
       agentActionVisibilities.push({
         "agentAction": "Transfer",
         "visible": document.getElementById("transferActionVisibility").value === 'true'
+      });
+    }
+
+    if (document.getElementById("conferenceAction").checked) {
+      agentActionVisibilities.push({
+        "agentAction": "Conference",
+        "visible": document.getElementById("conferenceActionVisibility").value === 'true'
       });
     }
     formData.agentActionVisibilities = JSON.stringify(agentActionVisibilities);
