@@ -157,7 +157,7 @@ const consultAllowedCheckbox = document.getElementById('isConsultAllowed');
 const isDialPadDisabled = document.getElementById('isDialPadDisabled');
 const isPhoneBookDisabled = document.getElementById('isPhoneBookDisabled');
 const agentCall = { callAttributes: { participantType: Constants.PARTICIPANT_TYPE.AGENT }};
-const call = { callAttributes: { participantType: Constants.PARTICIPANT_TYPE.INITIAL_CALLER }};
+let call = { callAttributes: { participantType: Constants.PARTICIPANT_TYPE.INITIAL_CALLER }};
 const thirdPartyCall = { callAttributes: { participantType: Constants.PARTICIPANT_TYPE.THIRD_PARTY }};
 const endCallDisabledCheckbox = document.getElementById('endCallDisabled');
 const updateSoftphoneControlsButton = document.getElementById('update-call');
@@ -494,6 +494,7 @@ function showError(error) {
 
 function prettyPrintCalls(activeCalls) {
     const isMultipartyAllowed = document.getElementById('isMultipartyAllowed').checked;
+    call.callAttributes.isAutoMergeOn = document.getElementById('callIsAutoMergeOn').checked;
     let isConsultCallPresent = false;
     activeCallsCard.style.display = "none";
     for (let i = 0; i <= MAX_PARTICIPANTS_INDEX; i++) {
@@ -1355,15 +1356,18 @@ function showCcaasDemoAppTab() {
 
 function setDemoConnectorMode(mode) {
     //set the mode to server cache so that OTT client apps can also access this information
-    fetch("/api/setOrgMode", {
+    fetch('/api/setOrgMode',{
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({orgMode : mode }),
-    }).then(response => response.json()).then((data) => {
-        console.log('setOrgMode response: ' + JSON.stringify(data));
-    })
+        body: JSON.stringify({orgMode: mode}),
+    }).then(response => response.json())
+        .then(data => {
+            console.log('setOrgMode response: ' + JSON.stringify(data));
+        }).catch((err) => {
+            console.log(`setOrgMode failed - ${err}`);
+    });
 
     // connector mode only applicable for ccaas remote. 
     if (!window.location.pathname.startsWith('/ccaas')) {
