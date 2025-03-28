@@ -209,16 +209,3 @@ app.post('/api/fetchServer', (req, res) => {
         console.log(`Error ${err}`);
     }
 });
-
-app.post('/api/setOrgMode', (req, res) => {
-    try {
-        if (req && req.body) {
-            modeCache.set('orgMode', req.body.orgMode);
-            console.log(`Org Mode set to ${req.body.orgMode}`);
-            res.send({ success: true});
-        }
-    } catch (err) {
-        console.log(`Error setting Org mode to cache: ${err}`);
-        res.send({ success: false});
-    }
-});
