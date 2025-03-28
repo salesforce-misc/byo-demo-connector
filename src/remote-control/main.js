@@ -1355,7 +1355,7 @@ function showCcaasDemoAppTab() {
 
 function setDemoConnectorMode(mode) {
     //set the mode to server cache so that OTT client apps can also access this information
-    fetch("http://localhost:3030/setOrgMode", {
+    fetch("/api/setOrgMode", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -1366,7 +1366,7 @@ function setDemoConnectorMode(mode) {
     })
 
     // connector mode only applicable for ccaas remote. 
-    if (!window.location.pathname.startsWith('/ccaas.html')) {
+    if (!window.location.pathname.startsWith('/ccaas')) {
         return false;
     }
 
@@ -1447,7 +1447,7 @@ function endACW(){
 }
 
 function retrySubscribe(){
-    fetch("http://localhost:3030/connect-and-subscribe", {
+    fetch("/api/connect-and-subscribe", {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
