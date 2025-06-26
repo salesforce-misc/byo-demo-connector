@@ -293,8 +293,8 @@ export function  initializeRemoteController(connector) {
                     }
                     break;
                     case Constants.SHARED_EVENT_TYPE.AFTER_CONVERSATION_WORK_STARTED:
-                    case Constants.SHARED_EVENT_TYPE.AFTER_CONVERSATION_WORK_ENDED:
-                        publishEvent({eventType: event.data.type, payload: new ACWInfo(event.data.acwInfo)});
+                    case Constants.VOICE_EVENT_TYPE.WRAP_UP_ENDED:
+                        publishEvent({eventType: event.data.type, payload: {callId: event.data.acwInfo.workItemId}});
                     break;
                     case Constants.CALL_UPDATED:
                         call = new PhoneCall({

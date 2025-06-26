@@ -1438,7 +1438,7 @@ function startACW(){
 
 function endACW(){
     sendMessageToConnector({
-        type: Constants.SHARED_EVENT_TYPE.AFTER_CONVERSATION_WORK_ENDED,
+        type: Constants.VOICE_EVENT_TYPE.WRAP_UP_ENDED,
         acwInfo: {
             agentWorkId: acwAgentWorkField.value,
             workItemId: acwWorkItemField.value
