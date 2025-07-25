@@ -497,6 +497,13 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                 <span class="slds-form-element__label">external transfer</span>
             </label>
         </div>
+        <div class="slds-checkbox">
+            <input type="checkbox" name="options" id="callIsAutoMergeOn"></input>
+            <label class="slds-checkbox__label" for="callIsAutoMergeOn">
+                <span class="slds-checkbox_faux"></span>
+                <span class="slds-form-element__label">auto merge</span>
+            </label>
+        </div>
     </div>
     <div class="slds-form-element">
         <span class="slds-form-element__label">Add participant contact types: </span> <div class="slds-checkbox">
@@ -1868,54 +1875,58 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                                     <div class="slds-form-element slds-form-element_stacked">
                                         <label class="slds-form-element__label slds-truncate" for="agentWorkActionVisibilities">Agent Work Action Visibilities</label>
                                         <table>
-                                            <tr>
-                                                <td class="slds-p-left_medium demo-app-agentWorkAction">
-                                                    <label class="slds-form-element__label slds-truncate" for="transferActionContainer">Action:</label>
-                                                    <div class="slds-checkbox" id="transferActionContainer">
-                                                        <input type="checkbox" name="options" id="transferAction"></input>
-                                                        <label class="slds-checkbox__label" for="transferAction">
-                                                            <span class="slds-checkbox_faux"></span>
-                                                            <span class="slds-form-element__label">Transfer</span>
-                                                        </label>
-                                                    </div>
-                                                </td>
-                                                <td class="slds-p-right_medium">
-                                                    <div class="slds-form-element slds-form-element_stacked"
-                                                        id="transferActionVisibilityContainer">
-                                                       <div class="slds-form-element__control slds-text-body_small">
-                                                            <label class="slds-form-element__label slds-truncate" for="transferActionVisibility">Visibile:</label>
-                                                            <select class="slds-select" id="transferActionVisibility" disabled>
-                                                                <option value="true">true</option>
-                                                                <option value="false">false</option>
-                                                            </select>
+                                            <thead>
+                                                <tr>
+                                                    <th><label class="slds-form-element__label slds-truncate" for="transferActionContainer">Action:</label></th>
+                                                    <th><label class="slds-form-element__label slds-truncate" for="transferActionVisibility">Visibile:</label></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td class="slds-p-left_medium demo-app-agentWorkAction">
+                                                        <div class="slds-checkbox" id="transferActionContainer">
+                                                            <input type="checkbox" name="options" id="transferAction"></input>
+                                                            <label class="slds-checkbox__label" for="transferAction">
+                                                                <span class="slds-checkbox_faux"></span>
+                                                                <span class="slds-form-element__label">Transfer</span>
+                                                            </label>
                                                         </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <!-- Keep following line as a sample for next added action(s) in 256+
-                                            <tr>
-                                                <td class="slds-p-left_medium slds-p-top_x-small demo-app-agentWorkAction">
-                                                    <div class="slds-checkbox" id="conferenceActionContainer">
-                                                        <input type="checkbox" name="options" id="conferenceAction"></input>
-                                                        <label class="slds-checkbox__label" for="conferenceAction">
-                                                            <span class="slds-checkbox_faux"></span>
-                                                            <span class="slds-form-element__label">Conference</span>
-                                                        </label>
-                                                    </div>
-                                                </td>
-                                                <td class="slds-p-right_medium slds-p-top_x-small">
-                                                    <div class="slds-form-element slds-form-element_stacked"
-                                                        id="conferenceActionVisibilityContainer">
-                                                       <div class="slds-form-element__control slds-text-body_small">
-                                                            <select class="slds-select" id="conferenceActionVisibility" disabled>
-                                                                <option value="TRUE">True</option>
-                                                                <option value="FALSE">False</option>
-                                                            </select>
+                                                    </td>
+                                                    <td class="slds-p-right_medium">
+                                                        <div class="slds-form-element slds-form-element_stacked"
+                                                            id="transferActionVisibilityContainer">
+                                                        <div class="slds-form-element__control slds-text-body_small">
+                                                                <select class="slds-select" id="transferActionVisibility" disabled>
+                                                                    <option value="true">true</option>
+                                                                    <option value="false">false</option>
+                                                                </select>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            -->
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="slds-p-left_medium demo-app-agentWorkAction">
+                                                        <div class="slds-checkbox" id="conferenceActionContainer">
+                                                            <input type="checkbox" name="options" id="conferenceAction"></input>
+                                                            <label class="slds-checkbox__label" for="conferenceAction">
+                                                                <span class="slds-checkbox_faux"></span>
+                                                                <span class="slds-form-element__label">Conference</span>
+                                                            </label>
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-p-right_medium">
+                                                        <div class="slds-form-element slds-form-element_stacked"
+                                                            id="conferenceActionVisibilityContainer">
+                                                        <div class="slds-form-element__control slds-text-body_small">
+                                                                <select class="slds-select" id="conferenceActionVisibility" disabled>
+                                                                    <option value="true">true</option>
+                                                                    <option value="false">false</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
                                         </table>
                                     </div>
                                     <div class="slds-form-element slds-form-element_stacked">
@@ -1947,6 +1958,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                                                 <select class="slds-select" id="routingTypeForAgentWork">
                                                     <option value="Initial">Initial</option>
                                                     <option value="Transfer">Transfer</option>
+                                                    <option value="Conference">Conference</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -1976,6 +1988,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                                                 <select class="slds-select" id="routingTypeForAgentWork">
                                                     <option value="Initial">Initial</option>
                                                     <option value="Transfer">Transfer</option>
+                                                    <option value="Conference">Conference</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -2000,6 +2013,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                                             <select class="slds-select" id="routingType">
                                                 <option value="Initial">Initial</option>
                                                 <option value="Transfer">Transfer</option>
+                                                <option value="Conference">Conference</option>
                                             </select>
                                         </div>
                                     </div>
@@ -2046,6 +2060,16 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                                     <div class="slds-form-element__control">
                                         <input type="text" id="ConversationIdForDelete" placeholder="Please enter conversation id" class="slds-input" />
                                     </div>
+                                    <label class="slds-form-element__label slds-truncate" for="CancelReasonForDelete">Cancel reason</label>
+                                    <div class="slds-form-element__control">
+                                        <select class="slds-select" id="CancelReasonForDelete">
+                                            <option value="None">None</option>
+                                            <option value="Unknown">Unknown</option>
+                                            <option value="Unavailable">Unavailable</option>
+                                            <option value="Decline">Decline</option>
+                                            <option value="Cancel">Cancel</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div id = "postRouteResultAPIContainer" class="slds-hide">
                                     <div class="slds-form-element slds-form-element_stacked">
@@ -2058,6 +2082,17 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                                         <label class="slds-form-element__label" for="conversationIdForPostRoutingResult"><abbr class="slds-required" title="required">* </abbr>Conversation Id</label>
                                         <div class="slds-form-element__control">
                                             <input type="text" id="conversationIdForPostRoutingResult" placeholder="e.g.: e587ff1f-ef6c-4373-a020-a57af78414ac" class="slds-input" />
+                                        </div>
+                                    </div>
+                                    <div class="slds-form-element slds-form-element_stacked">
+                                        <div class="slds-form-element slds-form-element_stacked">
+                                            <label class="slds-form-element__label" for="routingTypeForPostRoutingResult"><abbr class="slds-required" title="required">* </abbr>Routing Type</label>
+                                            <div class="slds-form-element__control">
+                                                <select class="slds-select" id="routingTypeForPostRoutingResult">
+                                                    <option value="Transfer">Transfer</option>
+                                                    <option value="Conference">Conference</option>
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="slds-form-element">

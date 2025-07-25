@@ -7,8 +7,7 @@ import { getTimeStampForLoglines } from '../util.mjs';
 
 // Get config metadata from .env
 const {
-  SF_SCRT_INSTANCE_URL, //OTT-needed
-  CAPACITY_WEIGHT
+  SF_SCRT_INSTANCE_URL
 } = process.env;
 const IS_LOCAL_CONFIG = process.env.IS_LOCAL_CONFIG === "true";
 // AgentWorkCache will store mapping of workItemId and agentWorkId
@@ -16,8 +15,7 @@ const agentWorkCache = new NodeCache();
 const responseCache = new NodeCache();
 
 const agentWorkApiUrl = '/api/v1/agentWork';
-const routingCorrelationId = uuidv4();
-const routingType = "Initial";
+
 /**
  * Sends a Salesforce create agent work request via Interaction Service api
  *
@@ -27,10 +25,11 @@ const routingType = "Initial";
  * @param {string} workItemId: Id of workItems like (MessagingSession, ..)
  * @returns {object} result object from interaction service with successful status or error code
  */
-export async function agentWork(orgId, authorizationContext, conversationIdentifier, workItemId, agentActionVisibilities, userId) {
+export async function agentWork(orgId, authorizationContext, conversationIdentifier, workItemId, 
+  agentActionVisibilities, userId, routingType, routingCorrelationId, useCache, isCapacityWeight, capacityNumber) {
   // Agentwork creation should happen only one time so if it exist don't call this api
   // We are storing it in agentWorkCache and validating against it
-  if (agentWorkCache.get(workItemId)){
+  if (agentWorkCache.get(workItemId) && useCache){
     // If agentWork was already created once then you don't need to call this funciton to create agentwork again
     console.log(getTimeStampForLoglines() + `Agentwork was already creaed for this workItem: "${workItemId}" - AgentWorkId: "${agentWorkCache.get(workItemId)}"`);
     return;
@@ -40,7 +39,7 @@ export async function agentWork(orgId, authorizationContext, conversationIdentif
   
   const accessToken = await getAccessToken();
   let jsonData = {};
-  jsonData = getAgentWorkData(workItemId, conversationIdentifier, userId, agentActionVisibilities);
+  jsonData = getAgentWorkData(workItemId, conversationIdentifier, userId, agentActionVisibilities, routingType, routingCorrelationId, isCapacityWeight, capacityNumber);
   jsonData = JSON.stringify(jsonData);
   console.log(getTimeStampForLoglines() + `agentWork request payload: "${jsonData}"`);
   const requestHeader = getAgentWorkRequestHeader(accessToken, orgId, authorizationContext);
@@ -67,19 +66,32 @@ export async function agentWork(orgId, authorizationContext, conversationIdentif
   return responseData;
 }
 
-function getAgentWorkData(workItemId, conversationIdentifier, userId, agentActionVisibilities) {
+function getAgentWorkData(workItemId, conversationIdentifier, userId, agentActionVisibilities, routingType, routingCorrelationId, isCapacityWeight, capacityNumber) {
   let agentWorkData = {};
   if (conversationIdentifier) {
-    agentWorkData = {
-      "userId": userId,
-      "workItemId": workItemId,
-      "capacityWeight": CAPACITY_WEIGHT,
-      "routingContext": {
-          "conversationIdentifier": conversationIdentifier,
-          "routingCorrelationId": routingCorrelationId,
-          "routingType": routingType
-      }    
-    };
+    if (isCapacityWeight) {
+      agentWorkData = {
+        "userId": userId,
+        "workItemId": workItemId,
+        "capacityWeight": capacityNumber,
+        "routingContext": {
+            "conversationIdentifier": conversationIdentifier,
+            "routingCorrelationId": routingCorrelationId,
+            "routingType": routingType
+        }    
+      };
+    } else {
+      agentWorkData = {
+        "userId": userId,
+        "workItemId": workItemId,
+        "capacityPercentage": capacityNumber,
+        "routingContext": {
+            "conversationIdentifier": conversationIdentifier,
+            "routingCorrelationId": routingCorrelationId,
+            "routingType": routingType
+        }    
+      };
+    }
   } else {
     agentWorkData = {
       "userId": userId,

@@ -9,6 +9,7 @@ The demo app is a sample application for both "Partner Telephony Systems" that i
 We’ve provided documentation for Salesforce Service Cloud Voice connector APIs in the [`/docs/`](https://github.com/salesforce/demo-scv-connector/tree/master/docs) folder.
 
 ## Installation
+
 ### Environment setup
 The developer environment requires [Node](https://nodejs.org/en/download/), [NPM](https://docs.npmjs.com/cli/install) and [webpack-dev-server](https://webpack.github.io/docs/webpack-dev-server.html). 
 
@@ -17,16 +18,15 @@ The developer environment requires [Node](https://nodejs.org/en/download/), [NPM
 #### Clone this repo
 
 ```
-$ git clone https://github.com/salesforce-misc/byo-demo-connector.git
+$ git clone https://git.soma.salesforce.com/hvcc/ccaas-demo-connector.git
 ```
 
 #### Install npm dependencies
 
 ```
-$ cd byo-demo-connector
+$ cd ccaas-demo-connector
 $ npm install
 ```
-
 ### Config Setup
 
 ```
@@ -64,42 +64,145 @@ SSL certificate for local HTTPS development
 - To avoid the warning message from the browser, you can setup a self-signed SSL certificate for you local web server.
  
 #### Setup "BYO OTT" application
-Open .env and replace all placeholder vars marked inside <> accordingly shown as below:
+Copy config.env.ott to .env, and replace all placeholder vars marked inside <> accordingly shown as below:
 
 ```
-################# env vars for ottApp (Messaging)
+#########################################
+## Section #1:                         ##
+##  The entries that are not           ##
+##  dynamically fetched from core,they ##
+##  are manually set here.             ##
+#########################################
 SF_CONSUMER_KEY="<connected app consumer key>"
 SF_PRIVATE_KEY="<private key>"
 SF_AUDIENCE=https://login.salesforce.com [^1]
-SF_SUBJECT=<admin user name>[^9]
+SF_SUBJECT=<admin user name>
 SF_AUTH_ENDPOINT=https://login.salesforce.com/services/oauth2/token [^2]
 SF_PUB_SUB_ENDPOINT=api.pubsub.salesforce.com:7443 [^3]
 SF_PUB_SUB_EVENT_RECEIVE_LIMIT=100
 SF_INSTANCE_URL=<Salesforce core app instance url> [^4][^9]
 SF_SCRT_INSTANCE_URL=<Salesforce core app scrt2 instance url> [^5][^9]
 SF_ORG_ID=<orgId>[^9]
-SF_AUTHORIZATION_CONTEXT=<ConversationChannelDefinition API Name>[^9]
+SF_PASSWORD=<Admin user password> [^11]
+SF_AUTHORIZATION_CONTEXT=<ConversationChannelDefinition API Name> [^9]
 CHANNEL_ADDRESS_IDENTIFIER=<Channel address identifier> [^6]
 END_USER_CLIENT_IDENTIFIER=<End user client identifier>
-PORT=3000
-IS_OTT=true[^8]
-API_VERSION=<Ex: "63.0" API version for the current release of salesforce app>[^10]
-SF_PASSWORD=<admin user password>[^11]
+API_VERSION=<Ex: "63.0" API version for the current release of salesforce app> [^10]
 ```
 
 #### Setup "BYO CCaaS" application for messaging
-
-Complete Setup "BYO OTT" application step above, update `IS_OTT` to `false`. Then replace all placeholder vars marked inside <> accordingly shown as below:
+Copy config.env to .env, finish the section #1 configure as shown above for BYO OTT setup, then replace all placeholder vars marked inside <> accordingly for Section #2 and #3 shown as below:
 
 ```
-################# extra env vars for CCaaS (Messaging)
-USER_ID=<Valid salesforce or external user id>[^9]
+#########################################
+## Section #2:                         ##
+##  The entries that are for BYO CCaaS ##
+#########################################
+USER_ID=<Valid salesforce or external user id> [^9]
 ROUTING_OWNER=<Owner of Routing possible values Partner|Salesforce>[^9]
 CAPACITY_WEIGHT=<Capacity weight which will be used in agent work example value:1>[^9]
-AUTO_CREATE_AGENT_WORK=<true or false>[^7][^9]
+AUTO_CREATE_AGENT_WORK=true[^7][^9]
+
+############################################
+## Section #3: Indicator to specify       ##
+## whether to dynamically fetch following ##
+## entries from core:                     ##
+##   - SF_INSTANCE_URL                    ##
+##   - SF_SCRT_INSTANCE_URL               ##
+##   - SF_AUTHORIZATION_CONTEXT           ##
+##   - SF_ORG_ID                          ##
+##   - USER_ID                            ##
+##   - SF_SUBJECT                         ##
+############################################
+IS_LOCAL_CONFIG=<true: read from local env config, or false: read from core>[^8]
 ```
 
-**Note**: 
+### Launch application 
+ 
+```
+$ npm start
+```
+
+By default the web server will run in SSL on port 8080. 
+
+Now that your web server is running, you can point your Service Cloud Voice Call Center Adapter URL to the web server URL (i.e. https://example.com:8080)
+
+### Replace private key
+Replace the src/server/private.key  data 
+```
+<BYO_TELEPHONY_CONNECTOR_PRIVATE_KEY>
+```
+
+with
+```
+MIIEpQIBAAKCAQEAtsQAYl2kv2UzGPkpV6HGE93IK58PW/KR38fBGdVwkHm35+J/
+T1gIXxdsvjQByXAJ1cZNR4bfHY7B3sXjUIYxesb8pOLgPZzxcX7edlgpWMydXmSX
+oPA0Z7QLCeU9sfyyNjpfFnG6M7GfimrHQvDTXf+uXSsdve5k26nGEOI7/WyrZ4hU
+OGYm61o4xvXEyrvXggK8wSZs0Efgl5GVJlSTXz0bkGjBb5MaRExylOqpS1UG5jKH
+G/dYNl0c12TDaNlgSJIZqGx9hY2zTSsvges+dIK3sLUqxRQqAH5rT7KTGcP+lX7z
+HZBYHvspmZMjQU9hJfK9e6XeXuOYbGjwSOlxtQIDAQABAoIBAQCZjyUjgLqjdUvx
+d6ec0XezyWwd+o7VGoImG5fLNOJXAW3bjxqYd8bQ3sWnKds2fMRGsU7NAi0EkKWj
+n3DWf2mjVv1/LIBsRCk4yvfvRzO2QHUYkjw0JJ5jY4rCzbGAkmjJ11F9ciCYvmzl
+x8GUJPPyzpiZ/1gF9P8Y8RRRq0PsMK5BAFeK0Xs/ZRhnjKjY9ljDhNvNnlYdVqmr
+4B3dpCYB1zxNU8CnHZCT+aYbm6ruZ4SGKL/BE8HunukoO0VgQSJZkNmZC9U+gwOn
+ghlTcSVZZJoIs24B1h2bTxBHvdDjZ3WXXfhgZ98IeNFIM8XhCF13+kE/8WpQdXsR
+JN6Y1PUhAoGBAN/Vyv+7ODEX+mCzuSt6uCcsCQRI77kyt8bP3fP0DfqMV065U6Tc
+8hcVEdoIDN1BwKBiAhosA3XBzbXOEUgsqIhxIPfJyK/mJZfPoeZQH+2XDda/Wxa9
+4DeIi/FZgAjUulSo/y9pHAUcqx/HehJecrBLjCrDbdR7BnQiKWmNM9C3AoGBANEH
+Y0h1/xsgU0YSGO3KAu/aW1GB8sUKvVUEUW6MwdZ/0jVB04yyU2RTXsZsDchriO5u
+QgcOlVzrzBpGHb+d52lwoBerguUxM83IRIMUEMBuuULF7BEtToFuoI+AhwCv0UZA
+duno5T68uZ8SYZn1Ic1z+OKQHMP+3fGQp6sLXEzzAoGAF0hkyj8ONEUbPS3UqAom
+16RD99ciYHA/H4YFv1d2kMZCWqT6Z164K+B8L+LAe89YGxa2w0Qqw/f5ztx1fb1v
+dmnWFRA/ONTGukjVvWA+QfeBcAINlor/pKcmb19w6vo9u4qsqKDVUk7OGgskzn5W
+jbH+DYCwjvaREElxZ1JRvncCgYEAid1+jTdON7z9T5T2HjgD8eCqJDs6PN3VfHJp
+pyltW6VYpsmw1vZy7BPUybhQ6uSKHwBXykHDH9Nh/d5LFqv2CmQ/Iv17SuFF0q8J
+CQ898T3WMQVLqxSf19x4R820vS45MEWqaKK0OMnO/+zmtN2qGtEn0X7NijPafM40
+2CqZCSMCgYEAlQ9QnDPoEst36VL/px8PYCbIiNJc2qvDlhkkLzJOsRLVHy+nXJgO
+uu3AxIUvp4eJscbLRDg/urAdDrjQzFw45XyWc4taazO3nW3c76Sba8gocSVbcC4U
+3KTb8gs0F96nkVojH5Vw5vjCCI+UokTYNoq2Q1wuAb+SDuCqaMlXYTA=
+```
+
+### Launch OTT Demo app
+When the app is running you can find it by going to this URL {your web server URL}/ottapp (i.e. https://localhost:8080/ottapp). You can use this URL to verify the installation succeed.
+
+This application provides BYO OTT testing tool that you can use to test inbound/outbound messaging.
+
+### Launch CCaaS Voice/Messaging Demo app
+When the app is running you can find it by going to this URL {your web server URL}/ccaas (i.e. https://localhost:8080/ccaas). You can use this URL to verify the installation succeed.
+
+This application provides both voice call simulation tool that you can use to test call actions such as making and answering calls and using phone controls, and BYO OTT testing tool that you can use to test inbound/outbound messaging. These two parts are organized in two tabs: "Voice" and "Message".
+
+**Note**:
+Sample payloads for APIs requiring json files are found here
+- [Register capabilities](/payloads/RegisterCapabilitySample.md)
+- [Conversation History API](/payloads/ConversationHistorySample.md)
+
+## Testing
+Lint all the source code and run all the unit tests:
+```
+$ npm test
+```
+To bundle the source code in the src/ folder into one connector.js file:
+```
+$ gulp bundle
+```
+To bundle the source code in the src/ folder into one minified connector_min.js file:
+```
+$ gulp bundle --mode prod
+```
+
+## Note about adding voice call recording via the ccaas demo connector UI 
+If you are testing voice call recording for BYOT, you should use this URL as the voice call recording URL in the UI: https://127.0.0.1:8080/assets/sampleaudio.mp3
+You have to use this url in order for the recording playback to work correctly
+
+## Note about using the telephony integration service
+Certain features (e.g. voice call transcripts) depend on the telephony integration service to work. In order for the demo connector to be able to authenticate with it, you need to set the private key in `src/server/private.key` to match the public key that you created your call center with. If you don't want to create a new key pair you can use the one in `src/server/cert.pem`
+
+## Contributing and Developing Locally
+We welcome contributors into our repo. Please read the [contributing guidelines](https://github.com/salesforce/demo-scv-connector/blob/master/CONTRIBUTING.md) for more information.
+
+
+**Note**:
 - [^1] The audience url for different environments:
   - Salesforce internal dev instance: `https://login.test1.pc-rnd.salesforce.com`
   - Sandbox instance: `https://test.salesforce.com`
@@ -116,41 +219,7 @@ AUTO_CREATE_AGENT_WORK=<true or false>[^7][^9]
 - [^5] The value of \<Salesforce core app scrt2 instance url\> above is an url with the pattern of "https://\<your org my domain name\>.my.salesforce-scrt.com".
 - [^6] The value of \<Channel address identifier\> above is the value from field "ChannelAddressIdentifier" in corresponding MessagingChannel record.
 - [^7] Auto create agent work boolean flag is used to specify if agent work should be created automatically when sending inbound messages.
-- [^8] Specify if it's an OTT only, applying to the circumstance of no contact center
-- [^9] No need to specify if you choose IS_OTT=false
+- [^8] Specify if it reads configuration from env or from core. Under the circumstance of no contact center, please select true.
+- [^9] No need to specify if you choose IS_LOCAL_CONFIG=false
 - [^10] The API version for the current release of salesforce app. This should be specified in the format "XX.0", where XX is the version number. For example, "62.0".
 - [^11] The admin password for the Salesforce instance. Ensure this is securely stored and not exposed in public repositories.
-
-### Launch application 
- 
-```
-$ npm start
-```
-
-By default the web server will run in SSL on port 8080. 
-
-Now that your web server is running, you can point your Service Cloud Voice Call Center Adapter URL to the web server URL (i.e. https://example.com:8080)
-
-### Launch CCaaS Voice/Messaging Demo app
-When the app is running you can find it by going to this URL {your web server URL}/ccaas (i.e. https://localhost:8080/ccaas). You can use this URL to verify the installation succeed.
-
-This application provides both voice call simulation tool that you can use to test call actions such as making and answering calls and using phone controls, and BYO OTT testing tool that you can use to test inbound/outbound messaging. These two parts are organized in two tabs: "Voice" and "Message".
-
-## Testing
-Lint all the source code and run all the unit tests:
-```
-$ npm test
-```
-To bundle the source code in the src/ folder into one connector.js file:
-```
-$ gulp bundle
-```
-To bundle the source code in the src/ folder into one minified connector_min.js file:
-```
-$ gulp bundle --mode prod
-```
-## Note about using the telephony integration service
-Certain features (e.g. voice call transcripts) depend on the telephony integration service to work. In order for the demo connector to be able to authenticate with it, you need to set the private key in `src/server/private.key` to match the public key that you created your call center with. If you don't want to create a new key pair you can use the one in `src/server/cert.pem`
-
-## Contributing and Developing Locally
-We welcome contributors into our repo. Please read the [contributing guidelines](https://github.com/salesforce/demo-scv-connector/blob/master/CONTRIBUTING.md) for more information.

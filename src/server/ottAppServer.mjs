@@ -26,7 +26,6 @@ customEnv.env();
 
 // Get config metadata from .env
 const {
-  PORT,
   SF_ORG_ID,
   CHANNEL_ADDRESS_IDENTIFIER,
   END_USER_CLIENT_IDENTIFIER,
@@ -49,10 +48,10 @@ settingsCache.set("channelAddressIdentifier", CHANNEL_ADDRESS_IDENTIFIER);
 settingsCache.set("endUserClientIdentifier", END_USER_CLIENT_IDENTIFIER);
 settingsCache.set("autoCreateAgentWork", AUTO_CREATE_AGENT_WORK);
 settingsCache.set("orgId", SF_ORG_ID);
-settingsCache.set("instanceUrl", SF_INSTANCE_URL)
-settingsCache.set("scrtUrl", SF_SCRT_INSTANCE_URL)
+settingsCache.set("instanceUrl", SF_INSTANCE_URL);
+settingsCache.set("scrtUrl", SF_SCRT_INSTANCE_URL);
 settingsCache.set("userId", USER_ID);
-settingsCache.set("userName", SF_SUBJECT)
+settingsCache.set("userName", SF_SUBJECT);
 
 // function to dynamically fetch conversation channel definition values and set in the settingsCache
 async function fetchAndCacheCCDValues() {
@@ -69,6 +68,7 @@ async function fetchAndCacheCCDValues() {
     //    - salesforce setup supports BYO inbound acknowledgements
     //    - salesforce setup supports BYO typing indicators
     const ccdData = await getConversationChannelDefinitions();
+    console.log(getTimeStampForLoglines() + "CCD data: ", ccdData);
     if(ccdData && ccdData.records && ccdData.records.length  > 0){
       const ccdDataRecord = ccdData.records[0];
       settingsCache.set("authorizationContext", ccdDataRecord.DeveloperName);
@@ -107,8 +107,6 @@ async function fetchAndCacheCCDValues() {
     console.error('Error fetching CCD values:', error);
   }
 }
-
-const port = PORT || 3000;
 
 export async function initOttApp(expressApp) {
 
@@ -174,6 +172,7 @@ export async function initOttApp(expressApp) {
             // fields value from UI
             "apiName": req.body.apiName,
             "conversationIdentifier": req.body.conversationIdentifier,
+            "cancelReason":req.body.cancelReason
           }
           break;
         case 'POST_ROUTING_RESULT':
@@ -181,6 +180,7 @@ export async function initOttApp(expressApp) {
             // fields value from UI
             "apiName": req.body.apiName,
             "conversationIdentifier": req.body.conversationIdentifier,
+            "routingType": req.body.routingType,
             "workItemId":req.body.workItemId,
             "success": req.body.success,
             "externallyRouted": req.body.externallyRouted,

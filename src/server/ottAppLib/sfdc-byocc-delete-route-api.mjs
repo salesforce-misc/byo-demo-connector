@@ -15,7 +15,11 @@ export async function sendDeleteRouteAPIRequest(req, requestHeader) {
   let responseData = {};
 
   let jsonData = {
-    "conversationIdentifier" : req.body.conversationIdentifier,
+    "conversationIdentifier" : req.body.conversationIdentifier
+  }
+
+  if (req.body.cancelReason != 'None') {
+    jsonData["cancelReason"] = req.body.cancelReason;
   }
 
   console.log(getTimeStampForLoglines() + "delete route json data: ");

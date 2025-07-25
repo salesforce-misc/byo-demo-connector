@@ -3,6 +3,9 @@ require('custom-env').env();
 module.exports = {
     mode: 'development',
     devtool: 'source-map',
+    infrastructureLogging: {
+      level: 'warn',
+    },
     entry: {
         main: './src/main/index.js',
         remote: './src/remote-control/main.js',
@@ -39,8 +42,8 @@ module.exports = {
                 {from: /^\/$/, to: 'app_debug.html'},
                 {from: /^\/remote/, to: 'remote.html'},
                 {from: /^\/login/, to: 'login.html'},
-                {from: /^\/ottapp/, to: 'ottapp.html'},
-                {from: /^\/ccaas/, to: 'ccaas.html'}
+                {from: /^\/ccaas/, to: 'ccaas.html'},
+                {from: /^\/ottapp/, to: 'ottapp.html'}
             ]
         }
     },

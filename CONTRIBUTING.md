@@ -1,38 +1,99 @@
-# Contributing Guide For CCAAS Demo Application
+# Contributing Guidelines
+Making changes to the Demo Connector
 
-Thank you for your interest in contributing to this project. We are not currently accepting contributions from external sources. If you would like to suggest a change or report a bug, please [open an issue on the repository page](https://github.com/salesforce-misc/byo-demo-connector/issues/new).
+## Testing Your Changes
+* To test locally, run:
+```
+$ npm start
+```
+and change your org's call center adapter URL to https://localhost:8080 (accept the certificates if needed)
 
-# Governance Model
+* To bundle the source code in the src folder into one connector.js file:
+```
+$ gulp bundle
+```
+* To bundle the source code in the src folder into one minified connector_min.js file:
+```
+$ gulp bundle --mode prod
+```
+ 
+## Release Versions
+For each new Salesforce release a new branch must be created:
+ - duplicate master branch code  
 
-## Published but not supported
+### Git Workflow
 
-The intent and goal of open sourcing this project is because it may contain useful or interesting code/concepts that we wish to share with the larger open source community. Although occasional work may be done on it, we will not be looking for or soliciting contributions.
+After you fork and clone the repo, the process for submitting a pull request is fairly straightforward and
+generally follows this workflow:
 
-# Getting started
+1. [Create a feature branch](#create-a-feature-branch)
+2. [Make your changes](#make-your-changes)
+3. [Rebase](#rebase)
+4. [Write unit tests](#Write-unit-tests)
+5. [Create a pull request](#create-a-pull-request)
+6. [Update the pull request](#update-the-pull-request)
 
-Please follow the instructions in [README.md](README.md) to get started for your project.
+#### Create a feature branch
 
-# Issues, requests & ideas
+```bash
+git checkout master
+git pull upstream master
+git checkout -b <name-of-the-feature>
+```
 
-Use GitHub Issues page to submit issues, enhancement requests and discuss ideas.
+#### Make your changes
 
-### Bug Reports and Fixes
--  If you find a bug, please search for it in the [Issues](https://github.com/salesforce-misc/byo-demo-connector/issues), and if it isn't already tracked,
-   [create a new issue](https://github.com/salesforce-misc/byo-demo-connector/issues/new). Fill out the "Bug Report" section of the issue template. Even if an Issue is closed, feel free to comment and add details, it will still
-   be reviewed.
--  Issues that have already been identified as a bug (note: able to reproduce) will be labelled `bug`.
+Modify the files, build, test, lint and eventually commit your code using the following command:
 
-### New Features
--  If you'd like to suggest new functionality to this project, describe the problem you want to solve in a [new Issue](https://github.com/salesforce-misc/byo-demo-connector/issues/new).
--  Issues that have been identified as a feature request will be labelled `enhancement`.
+```bash
+git add <path/to/file/to/commit>
+git commit
+git push origin <name-of-the-feature>
+```
 
-### Tests, Documentation, Miscellaneous
--  If you'd like to suggest the improvement for the tests, you want to make the documentation clearer, you have an
-   alternative implementation of something that may have advantages over the way its currently
-   done, or you have any other change, we would be happy to hear about it! Please [open an Issue](https://github.com/salesforce-misc/byo-demo-connector/issues/new) to discuss the idea.
+The above commands commit the files into your feature branch. You can keep
+pushing new changes into the same branch until you are ready to create a pull
+request.
 
-# Code of Conduct
-Please follow our [Code of Conduct](CODE_OF_CONDUCT.md).
+#### Rebase
 
-# License
-Please refer to [LICENSE](LICENSE.txt) for the license information.
+Sometimes your feature branch gets stale with respect to the master branch,
+and requires a rebase. The following steps can help:
+
+```bash
+git checkout <name-of-the-feature>
+git fetch upstream
+git rebase upstream/master
+```
+
+_Note: If no conflicts arise, these commands ensure that your changes are applied on top of the latest changes from the master branch. Any conflicts must be manually resolved._
+
+#### Write unit tests
+
+We use the Jest testing framework. You must test your code to verify that the function works as expected. Create unit tests in the `/src/test/` subfolder
+
+#### Run unit tests
+
+```sh
+npm test
+```
+
+### Create a pull request
+
+If you've never created a pull request before, follow [these
+instructions][creating-a-pull-request]. Fill up the pull request template to inform us of your change.
+
+### Update the pull request
+
+```sh
+git fetch origin
+git rebase origin/${base_branch}
+
+# If there were no merge conflicts in the rebase
+git push origin ${feature_branch}
+
+# If there was a merge conflict that was resolved
+git push origin ${feature_branch} --force
+```
+
+_note: If more changes are needed as part of the pull request, just keep committing and pushing your feature branch as described above and the pull request automatically updates._

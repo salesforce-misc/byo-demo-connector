@@ -265,6 +265,12 @@ export const ScrtConnector = {
             fieldValues.dialedNumber = params.dialedNumber;
         }
 
+        if(params.transferTarget) {
+            fieldValues.flowInputParameters = {
+                transferTarget: params.transferTarget
+            };
+        }
+
         const headers = {
             headers: {
                 'Authorization': `Bearer ${getToken()}`,

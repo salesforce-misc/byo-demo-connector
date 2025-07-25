@@ -95,7 +95,3 @@ function getRequestHeader(accessToken) {
     }
   };
 }
-
-export function getApiVersion() {
-  return API_VERSION;
-}

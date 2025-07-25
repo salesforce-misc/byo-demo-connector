@@ -159,6 +159,7 @@ window.addEventListener("load", () => {
           formData = {
             "apiName": document.getElementById("selected-api-name").value,
             "conversationIdentifier": document.getElementById("ConversationIdForDelete").value,
+            "cancelReason":document.getElementById("CancelReasonForDelete").value
           }
           break;
         case 'POST_ROUTING_RESULT':
@@ -166,6 +167,7 @@ window.addEventListener("load", () => {
             formData = {
               "apiName": document.getElementById("selected-api-name").value,
               "conversationIdentifier": document.getElementById("conversationIdForPostRoutingResult").value,
+              "routingType": document.getElementById("routingTypeForPostRoutingResult").value,
               "workItemId": document.getElementById("workItemIdForPostRoutingResult").value,
               "success": document.getElementById("successCheckbox").checked,
               "externallyRouted": document.getElementById("externallyRoutedCheckbox").checked,
@@ -175,6 +177,7 @@ window.addEventListener("load", () => {
             formData = {
               "apiName": document.getElementById("selected-api-name").value,
               "conversationIdentifier": document.getElementById("conversationIdForPostRoutingResult").value,
+              "routingType": document.getElementById("routingTypeForPostRoutingResult").value,
               "workItemId": document.getElementById("workItemIdForPostRoutingResult").value,
               "success": document.getElementById("successCheckbox").checked,
               "externallyRouted": document.getElementById("externallyRoutedCheckbox").checked,
@@ -384,6 +387,8 @@ window.addEventListener("load", () => {
   const capacityPercentageContainer = document.getElementById("capacityPercentageContainer");
   const transferAction = document.getElementById("transferAction");
   const transferActionVisibility = document.getElementById("transferActionVisibility");
+  const conferenceAction = document.getElementById("conferenceAction");
+  const conferenceActionVisibility = document.getElementById("conferenceActionVisibility");
   const capacityWeightContainer = document.getElementById("capacityWeightContainer");
 
   if (interactionRequestDropDown) {
@@ -409,6 +414,12 @@ window.addEventListener("load", () => {
   if (transferAction && transferActionVisibility) {
     transferAction.addEventListener("change", (event) => {
       transferActionVisibility.disabled = !event.target.checked;
+    });
+  }
+
+  if (conferenceAction && conferenceActionVisibility) {
+    conferenceAction.addEventListener("change", (event) => {
+      conferenceActionVisibility.disabled = !event.target.checked;
     });
   }
 
@@ -509,15 +520,18 @@ window.addEventListener("load", () => {
   let conversationEntriesBody = {};
   const conversationParticipantsPayload = document.getElementById('conversationsPayload');
   const conversationEntriesPayload = document.getElementById('entriesPayload');
-  // Get the contents from the uploaded JSON file for Conversation Particiapnts and ConversationEntries.
-  document.getElementById('conversationParticipants').addEventListener('change', async function(event) {
-    await readFilesForConversationHistory (event, conversationParticipantsPayload, 'conversationsPayload');
-    console.log(conversationParticipantsBody);
-  });
-  document.getElementById('conversationEntries').addEventListener('change', async function(event) {
-    await readFilesForConversationHistory(event, conversationEntriesPayload, 'entriesPayload');
-    console.log(conversationEntriesBody);
-  });
+  const conversationParticipantsFileInput = document.getElementById('conversationParticipants');
+  if (conversationParticipantsFileInput) {
+    // Get the contents from the uploaded JSON file for Conversation Particiapnts and ConversationEntries.
+    document.getElementById('conversationParticipants').addEventListener('change', async function(event) {
+      await readFilesForConversationHistory (event, conversationParticipantsPayload, 'conversationsPayload');
+      console.log(conversationParticipantsBody);
+    });
+    document.getElementById('conversationEntries').addEventListener('change', async function(event) {
+      await readFilesForConversationHistory(event, conversationEntriesPayload, 'entriesPayload');
+      console.log(conversationEntriesBody);
+    });
+  }
 
   function readFilesForConversationHistory(event, payloadUiText, payloadElementId) {
     return new Promise(() => {
@@ -588,6 +602,13 @@ window.addEventListener("load", () => {
       agentActionVisibilities.push({
         "agentAction": "Transfer",
         "visible": document.getElementById("transferActionVisibility").value === 'true'
+      });
+    }
+
+    if (document.getElementById("conferenceAction").checked) {
+      agentActionVisibilities.push({
+        "agentAction": "Conference",
+        "visible": document.getElementById("conferenceActionVisibility").value === 'true'
       });
     }
     formData.agentActionVisibilities = JSON.stringify(agentActionVisibilities);

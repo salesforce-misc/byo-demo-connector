@@ -16,6 +16,7 @@ export async function sendPostRoutingResultAPIRequest(req, requestHeader) {
 
   let jsonData = {
     "conversationIdentifier" : req.body.conversationIdentifier,
+    "routingType": req.body.routingType,
     "workItemId":req.body.workItemId,
     "success": req.body.success,
     "externallyRouted": req.body.externallyRouted,

@@ -15,9 +15,11 @@ import { getTimeStampForLoglines } from '../util.mjs';
 // Get config metadata from .env
 const {
   SF_SCRT_INSTANCE_URL, // OTT-needed
-  USER_ID
+  USER_ID,
+  CAPACITY_WEIGHT
 } = process.env;
 const IS_LOCAL_CONFIG = process.env.IS_LOCAL_CONFIG === "true";
+const routingType = "Initial";
 /**
  * Sends a SF inbound message to Salesforce via the BYOC REST API.
  *
@@ -371,6 +373,7 @@ function checkAndCreateAgentWork(orgId, authorizationContext, routingOwner, inte
 
   console.log(getTimeStampForLoglines() + `workItemId:"${workItemId}"\n======= conversationIdentifier:"${conversationIdentifier}"`);
   if (workItemId !== null && conversationIdentifier !== null) {
-    agentWork(orgId, authorizationContext, conversationIdentifier, workItemId, null, (IS_LOCAL_CONFIG ? USER_ID : settingsCache.get("userId")));
+    agentWork(orgId, authorizationContext, conversationIdentifier, workItemId, null, 
+      (IS_LOCAL_CONFIG ? USER_ID : settingsCache.get("userId")), routingType, uuidv4(), true, true, CAPACITY_WEIGHT);
   }
 }

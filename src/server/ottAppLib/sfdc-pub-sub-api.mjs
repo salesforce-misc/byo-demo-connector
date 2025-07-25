@@ -4,11 +4,11 @@ import protoLoader from '@grpc/proto-loader';
 import path from 'path';
 import fs from 'fs';
 import avro from 'avro-js';
-import certifi from 'certifi';
 import {getAccessToken} from './sfdc-auth.mjs';
 import {fileURLToPath} from 'url';
 import { settingsCache } from '../ottAppServer.mjs';
 import { getTimeStampForLoglines } from '../util.mjs';
+import https from 'https';
 
 // Import dotenv that loads the config metadata from .env
 //require('dotenv').config();
@@ -29,7 +29,23 @@ export async function connectToPubSubApi() {
   console.log(getTimeStampForLoglines() + 'Start connectToPubSubApi()');
 
   // Read certificates
-  const rootCert = fs.readFileSync(certifi);
+  // cacert.pem is referenced from https://github.com/pozil/pub-sub-api-node-client/blob/main/src/certs/cacert.pem
+  const rootCert = await new Promise((resolve, reject) => {
+    https.get('https://raw.githubusercontent.com/pozil/pub-sub-api-node-client/main/src/certs/cacert.pem', (res) => {
+      let data = '';
+
+      res.on('data', chunk => {
+        data += chunk;
+      });
+
+      res.on('end', () => {
+        resolve(Buffer.from(data)); // Convert string to Buffer
+      });
+    }).on('error', (err) => {
+      console.error('Error fetching certificate:', err.message);
+      reject(err);
+    });
+  });
 
   // Load proto definition
   const __filename = fileURLToPath(import.meta.url);

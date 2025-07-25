@@ -64,7 +64,14 @@ export async function sendRunApiLabRequest(req) {
       }
       case "POST_AGENT_WORK": {
         console.log(getTimeStampForLoglines() + 'Sending Agent Work API post request...');
-        responseData = await agentWork( SF_ORG_ID, SF_AUTHORIZATION_CONTEXT, req.body.conversationIdentifier, req.body.workItemId, req.body.agentActionVisibilities, req.body.userId);
+        if (req.body.capacityWeight) {
+          responseData = await agentWork( SF_ORG_ID, SF_AUTHORIZATION_CONTEXT, req.body.conversationIdentifier, 
+            req.body.workItemId, req.body.agentActionVisibilities, req.body.userId, req.body.routingType, req.body.routingCorrelationId, false, true, req.body.capacityWeight);
+        } else {
+          responseData = await agentWork( SF_ORG_ID, SF_AUTHORIZATION_CONTEXT, req.body.conversationIdentifier, 
+            req.body.workItemId, req.body.agentActionVisibilities, req.body.userId, req.body.routingType, req.body.routingCorrelationId, false, false, req.body.capacityPercentage);
+        }
+
         console.log(getTimeStampForLoglines() + 'Agent Work API post request sent.');
         break;
       }

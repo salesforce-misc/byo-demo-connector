@@ -21,7 +21,8 @@ import { publishEvent, log, ActiveCallsResult, AgentConfigResult, SharedCapabili
 import { io } from "socket.io-client";
 import { USER_MESSAGE, FILTER_TYPES_TO_CONTACT_TYPES } from '../common/constants';
 import { EventEmitter } from 'events';
-/** 
+import { hidDeviceHandler } from "../hid/hidDeviceHandler";
+/**
  * Class representing a Phone Call
  */
 class Call extends PhoneCall {
@@ -101,13 +102,13 @@ export class Sdk {
             hasAgentAvailability: true,
             hasQueueWaitTime: true,
             supportsMos : false,
-            hasSupervisorListenIn: false,
-            hasSupervisorBargeIn: false,
-            hasBlindTransfer : false,
+            hasSupervisorListenIn: true,
+            hasSupervisorBargeIn: true,
+            hasBlindTransfer : true,
             hasTransferToOmniFlow : true,
             hasPendingStatusChange: true,
             hasPhoneBook : false,
-            canConsult : false,
+            canConsult : true,
             isDialPadDisabled: false,
             isPhoneBookDisabled: false,
             isHidSupported: false,
@@ -134,7 +135,8 @@ export class Sdk {
         delayMs: 0, //Delay in milliseconds before resolving a promise
         contactTypes: JSON.parse(localStorage.getItem('contactTypes')) || 
             [ Constants.CONTACT_TYPE.AGENT, Constants.CONTACT_TYPE.QUEUE, Constants.CONTACT_TYPE.PHONEBOOK, Constants.CONTACT_TYPE.PHONENUMBER ],
-        contactCenterAdditionalSettings: new ContactCenterAdditionalSettings()
+        contactCenterAdditionalSettings: new ContactCenterAdditionalSettings(),
+        flowConfig : null
     }){
         this.state = {...state, 
             showLoginPage: !!JSON.parse(localStorage.getItem('showLoginPage')),
@@ -164,7 +166,8 @@ export class Sdk {
             return consultCall;
         } 
         if (call.callAttributes && call.callAttributes.participantType) {
-            const callByParticipant = Object.values(this.state.activeCalls).filter((obj) => obj['callAttributes']['participantType'] === call.callAttributes.participantType).pop();
+            // During a consult call in list there can be 2 Initial callers, so we do shift() to get the first non-consult one
+            const callByParticipant = Object.values(this.state.activeCalls).filter((obj) => obj['callAttributes']['participantType'] === call.callAttributes.participantType).shift();
             if (!callByParticipant) {
                 throw new Error("Couldn't find an active call for participant " + call.callAttributes.participantType);
             }
@@ -221,7 +224,7 @@ export class Sdk {
         const userId = this.state.userId;
         socket.emit("presence", { isAvailable, username , fullName, userId});
     }
-
+    
     /**
      * Get the primary call
      * @returns {Call} - The primary call
@@ -231,11 +234,19 @@ export class Sdk {
         try {
             primaryCall = this.getCall({ callAttributes: { participantType: Constants.PARTICIPANT_TYPE.INITIAL_CALLER }});
         } catch (e) {
-            primaryCall = this.getCall({ callAttributes: { participantType: Constants.PARTICIPANT_TYPE.SUPERVISOR }});
+            try {
+                primaryCall = this.getCall({ callAttributes: { participantType: Constants.PARTICIPANT_TYPE.SUPERVISOR }});
+            } catch (e) {
+                try {
+                    primaryCall = this.getCall({callAttributes: { isConsultCall: true }});
+                } catch (e) {
+                    return this.getActiveCallsList()[0];
+                }
+            }
         }
         return primaryCall;
     }
-    
+
     /**
      * for multiparty - update a call with a value to callInfo. 
      * otherwise, Update the Main Call Info (with the initial caller or supervisor)
@@ -263,13 +274,20 @@ export class Sdk {
     }
 
     setAgentConfig(config) {
-        if (config.selectedPhone) {
+        if (!config) {
+            return;
+        }
+
+        if (config.selectedPhone && Object.keys(config.selectedPhone).length > 0) {
             this.state.agentConfig.selectedPhone = config.selectedPhone;
         }
-        if (config.hidDeviceInfo) {
+        if (config.hidDeviceInfo && Object.keys(config.hidDeviceInfo).length > 0) {
             this.state.agentConfig.hidDeviceInfo = config.hidDeviceInfo;
         }
         localStorage.setItem('agentConfig', JSON.stringify(this.state.agentConfig));
+        if(config.hidDeviceInfo !== undefined) {
+            hidDeviceHandler(config, this);
+        }
         return this.executeAsync("setAgentConfig", new SetAgentConfigResult({
             success: true
         }));
@@ -626,13 +644,13 @@ export class Sdk {
         if (message.messageType) {
             switch(message.messageType){
                 case USER_MESSAGE.CALL_STARTED:
-                    this.startTransferCall(message);
+                    this.startTransferOrConsultCall(message);
                     break;
                 case USER_MESSAGE.INTERNAL_CALL_STARTED:
                     this.startInternalCall(message);
                     break;
                 case USER_MESSAGE.PARTICIPANT_CONNECTED:
-                    if (message.fromUsername !== this.state.agentId ) {
+                    if (message.fromUsername !== this.state.agentId && !this.isSupervisorListeningIn()) {
                         this.connectParticipant(message.data.callInfo, message.data.callType, message.data.call);
                     }
                     break;
@@ -640,7 +658,9 @@ export class Sdk {
                     this.publishCallBargedInEventToAgents(message.data);
                     break;
                 case USER_MESSAGE.CALL_DESTROYED:
-                    this.processCallDestroyed(message.data);
+                    if (!this.isSupervisorListeningIn()) {
+                        this.processCallDestroyed(message.data);
+                    }
                     break;
                 case USER_MESSAGE.MUTE:
                     if (message.fromUsername !== this.state.agentId) {
@@ -653,18 +673,39 @@ export class Sdk {
                     }
                     break;
                 case USER_MESSAGE.MERGE:
-                    if (message.fromUsername !== this.state.agentId && message.data.consultCall) {
+                    // Dont merge if there are no active calls
+                    if (!this.hasActiveCalls()) {
+                        return;
+                    }
+
+                    // Don't merge the supervisor if the supervisor is actively listening into a call
+                    if (message.fromUsername !== this.state.agentId && message.data.consultCall && !this.isSupervisorListeningIn()) {
                         this.state.activeConferenceCalls = message.data.activeConferenceCalls;
-                        let primaryCallId = this.getPrimaryCall().callId;
-                        // update the correct participanttype in the MPC
-                        let elem = this.state.activeConferenceCalls.find(({callId}) => callId === primaryCallId);
-                        if (elem) {
-                            elem.callAttributes.participantType = Constants.PARTICIPANT_TYPE.INITIAL_CALLER;
+                        let primaryCall;
+                        let activeCallList = this.getActiveCallsList();
+
+                        // goal is to find the primary call and change its participantType / receiverContact before merging
+                        if (activeCallList.length === 1 && this.hasConsultCall(activeCallList)) {
+                            // if we are merging activeCalls into consult user, then currently there is no primary call ID
+                            // and the consult user will have only 1 call. and that is as good as a primary call
+                            primaryCall = activeCallList[0];
+                        } else {
+                            // if we are merging consult call into multiparty group user, then they will have a primary call
+                            primaryCall = this.getPrimaryCall();
                         }
 
-                        if(message.data.consultCall.callId === primaryCallId) {
+                        // update the correct participanttype in the MPC
+                        let elem = this.state.activeConferenceCalls.find(({callId}) => callId === primaryCall.callId);
+                        if (elem) {
+                            elem.callAttributes.participantType = Constants.PARTICIPANT_TYPE.INITIAL_CALLER;
+                            elem.receiverContact = elem.receiverContact || this.state.activeCalls[primaryCall.callId].receiverContact;
+                        }
+                        if (message.data.consultCall.callId === primaryCall.callId) {
                             message.data.consultCall.callAttributes.participantType = Constants.PARTICIPANT_TYPE.INITIAL_CALLER;
                         }
+                        message.data.consultCall.contact = new Contact({id: message.fromUsername});
+                        message.data.consultCall.callInfo.renderContactId = message.fromUsername;
+
                         this.mergeConsultCall(message.data.consultCall);
                         this.updateConferenceUsers(true);
                     }
@@ -693,33 +734,40 @@ export class Sdk {
         return Math.random().toString(36).substring(7);
     }
 
-    startTransferCall(message){
+    startTransferOrConsultCall(message) {
         const isConsultCall = message.data.isConsultCall;
         let flowConfig = message.data.flowConfig || { isUnifiedRoutingEnabled: false };
         flowConfig.isTransferFlow = true;
-        if (this.state.isMultipartyAllowed && message.data) {
-            message.data.callInfo = message.data.callInfo || {};
-            message.data.callInfo.callStateTimestamp = message.data.callInfo.callStateTimestamp ? new Date(message.data.callInfo.callStateTimestamp) : new Date();
-        }
+        const callInfo = message.data.callInfo || {};
+        callInfo.callStateTimestamp = message.data.callInfo?.callStateTimestamp ? new Date(message.data.callInfo.callStateTimestamp) : new Date();
         const call = new PhoneCall({
-            callType: isConsultCall ? "consult" : "transfer",
+            callType: isConsultCall ? Constants.CALL_TYPE.CONSULT : Constants.CALL_TYPE.TRANSFER,
             phoneNumber: message.data.phoneNumber,
             callId: message.data.callId || this.generateCallId(),
-            callAttributes: new PhoneCallAttributes({participantType: Constants.PARTICIPANT_TYPE.INITIAL_CALLER, voiceCallId: message.data.voiceCallId, isConsultCall }),
+            callAttributes: new PhoneCallAttributes({
+                participantType: isConsultCall ? Constants.PARTICIPANT_TYPE.THIRD_PARTY : Constants.PARTICIPANT_TYPE.INITIAL_CALLER,
+                voiceCallId: message.data.voiceCallId,
+                parentId: message.data.callAttributes?.parentId,
+                isConsultCall
+            }),
+            state: Constants.CALL_STATE.RINGING  // Explicitly set initial state to RINGING
         });
+        
+        const renderContact = callInfo.renderContact || message.data.renderContact;
+        call.callInfo = Object.assign(callInfo, JSON.parse(localStorage.getItem('callInfo')));
 
-        if (this.state.isMultipartyAllowed) {
-            call.callInfo = Object.assign(message.data.callInfo || {}, JSON.parse(localStorage.getItem('callInfo')));
-            call.contact = message.data.callInfo.renderContact && new Contact(message.data.callInfo.renderContact);
-        } else {
-            call.callInfo = new CallInfo({ isOnHold:false });
+        if (!this.state.isMultipartyAllowed) {
+            call.callInfo.isOnHold = false;
         }
-
+        if (renderContact) {
+            call.contact = new Contact(renderContact);
+            call.toContact = this.getCurrentUserContact();
+        }
         call.callInfo.renderContactId = message.fromUsername;
         this.addCall(call);
         //When Unified Routing is enabled, we need to invoke OmniFlow, otherwise regular flow to publish CALL_STARTED event.
-        if(flowConfig.isUnifiedRoutingEnabled) {
-            this.executeOmniFlowForUnifiedRouting(message.data, flowConfig);
+        if(flowConfig?.isUnifiedRoutingEnabled) {
+            //this.executeOmniFlowForUnifiedRouting(message.data, flowConfig);
         } else {
             let callResult = new CallResult({call});
             publishEvent({ eventType: Constants.VOICE_EVENT_TYPE.CALL_STARTED, payload: callResult});
@@ -757,14 +805,18 @@ export class Sdk {
                     this.state.activeConferenceCalls.forEach(call => {
                         const activeCall = this.state.activeCalls[call.callId];
                         if (updateActiveCallToo || !activeCall) {
-                            const callAttributes = activeCall ? activeCall.callAttributes : null;
+                            const callAttributes = activeCall ? activeCall.callAttributes : { isAutoMergeOn: true };
                             let callInfo = this.state.isMultipartyAllowed
                                 ? Object.assign(call.callInfo, JSON.parse(localStorage.getItem('callInfo')))
                                 : call.callInfo || {};
                             callInfo.callStateTimestamp = callInfo.callStateTimestamp
                                 ? new Date(callInfo.callStateTimestamp)
                                 : new Date();
-                            const useContact = (callAttributes && callAttributes.participantType === Constants.PARTICIPANT_TYPE.INITIAL_CALLER) ? call.receiverContact : call.contact;
+                            if (activeCall) {
+                                call.contact = activeCall.contact;
+                                callInfo.renderContactId = activeCall.callInfo.renderContactId;
+                            }
+                            const useContact = call.contact;
                             const newCall = new Call(
                                 Constants.CALL_TYPE.ADD_PARTICIPANT,
                                 new Contact(useContact),
@@ -775,6 +827,8 @@ export class Sdk {
                                 new CallInfo(callInfo),
                                 call.callId
                             );
+                            newCall.fromContact = call.fromContact;
+                            newCall.toContact = call.toContact;
                             this.addCall(newCall);
                             this.connectParticipant(null, null, newCall);
                         }
@@ -795,9 +849,14 @@ export class Sdk {
             }
             if (callToDestroy) {
                 if (this.state.isMultipartyAllowed) {
-                    if(messageData.target === this.state.agentId &&
-                        callToDestroy.callAttributes.participantType === Constants.PARTICIPANT_TYPE.INITIAL_CALLER) {
-                        this.hangupMultiParty(callToDestroy, messageData.reason, null);
+                    if (messageData.target === this.state.agentId) {
+                        if (callToDestroy.callType === Constants.CALL_TYPE.CONSULT.toString()) {
+                            let destroyedCall = this.destroyCalls(callToDestroy, messageData.reason);
+                            let payload = new CallResult({call: destroyedCall.pop()});
+                            publishEvent({ eventType: Constants.VOICE_EVENT_TYPE.PARTICIPANT_REMOVED, payload });
+                        } else {
+                            this.hangupMultiParty(callToDestroy, messageData.reason, null);
+                        }
                     } else {
                         let primaryCall;
                         try {
@@ -814,9 +873,9 @@ export class Sdk {
                             publishEvent({eventType: Constants.VOICE_EVENT_TYPE.PARTICIPANT_CONNECTED, 
                                             payload: new ParticipantResult({
                                                 callId: primaryCall.callId,
-                                                contact: payload.call.contact,
+                                                contact: new Contact(payload.call.contact),
                                                 phoneNumber: payload.call.contact && payload.call.contact.phoneNumber,
-                                                callInfo: payload.call.callInfo,
+                                                callInfo: new CallInfo(payload.call.callInfo),
                                                 initialCallHasEnded: payload.call.callAttributes && payload.call.callAttributes.initialCallHasEnded
                                             })})
                         }
@@ -938,9 +997,18 @@ export class Sdk {
         });
     }
 
+    getCurrentUserContact() {
+        return new Contact({
+            phoneNumber: this.state.agentId,
+            id: this.state.agentId,
+            type: this.state.type,
+            name: this.state.userFullName
+        });
+    }
+
     /**
      * start a call
-     * @param {Contact} contact
+     * @param {Contact} contact ToContact
      * @param {Object} callInfo (callInfo.isSoftphoneCall is false if dialing from a desk phone)
      * @param {Boolean} fireCallStarted boolean to indicate whether to fire the call started event
      * @param {Boolean} isCallback boolean providing hint from click-to-dial whether this is a callback.
@@ -955,12 +1023,11 @@ export class Sdk {
             ...callInfo,
             isOnHold: callInfo?.isOnHold ?? false,
             callStateTimestamp: new Date(),
+            renderContactId: contact.id,
         };
         
         const callAttributes = {
-            participantType: isConsultCall 
-                ? Constants.PARTICIPANT_TYPE.THIRD_PARTY //TODO: determine participantType based on contact.type
-                : Constants.PARTICIPANT_TYPE.INITIAL_CALLER,
+            participantType: Constants.PARTICIPANT_TYPE.INITIAL_CALLER,
             parentId: isConsultCall
                 ? this.getPrimaryCall().callId // send primary callId to createConsultConversation
                 : null,
@@ -977,6 +1044,7 @@ export class Sdk {
         } 
 
         const call = new Call(callType, contact, callAttributes, new CallInfo(callInfo));
+        call.fromContact = this.getCurrentUserContact();
         this.addCall(call);
         const callResult = new CallResult({ call });
 
@@ -986,12 +1054,10 @@ export class Sdk {
         
         this.state.agentAvailable = false;
         if (this.state.onlineUsers.includes(contact.id) && contact.type === Constants.CONTACT_TYPE.AGENT) {
-            const renderContact = new Contact({
-                phoneNumber: this.state.agentId, 
-                id: this.state.agentId, 
-                name: this.state.userFullName
-            })
-            this.messageUser(contact.id, isConsultCall ? USER_MESSAGE.CALL_STARTED : USER_MESSAGE.INTERNAL_CALL_STARTED, {phoneNumber: contact.phoneNumber, callId: call.callId, contact, renderContact: renderContact, isConsultCall});
+            const renderContact = this.getCurrentUserContact();
+            const fromContact = new Contact(renderContact);
+            const toContact = new Contact(contact);
+            this.messageUser(contact.id, isConsultCall ? USER_MESSAGE.CALL_STARTED : USER_MESSAGE.INTERNAL_CALL_STARTED, {phoneNumber: contact.phoneNumber, callId: call.callId, contact, renderContact: renderContact, fromContact, toContact, isConsultCall, callAttributes});
         }
         
         return this.executeAsync('dial', callResult);
@@ -1016,12 +1082,20 @@ export class Sdk {
         return this.createVoiceCall(undefined, Constants.CALL_TYPE.INBOUND, phoneNumber, callInfo && callInfo.additionalFields).then((data) => {
             callAttributes.voiceCallId = data.voiceCallId;
             const call = new Call(Constants.CALL_TYPE.INBOUND.toLowerCase(), contact, callAttributes, new CallInfo(callInfo), data.vendorCallKey || this.generateCallId());
+            call.fromContact = contact;
+            call.toContact = this.getCurrentUserContact();
+            //delete call.toContact;
             this.addCall(call);
             const callResult = new CallResult({
                 call
             });
             //When Unified Routing is enabled, we need to invoke OmniFlow, otherwise regular flow to publish CALL_STARTED event.
-            if(flowConfig.isUnifiedRoutingEnabled) {
+            if(flowConfig?.isUnifiedRoutingEnabled) {
+                if (this.state.flowConfig == null) {
+                    this.state.flowConfig = { ...flowConfig };
+                } else {
+                    Object.assign(this.state.flowConfig, flowConfig);
+                }
                 console.log('Inside isUnifiedRoutingEnabled ' + flowConfig.isUnifiedRoutingEnabled);
                 var response = this.executeOmniFlowForUnifiedRouting(data, flowConfig);
                 console.log('response From execute onmi flow' + response);
@@ -1130,7 +1204,15 @@ export class Sdk {
     getActiveCallsObj() {
         const activeCalls = JSON.parse(localStorage.getItem('activeCalls')) || {};
         Object.keys(activeCalls).forEach(callId => {
-            if (activeCalls[callId].contact) activeCalls[callId].contact = new Contact(activeCalls[callId].contact);
+            if (activeCalls[callId].contact) {
+                activeCalls[callId].contact = new Contact(activeCalls[callId].contact);
+            } 
+            if (activeCalls[callId].toContact) {
+                activeCalls[callId].toContact = new Contact(activeCalls[callId].toContact);
+            }
+            if (activeCalls[callId].fromContact) {
+                activeCalls[callId].fromContact = new Contact(activeCalls[callId].fromContact);
+            }
             activeCalls[callId].callInfo.callStateTimestamp = activeCalls[callId].callInfo.callStateTimestamp ? new Date(activeCalls[callId].callInfo.callStateTimestamp) : new Date();
             activeCalls[callId].callInfo = new CallInfo(activeCalls[callId].callInfo);
             activeCalls[callId].callAttributes = new PhoneCallAttributes(activeCalls[callId].callAttributes);
@@ -1225,21 +1307,32 @@ export class Sdk {
                 name: this.state.userFullName
             })
             callToAccept.receiverContact = receiverContact;
+            callToAccept.toContact = this.getCurrentUserContact();
             /* If it's not internal call , contact is the source of truth of which participant we are rendering*/
             if (callToAccept.callType === 'internalcall') {
                 /* If it's an internal call, contact will be ourself. We render the initiator's name passed from startInternalCall */
                 callToAccept.contact.name = callToAccept.callInfo.renderContactId;
             }
             const currType = callToAccept.callType.toLowerCase();
-            const state = ((currType === Constants.CALL_TYPE.CALLBACK.toLowerCase() || currType === Constants.CALL_TYPE.INTERNAL_CALL.toLowerCase()) &&
-                callToAccept.state !== Constants.CALL_STATE.CONNECTED) ?
-                Constants.CALL_STATE.RINGING : Constants.CALL_STATE.CONNECTED;
+            const state = ((
+                currType === Constants.CALL_TYPE.CALLBACK.toLowerCase() ||
+                currType === Constants.CALL_TYPE.INTERNAL_CALL.toLowerCase()) &&
+            callToAccept.state !== Constants.CALL_STATE.CONNECTED) ?
+            Constants.CALL_STATE.RINGING : Constants.CALL_STATE.CONNECTED;
+            
             callToAccept.state = state;
             // callToAccept.callAttributes.state = state;
             this.log("acceptCall", callToAccept);
             this.addCall(callToAccept);
             this.state.agentAvailable = false;
-            this.messageUser(null, USER_MESSAGE.PARTICIPANT_CONNECTED, { callInfo: callToAccept.callInfo, callType: currType, call: callToAccept});
+            if (currType === Constants.CALL_TYPE.TRANSFER.toLowerCase() || 
+                currType === Constants.CALL_TYPE.CONSULT.toLowerCase()) {
+                this.messageUser(null, USER_MESSAGE.PARTICIPANT_CONNECTED, { 
+                    callInfo: callToAccept.callInfo, 
+                    callType: currType, 
+                    call: callToAccept
+                });
+            }
             callResult = new CallResult({ call: callToAccept });
             this.updateConferenceUsers(false);
         }
@@ -1283,15 +1376,23 @@ export class Sdk {
                 if (call.callId) {
                     callObj = this.getCall(call);
                     if (callObj.callAttributes &&
-                        callObj.callAttributes.participantType === Constants.PARTICIPANT_TYPE.INITIAL_CALLER &&
+                        callObj.callAttributes?.participantType === Constants.PARTICIPANT_TYPE.INITIAL_CALLER &&
                         (!callObj.contact || (this.state.agentId === callObj.contact.id))) {
+                        destroyedCalls = this.hangupMultiParty(callObj, reason, agentErrorStatus);
+                    } else if (callObj.callType?.toLowerCase() === Constants.CALL_TYPE.CONSULT.toString().toLowerCase() &&
+                        callObj.callAttributes?.participantType.toLowerCase() === Constants.PARTICIPANT_TYPE.THIRD_PARTY.toString().toLowerCase()) {
                         destroyedCalls = this.hangupMultiParty(callObj, reason, agentErrorStatus);
                     } else {
                         destroyedCalls = this.destroyCalls(callObj, reason);
                         this.beginWrapup(destroyedCalls[0]);
                     }
                 } else {
-                    callObj = this.getCall({callAttributes: { participantType: Constants.PARTICIPANT_TYPE.INITIAL_CALLER }});
+                    const consultCall = Object.values(this.state.activeCalls).filter((obj) => obj.callAttributes?.isConsultCall === true)[0];
+                    if (consultCall) {
+                        callObj = consultCall;
+                    } else {
+                        callObj = this.getCall({callAttributes: { participantType: Constants.PARTICIPANT_TYPE.INITIAL_CALLER }});
+                    }
                     destroyedCalls = this.hangupMultiParty(callObj, reason, agentErrorStatus);
                 }
 
@@ -1330,6 +1431,7 @@ export class Sdk {
      */
     processMute(call, isMuted) {
         const isGlobal = call ? call.isGlobal : false;
+        const isSupervisor = call && call.isSupervisor;
         call = this.updateCallInfo({ isMuted }, call);
         const targetIsPrimaryCaller = this.getPrimaryCall().callId === call.callId;
         /* Find the muting target
@@ -1337,12 +1439,14 @@ export class Sdk {
          * (2) Muting my primary call (but not me)? Check call.contact.id for primary call initiator's info
          * (3) Muting someone else: Read the renderContactId
         */
-        const target = isGlobal ? this.state.agentId : targetIsPrimaryCaller ? (call.contact.id ? call.contact.id : call.contact.phoneNumber) : call.callInfo.renderContactId;
+        const target = isGlobal ? this.state.agentId : (targetIsPrimaryCaller && call.contact) ? (call.contact.id ? call.contact.id : call.contact.phoneNumber) : call.callInfo.renderContactId;
         /* Setting target in call.callAttribute and it will be broadcasted to other agents */
         call.callAttributes.target = target;
         /* Broadcast the mute message to all the users */
         const userMessage = isMuted ? USER_MESSAGE.MUTE : USER_MESSAGE.UNMUTE;
-        this.messageUser(null, userMessage, call, isMuted);
+        if (this.state.isMultipartyAllowed && isSupervisor === false) {
+            this.messageUser(null, userMessage, call, isMuted);
+        }
         return this.executeAsync("mute", new MuteToggleResult({ isMuted,  call, isGlobal }));
     }
     /**
@@ -1402,7 +1506,7 @@ export class Sdk {
         if (this.isConsultCall(call)) {
             call = this.getCall({ callAttributes: { isConsultCall : true }});
         } 
-        return this.executeAsync("pauseRecording", new RecordingToggleResult({ isRecordingPaused }, this.updateCallInfo({ isRecordingPaused }, call)));
+        return this.executeAsync("pauseRecording", new RecordingToggleResult({ isRecordingPaused, contactId : call.callId }, this.updateCallInfo({ isRecordingPaused }, call)));
     }
     /**
      * resume recording for the call
@@ -1414,7 +1518,7 @@ export class Sdk {
         if (this.isConsultCall(call)) {
             call = this.getCall({ callAttributes: { isConsultCall : true }});
         }
-        return this.executeAsync("resumeRecording", new RecordingToggleResult({ isRecordingPaused }, this.updateCallInfo({ isRecordingPaused }, call)));
+        return this.executeAsync("resumeRecording", new RecordingToggleResult({ isRecordingPaused, contactId : call.callId }, this.updateCallInfo({ isRecordingPaused }, call)));
     }
     /**
     * Supervise a call
@@ -1517,8 +1621,13 @@ export class Sdk {
 
             if (callToMerge) {
                 this.mergeConsultCall(callToMerge);
+                // change consult call participantType
+                callToMerge.callAttributes.participantType = Constants.PARTICIPANT_TYPE.THIRD_PARTY;
                 this.messageUser(null, USER_MESSAGE.MERGE, { consultCall: callToMerge, activeConferenceCalls: Object.values(this.state.activeCalls) });
             }
+            // When call is merged and primary call is on Hold, we should resume the primary call
+            let primaryCall = this.getPrimaryCall();
+            this.updateHoldState(primaryCall, false);
         } else {
             calls.forEach((call) => {
                 this.updateHoldState(call, false);
@@ -1546,14 +1655,34 @@ export class Sdk {
             calls?.some(call => call?.callAttributes?.isConsultCall === true)
         );
     }
-    
+
     mergeConsultCall(consultCall) {
         consultCall.callAttributes.isConsultCall = false;
         consultCall.callType = Constants.CALL_TYPE.ADD_PARTICIPANT;
         consultCall.callAttributes.isAutoMergeOn = true;
         consultCall.reason = Constants.HANGUP_REASON.PHONE_CALL_ENDED;
-        this.addCall(consultCall);
-        this.updateHoldState(consultCall, false);
+        let callToUpdate = this.state.activeCalls[consultCall.callId];
+        if (callToUpdate) {
+            let params = {
+                callAttributes: {
+                    isConsultCall: false,
+                    isAutoMergeOn: true,
+                    isOnHold: false,
+                    participantType: consultCall.callAttributes.participantType
+                },
+                callInfo: {
+                    isOnHold: false
+                },
+                callType: Constants.CALL_TYPE.ADD_PARTICIPANT,
+                reason: Constants.HANGUP_REASON.PHONE_CALL_ENDED,
+            }
+            for (const key in params) {
+                callToUpdate[key] = typeof params[key] === 'object' ? Object.assign({}, callToUpdate[key], params[key]) : params[key];
+            }
+        } else {
+            this.addCall(consultCall);
+            this.updateHoldState(consultCall, false);
+        }
     }
 
     /**
@@ -1605,9 +1734,12 @@ export class Sdk {
      */
     async addParticipant(contact, call, isBlindTransfer) {
         const parentCall = this.getCall(call);
-        // if auto-merge is off then its either a consult call or a transfer call
-        const isAutoMergeOn = call.callAttributes && call.callAttributes.isAutoMergeOn;
-        let callAttributes = parentCall.callAttributes || {};
+        const isAutoMergeOn = call.callAttributes?.isAutoMergeOn;
+        const callAttributes = {
+            ...parentCall.callAttributes,
+            isAutoMergeOn,
+            isBlindTransfer,
+        };
         const initiatorContact = new Contact({
             phoneNumber: this.state.agentId, 
             id: this.state.agentId, 
@@ -1624,6 +1756,7 @@ export class Sdk {
         }
         callInfo.isExternalTransfer = isExternalTransfer;
         callInfo.callStateTimestamp = new Date();
+        callInfo.initialCallId = parentCall.callId;
         let additionalFields = callInfo.additionalFields ? callInfo.additionalFields : parentCall.callInfo && parentCall.callInfo.additionalFields;
         let transferCall = await this.createVoiceCall(parentCall.callId, Constants.CALL_TYPE.TRANSFER, parentCall.phoneNumber, additionalFields);
         let transferTo = contact.id;
@@ -1634,9 +1767,38 @@ export class Sdk {
         if (!contact.id) {
             contact.id = Math.random().toString(36).substring(5);
         }
+
+        //newTransferVendorkey is created so that we dont have generate vendor key for transfer call everytime.
+        let newTransferVendorkey = transferCall.vendorCallKey || this.generateCallId();
+
+        /*
+         executeOmniFlow API is required for Unified routing. Adding it here will take care of warm & Blind transfer.
+         */
+        if(this.state?.flowConfig?.isUnifiedRoutingEnabled) {
+            let callInfoData = {
+                transferTo,
+                voiceCallId : newTransferVendorkey
+            };
+            let flowConfigData = {
+                dialedNumber : this.state.flowConfig.dialedNumber
+            };
+            await this.executeOmniFlowForUnifiedRouting(callInfoData,flowConfigData);
+        }
+        
         if (isBlindTransfer) {
             if (this.state.onlineUsers.includes(transferTo)) {
-                this.messageUser(transferTo, USER_MESSAGE.CALL_STARTED, {phoneNumber: parentCall.phoneNumber, callId: transferCall.vendorCallKey || this.generateCallId(), voiceCallId: transferCall.voiceCallId});
+                this.messageUser(transferTo, USER_MESSAGE.CALL_STARTED, {phoneNumber: parentCall.phoneNumber, callId: newTransferVendorkey, voiceCallId: transferCall.voiceCallId});
+            } else{
+                //Only for unified routing - Transfer to queue use case is supported in demo connector
+                if(this.state?.flowConfig?.isUnifiedRoutingEnabled) {
+                    // to handle Transfer to queue use case
+                    this.messageUser(null, USER_MESSAGE.CALL_STARTED, {
+                        phoneNumber: parentCall.phoneNumber,
+                        callId: newTransferVendorkey,
+                        voiceCallId: transferCall.voiceCallId,
+                        flowConfig: this.state.flowConfig
+                    });
+                }
             }
             const destroyedCall = this.destroyCall(call, Constants.HANGUP_REASON.PHONE_CALL_ENDED);
             this.log("addParticipant - cold transfer (destroyed call)", destroyedCall);
@@ -1656,18 +1818,38 @@ export class Sdk {
 
         const parentVoiceCallId = callAttributes.voiceCallId;
         if (this.state.isMultipartyAllowed) {
-            callInfo = Object.assign(callInfo, JSON.parse(localStorage.getItem('callInfo')));
+            callInfo = Object.assign(
+                callInfo,
+                JSON.parse(localStorage.getItem('callInfo')),
+                {
+                    isRecordingPaused : parentCall.callInfo ? parentCall.callInfo.isRecordingPaused : false
+                }
+            );
         }
-        const newCall = new Call(Constants.CALL_TYPE.ADD_PARTICIPANT, contact, { participantType: Constants.PARTICIPANT_TYPE.THIRD_PARTY, voiceCallId: parentVoiceCallId, isAutoMergeOn }, new CallInfo(callInfo));
-        newCall.callId = transferCall.vendorCallKey || this.generateCallId() ;
+        const newCall = new Call(Constants.CALL_TYPE.ADD_PARTICIPANT, contact, { participantType: Constants.PARTICIPANT_TYPE.THIRD_PARTY, voiceCallId: parentVoiceCallId, isAutoMergeOn }, new CallInfo(callInfo), transferCall.vendorCallKey || this.generateCallId());
         newCall.parentCallId = parentCall.callId;
         newCall.callAttributes.isOnHold = false; // same FIXME
         newCall.state = Constants.CALL_STATE.TRANSFERRING;
-        
+        newCall.fromContact = initiatorContact;
+
         this.log("addParticipant to parent voiceCall " + parentVoiceCallId, newCall);
         this.addCall(parentCall);
         if (this.state.onlineUsers.includes(transferTo)) {
-            this.messageUser(transferTo, USER_MESSAGE.CALL_STARTED, {phoneNumber: contact.phoneNumber, callInfo, contact, initiatorContact, callId: newCall.callId, voiceCallId: transferCall.voiceCallId, activeConferenceCalls: isAutoMergeOn ? Object.values(this.state.activeCalls) : [], flowConfig: this.state.flowConfig });
+            this.messageUser(transferTo, USER_MESSAGE.CALL_STARTED, {phoneNumber: this.state.userFullName, callInfo, contact, initiatorContact, callId: newCall.callId, voiceCallId: transferCall.voiceCallId, activeConferenceCalls: isAutoMergeOn ? Object.values(this.state.activeCalls) : [], flowConfig: this.state.flowConfig });
+        }else{
+            if(this.state?.flowConfig?.isUnifiedRoutingEnabled) {
+                // to handle Transfer to queue use case
+                this.messageUser(null, USER_MESSAGE.CALL_STARTED, {
+                    phoneNumber: this.state.userFullName,
+                    callInfo,
+                    contact,
+                    initiatorContact,
+                    callId: newCall.callId,
+                    voiceCallId: transferCall.voiceCallId,
+                    activeConferenceCalls: isAutoMergeOn ? Object.values(this.state.activeCalls) : [],
+                    flowConfig: this.state.flowConfig
+                });
+            }
         }
         this.addCall(newCall);
         return this.executeAsync("addParticipant", new ParticipantResult({
@@ -1709,10 +1891,12 @@ export class Sdk {
             voiceCallId:call.voiceCallId,
             fallbackQueue: fallbackQueue
         };
+        if(call?.transferTo){
+            requestObject.transferTarget = call.transferTo;
+        }
         if (flowConfig?.isTransferFlow) {
             requestObject.flowDevName = flowDevName;
         } else {
-            this.state.flowConfig = flowConfig;
             requestObject.flowName = flowDevName;
         }
 
@@ -1758,6 +1942,16 @@ export class Sdk {
      */
     connectParticipant(callInfo, callType, call) {
         // Verify if this participant is newly joined.
+        if (!this.hasActiveCalls()) {
+            return; //need to have at least an initial call to connect a participant
+        }
+
+        // avoid connecting consult call to an agent who did not initiate the conversation
+        if (call?.callType === Constants.CALL_TYPE.CONSULT &&
+            Object.keys(this.state.activeCalls).indexOf(call.callId) === -1) {
+            return;
+        }
+
         let receiverContact;
         if (call) {
             if (call.receiverContact) {
@@ -1771,29 +1965,34 @@ export class Sdk {
                 }
             }
         }
-        if (!this.hasActiveCalls()) {
-            return; //need to have at least an initial call to connect a participant
-        }
+
         if (this.state.isMultipartyAllowed && call && !this.state.activeCalls[call.callId]) {
             call.callType = Constants.CALL_TYPE.ADD_PARTICIPANT;
             call.callAttributes.participantType = Constants.PARTICIPANT_TYPE.THIRD_PARTY;
             this.addCall(call);
         }
-        if (callType !==  Constants.CALL_TYPE.INTERNAL_CALL.toLowerCase()) {
-            call = this.getCall({...(call || {}),callAttributes: { participantType: Constants.PARTICIPANT_TYPE.THIRD_PARTY }});
-            call.state = Constants.CALL_STATE.TRANSFERRED;
-        } else {
+        if (callType === Constants.CALL_TYPE.INTERNAL_CALL.toLowerCase()) {
             call = this.getCall({...(call || {}), callAttributes: { participantType: Constants.PARTICIPANT_TYPE.INITIAL_CALLER }});
             call.state = Constants.CALL_STATE.CONNECTED;
+        } else if (callType === Constants.CALL_TYPE.CONSULT.toLowerCase()) {
+            call = this.getCall({...(call || {}),callAttributes: { participantType: Constants.PARTICIPANT_TYPE.THIRD_PARTY }});
+            call.state = Constants.CALL_STATE.CONNECTED;
+        } else {
+            call = this.getCall({...(call || {}),callAttributes: { participantType: Constants.PARTICIPANT_TYPE.THIRD_PARTY }});
+            call.state = Constants.CALL_STATE.TRANSFERRED;
         }      
         this.log("connectParticipant", call);
         this.addCall(call);
-        if (callType !==  Constants.CALL_TYPE.INTERNAL_CALL.toLowerCase()) {
+        if (!callType) {
+            callType = call.callType.toLowerCase();
+        }
+        if (callType !==  Constants.CALL_TYPE.INTERNAL_CALL.toLowerCase() && callType !==  Constants.CALL_TYPE.CONSULT.toLowerCase()) {
             let publishedCallInfo = call.callInfo || {};
             publishedCallInfo.callStateTimestamp = publishedCallInfo.callStateTimestamp ? new Date(publishedCallInfo.callStateTimestamp) : new Date();
             publishEvent({eventType: Constants.VOICE_EVENT_TYPE.PARTICIPANT_CONNECTED, payload: new ParticipantResult({
                 contact: receiverContact ? receiverContact : call.contact,
                 phoneNumber: call.contact && call.contact.phoneNumber,
+                callAttributes: call.callAttributes,
                 callInfo: new CallInfo(publishedCallInfo),
                 initialCallHasEnded: call.callAttributes && call.callAttributes.initialCallHasEnded,
                 callId: call.callId
@@ -1830,10 +2029,6 @@ export class Sdk {
         this.beginWrapup(destroyedCall);
         
         const payload = new CallResult({ call: destroyedCall });
-        // we have to use this hack so that the participant is actually removed
-        // refer to baseConnector.js , code at : case constants.VOICE_EVENT_TYPE.PARTICIPANT_REMOVED
-        // https://sourcegraph.soma.salesforce.com/git.soma.salesforce.com/hvcc/scv-connector-base/-/blob/src/main/baseConnector.js?L1054
-        payload.call.callAttributes.participantType = Constants.PARTICIPANT_TYPE.THIRD_PARTY;
         publishEvent({ eventType: Constants.VOICE_EVENT_TYPE.PARTICIPANT_REMOVED, payload });
         return this.executeAsync("removeParticipant", payload);
     }
@@ -2031,5 +2226,11 @@ export class Sdk {
 
     publishCallBargedInEventToAgents(parentCall) {
         publishEvent({ eventType: "CALL_BARGED_IN", payload: new SupervisedCallInfo(parentCall)});
+    }
+
+    isSupervisorListeningIn() {
+        return this.state.capabilities.hasSupervisorListenIn && Object.values(this.state.activeCalls || {}).some(
+            (obj) => obj?.callAttributes?.participantType === Constants.PARTICIPANT_TYPE.SUPERVISOR
+        );
     }
 }
