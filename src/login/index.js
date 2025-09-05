@@ -12,7 +12,7 @@ const previewButton = document.getElementById('preview');
 const passwordInput = document.getElementById('password');
 const showPasswordContainer = document.getElementById('show-password-container');
 const hidePasswordContainer = document.getElementById('hide-password-container');
-let showPassword = false;
+var showPassword = false;
 
 previewButton.addEventListener('click', () => {
     showPassword = !showPassword;
