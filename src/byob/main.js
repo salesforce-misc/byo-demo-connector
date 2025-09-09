@@ -183,7 +183,8 @@ window.addEventListener("load", () => {
     if (orgMode !== 'VOICE_ONLY') {
       console.log('\n=============== EventSource - replymsg event:', event.data);
       let replyObj = JSON.parse(event.data);
-      if (replyObj.type === messagingConstants.EVENT_TYPE.INTERACTION) {
+      if (replyObj.eventType === messagingConstants.EVENT_TYPE.INTERACTION
+          || replyObj.type === messagingConstants.EVENT_TYPE.INTERACTION) {
         //check if event is typing indicator
         let payload = JSON.parse(replyObj.payloadField.string);
         let eventType = payload.payload.entryType;
@@ -212,7 +213,8 @@ window.addEventListener("load", () => {
           default:
             console.log('Unsupported message type:', replyObj.messageType);
         }
-      } else if (replyObj.type === messagingConstants.EVENT_TYPE.ROUTING_REQUESTED) {
+      } else if (replyObj.type === messagingConstants.EVENT_TYPE.ROUTING_REQUESTED ||
+          replyObj.eventType === messagingConstants.EVENT_TYPE.ROUTING_REQUESTED) {
         appendInboundEventToChatList(replyObj.type, replyObj.payloadField, chatList, outboundTypingStarted);
       }
     }
