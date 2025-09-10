@@ -29,13 +29,20 @@ $ npm install
 ```
 ### Config Setup
 
+
+#### For "BYO CCaaS" application
 ```
 $ cp config.env .env
 ```
 
+#### For "BYO OTT" application
+```
+$ cp config.env.ott .env
+```
+
 #### Setup "Partner Telephony Systems" application
 
-Open .env and set following config values as per Org and Environment if needed.
+Open `.env` and set following config values as per Org and Environment if needed.
 
 ```
 ################## env vars for remote-control (Voice)
