@@ -2,45 +2,48 @@
  * Sends a SF participant to Salesforce via the REST API.
  */
 import axios from 'axios';
-import NodeCache from "node-cache" ;
 import { settingsCache } from '../ottAppServer.mjs';
-import { getTimeStampForLoglines } from '../util.mjs';
+import { logger, generateApiUrl } from '../util.mjs';
 
-const {
-    SF_SCRT_INSTANCE_URL
-} = process.env;
-const IS_LOCAL_CONFIG = process.env.IS_LOCAL_CONFIG === "true";
-const responseCache = new NodeCache();
-const postParticipantEndpoint = '/api/v1/participant';
+const participantEndpoint = '/api/v1/participant';
 
-export async function sendPostParticipantAPIRequest(req, requestHeader) {
-
-    let responseData = {};
-
-    let jsonData = {
+/**
+ * Generates the participant request payload object
+ * @param {Object} req - Express request object containing participant data in body
+ * @returns {Object} Payload object with conversationIdentifier, participants, and operation
+ */
+function generateParticipantPayload(req) {
+    return {
         "conversationIdentifier" : req.body.conversationIdentifier,
         "participants" : req.body.participants,
         "operation" : req.body.operation
-    }
+    };
+}
 
-    console.log(getTimeStampForLoglines() + "post participant json data: ");
-    console.dir(jsonData);
+/**
+ * Sends a POST request to the Salesforce participant API
+ * @param {Object} req - Express request object containing participant data
+ * @param {Object} requestHeader - HTTP headers for the API request
+ * @returns {Promise<Object>} Response data from the API call
+ */
+export async function sendPostParticipantAPIRequest(req, requestHeader) {
+    
+    const requestPayload = generateParticipantPayload(req);
+    const requestId = requestHeader.headers.RequestId;
+    logger.info(`POST /participant API with requestId ${requestId} and request payload: `, requestPayload);
+    const participantApiUrl = generateApiUrl(settingsCache, participantEndpoint);
 
-    responseData = await axios.post(
-        (IS_LOCAL_CONFIG ? SF_SCRT_INSTANCE_URL : settingsCache.get("scrtUrl")) + postParticipantEndpoint,
-        jsonData,
-        requestHeader
-    ).then(function (response) {
-        console.log(getTimeStampForLoglines() + "post participant api request completed successfully: ", response.data);
-        responseCache.set("success", response.data.success);
+    try {
+        const response = await axios.post(
+            participantApiUrl,
+            JSON.stringify(requestPayload),
+            requestHeader
+        );
+        logger.info(`POST /participant API with requestId ${requestId} completed successfully: `, response.data);
         return response.data;
-    }).catch(function (error) {
-        let errorResponseData = error.response.data;
-        console.dir(errorResponseData);
-        console.log(getTimeStampForLoglines() + "post participant api request has error: ", errorResponseData);
-        responseCache.set("message", errorResponseData.message);
-        responseCache.set("code", errorResponseData.code);
-        return errorResponseData;
-    });
-    return responseData;
+    } catch (error) {
+        let responseData = error.response?.data || { message: error.message, code: error.code || 'UNKNOWN_ERROR' };
+        logger.error(`POST /participant API with requestId ${requestId} has error: `, responseData);
+        return responseData;
+    }
 }

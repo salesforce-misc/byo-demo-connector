@@ -1,11 +1,7 @@
 import jwt from 'jsonwebtoken';
-//import { v4: uuidv4 } from "uuid";
 import axios from 'axios';
 import { settingsCache } from '../ottAppServer.mjs';
-import { getTimeStampForLoglines } from '../util.mjs';
-
-// Import dotenv that loads the config metadata from .env
-//require('dotenv').config();
+import { logger } from '../util.mjs';
 
 // Get config metadata from .env
 const {
@@ -41,37 +37,46 @@ function generateJWT(payload, expiresIn, privateKey) {
  */
 export async function getAccessToken(refresh) {
   if (refresh || !cachedAccessToken) {
-    // TODO: The console logs will be refactored in next story W-13133225
-    console.log(getTimeStampForLoglines() + `Obtain a new access token.`);
     // Obtain a new access token.
     const consumerKey = SF_CONSUMER_KEY;
     const privateKey = SF_PRIVATE_KEY.replace(/\\n/g, '\n');
     // If there's no private key provided in .env for messaging, we should still allow the app run and enable phone usage
     // Return null here to avoid secretOrPrivateKey error
     if (!privateKey || privateKey.length < 50) {
-      return null;}
+      logger.error(`Missing required environment variables. Check if the SF_PRIVATE_KEY is correct in env file.`);
+      return null;
+    }
     const aud = SF_AUDIENCE;
     let sub = IS_LOCAL_CONFIG ? SF_SUBJECT : settingsCache.get("userName"); // read from .env if it's ott
 
     // wait until critical data are retrieved from core
     if (!sub) {
+      logger.error(`Missing required environment variables. Check if the SF_SUBJECT is correct in env file.`);
       return null;
     }
 
     const jwt = generateJWT({ iss: consumerKey, sub, aud }, '3m', privateKey);
-    const response = await axios.post(SF_AUTH_ENDPOINT,
-      `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`,
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
+
+    logger.info(`POST ${SF_AUTH_ENDPOINT} to obtain access token.`);
+    try {
+      const response = await axios.post(SF_AUTH_ENDPOINT,
+        `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`,
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
         }
-      }
-    );
-
-    cachedAccessToken = response.data.access_token;
+      );
+      logger.info(`POST ${SF_AUTH_ENDPOINT} completed successfully. Access token: ${response.data.access_token}`);
+      cachedAccessToken = response.data.access_token;
+      return response.data.access_token;
+    } catch (error) {
+      const errorMessage = error.response?.data?.error_description || error.response?.data?.error || error.message || error;
+      logger.error(`POST ${SF_AUTH_ENDPOINT} has error. Check if the SF_CONSUMER_KEY, SF_PRIVATE_KEY, SF_AUDIENCE, SF_SUBJECT, and SF_AUTH_ENDPOINT are correct in env file. Error: ${errorMessage}`);
+      return null;
+    }
+  } else {
+    logger.info(`GET access token from cache. Access token: ${cachedAccessToken}`);
+    return cachedAccessToken;
   }
-
-  console.log(getTimeStampForLoglines() + `cachedAccessToken: ${cachedAccessToken}.`);
-  return cachedAccessToken;
 }
-

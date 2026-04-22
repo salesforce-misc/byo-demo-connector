@@ -9,9 +9,9 @@ import { sendConversationAPIRequest } from './sfdc-byocc-post-conversation-api.m
 import { sendPostParticipantAPIRequest } from './sfdc-byocc-post-participant-api.mjs';
 import { sendPostMessagingSessionAPIRequest } from './sfdc-byocc-post-messaging-session-api.mjs';
 import { v4 as uuidv4} from 'uuid';
-import { agentWork } from './sfdc-byocc-agentwork-api.mjs';
+import { agentWork, patchAgentWork } from './sfdc-byocc-agentwork-api.mjs';
 import { settingsCache } from '../ottAppServer.mjs';
-import { getTimeStampForLoglines } from '../util.mjs';
+import { getTimeStampForLoglines, logger } from '../util.mjs';
 
 //Get config metadata from .env
 const {
@@ -26,84 +26,60 @@ export async function sendRunApiLabRequest(req) {
   const accessToken = await getAccessToken();
   const requestHeader = getRequestHeader(accessToken, IS_LOCAL_CONFIG ? SF_ORG_ID : settingsCache.get("orgId"), IS_LOCAL_CONFIG ? SF_AUTHORIZATION_CONTEXT : settingsCache.get("authorizationContext"));
 
-  console.log(getTimeStampForLoglines() + "Request body: ", req.body);
-  console.log(getTimeStampForLoglines() + "Request header: ", requestHeader);
-
   if (!IS_LOCAL_CONFIG && !(accessToken && settingsCache.get("orgId") && settingsCache.get("authorizationContext") && settingsCache.get("scrtUrl"))) {
-    console.log(getTimeStampForLoglines() + "[Warn]  Please check if the user is in a Contact Center,  refresh your (1) Salesforce App and then (2)demo connector page to retrieve critical contact center data to start sending route request.")
-  } else {
-    // run request base on the apiName in the request;
-    switch (req.body.apiName){
-      case "CONSENT": {
-        console.log(getTimeStampForLoglines() + 'Sending consent API patch request...');
-        responseData = await sendConsentAPIRequest(req, requestHeader);
-        console.log(getTimeStampForLoglines() + 'Consent API patch request sent.');
-        break;
-      }
-      case "POST_ROUTE": {
-        console.log(getTimeStampForLoglines() + 'Sending route API post request...');
-        responseData = await sendPostRouteAPIRequest(req, requestHeader);
-        console.log(getTimeStampForLoglines() + 'Route API post request sent.');
-        break;
-      }
-      case "DELETE_ROUTE": {
-        console.log(getTimeStampForLoglines() + 'Sending route API delete request...');
-        responseData = await sendDeleteRouteAPIRequest(req, requestHeader);
-        console.log(getTimeStampForLoglines() + 'Route API delete request sent.');
-        break;
-      }
-      case "POST_ROUTING_RESULT": {
-        console.log(getTimeStampForLoglines() + 'Sending Routing Result API post request...');
-        responseData = await sendPostRoutingResultAPIRequest(req, requestHeader);
-        console.log(getTimeStampForLoglines() + 'Routing Result API post request sent.');
-        break;
-      }
-      case 'PATCH_REGISTER_CAPABILITIES': {
-        console.log(getTimeStampForLoglines() + 'Sending Register Capabilities API patch request...');
-        responseData = await sendPatchRegisterCapabilitiesAPIRequest(req, requestHeader);
-        console.log(getTimeStampForLoglines() + 'Register Capabilities API patch request was sent.');
-        break;
-      }
-      case "POST_AGENT_WORK": {
-        console.log(getTimeStampForLoglines() + 'Sending Agent Work API post request...');
-        if (req.body.capacityWeight) {
-          responseData = await agentWork( SF_ORG_ID, SF_AUTHORIZATION_CONTEXT, req.body.conversationIdentifier, 
-            req.body.workItemId, req.body.agentActionVisibilities, req.body.userId, req.body.routingType, req.body.routingCorrelationId, false, true, req.body.capacityWeight);
-        } else {
-          responseData = await agentWork( SF_ORG_ID, SF_AUTHORIZATION_CONTEXT, req.body.conversationIdentifier, 
-            req.body.workItemId, req.body.agentActionVisibilities, req.body.userId, req.body.routingType, req.body.routingCorrelationId, false, false, req.body.capacityPercentage);
-        }
-
-        console.log(getTimeStampForLoglines() + 'Agent Work API post request sent.');
-        break;
-      }
-      case "POST_CONVERSATION_HISTORY": {
-        console.log(getTimeStampForLoglines() + 'Sending Conversation History API post request...');
-        responseData = await sendConversationHistoryRequest(req, requestHeader);
-        console.log(getTimeStampForLoglines() + 'Conversation History API post request sent.');
-        break;
-      }
-      case "POST_CONVERSATION": {
-        console.log(getTimeStampForLoglines() + 'Sending Conversation API post request...');
-        responseData = await sendConversationAPIRequest(req, requestHeader);
-        console.log(getTimeStampForLoglines() + 'Conversation API post request sent.');
-        break;
-      }
-      case "POST_PARTICIPANT": {
-        console.log(getTimeStampForLoglines() + 'Sending Participant API post request...');
-        responseData = await sendPostParticipantAPIRequest(req, requestHeader);
-        console.log(getTimeStampForLoglines() + 'Participant API post request sent.');
-        break;
-      }
-      case "POST_MESSAGING_SESSION": {
-        console.log(getTimeStampForLoglines() + 'Sending Messaging Session API post request...');
-        responseData = await sendPostMessagingSessionAPIRequest(req, requestHeader);
-        console.log(getTimeStampForLoglines() + 'Messaging Session API post request sent.');
-        break;
-      }
+    logger.error("[Warn] Please check if the user is in a Contact Center, refresh your (1) Salesforce App and then (2)demo connector page to retrieve critical contact center data to start sending route request.");
+    return;
+  } 
+  // run request base on the apiName in the request;
+  switch (req.body.apiName){
+    case "CONSENT": {
+      responseData = await sendConsentAPIRequest(req, requestHeader);
+      break;
     }
-    return responseData;
+    case "POST_ROUTE": {
+      responseData = await sendPostRouteAPIRequest(req, requestHeader);
+      break;
+    }
+    case "DELETE_ROUTE": {
+      responseData = await sendDeleteRouteAPIRequest(req, requestHeader);
+      break;
+    }
+    case "POST_ROUTING_RESULT": {
+      responseData = await sendPostRoutingResultAPIRequest(req, requestHeader);
+      break;
+    }
+    case 'PATCH_REGISTER_CAPABILITIES': {
+      responseData = await sendPatchRegisterCapabilitiesAPIRequest(req, requestHeader);
+      break;
+    }
+    case "POST_AGENT_WORK": {
+      const isCapacityWeight = !!req.body.capacityWeight;
+      const capacityNumber = req.body.capacityWeight || req.body.capacityPercentage;
+      responseData = await agentWork(SF_ORG_ID, SF_AUTHORIZATION_CONTEXT, req.body.conversationIdentifier, req.body.workItemId, req.body.agentActionVisibilities, req.body.userId, req.body.routingType, req.body.routingCorrelationId, false, isCapacityWeight, capacityNumber);
+      break;
+    }
+    case "PATCH_AGENT_WORK": {
+      responseData = await patchAgentWork(SF_ORG_ID, SF_AUTHORIZATION_CONTEXT, "ConversationChannelDefinition", req);
+      break;
+    }
+    case "POST_CONVERSATION_HISTORY": {
+      responseData = await sendConversationHistoryRequest(req, requestHeader);
+      break;
+    }
+    case "POST_CONVERSATION": {
+      responseData = await sendConversationAPIRequest(req, requestHeader);
+      break;
+    }
+    case "POST_PARTICIPANT": {
+      responseData = await sendPostParticipantAPIRequest(req, requestHeader);
+      break;
+    }
+    case "POST_MESSAGING_SESSION": {
+      responseData = await sendPostMessagingSessionAPIRequest(req, requestHeader);
+      break;
+    }
   }
+  return responseData;
 }
 
 function getRequestHeader(accessToken, orgId, authorizationContext) {

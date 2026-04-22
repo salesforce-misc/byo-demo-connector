@@ -1,52 +1,52 @@
 import axios from 'axios';
-import NodeCache from "node-cache" ;
 import { settingsCache } from '../ottAppServer.mjs';
-import { getTimeStampForLoglines } from '../util.mjs';
+import { logger, generateApiUrl } from '../util.mjs';
 
-// Get config metadata from .env
-const {
-    SF_SCRT_INSTANCE_URL
-  } = process.env;
-const IS_LOCAL_CONFIG = process.env.IS_LOCAL_CONFIG === "true";
-const responseCache = new NodeCache();
+const deleteRouteEndpoint = "/api/v1/route";
 
-export async function sendDeleteRouteAPIRequest(req, requestHeader) {
-
-  let responseData = {};
-
-  let jsonData = {
+/**
+ * Generates the delete route request payload object
+ * @param {Object} req - Express request object containing route data in body
+ * @returns {Object} Payload object with conversationIdentifier and optionally cancelReason
+ */
+function generateDeleteRoutePayload(req) {
+  const payload = {
     "conversationIdentifier" : req.body.conversationIdentifier
-  }
+  };
 
   if (req.body.cancelReason != 'None') {
-    jsonData["cancelReason"] = req.body.cancelReason;
+    payload["cancelReason"] = req.body.cancelReason;
   }
 
-  console.log(getTimeStampForLoglines() + "delete route json data: ");
-  console.dir(jsonData);
-
-  responseData = await axios.delete(
-    (IS_LOCAL_CONFIG ? SF_SCRT_INSTANCE_URL : settingsCache.get("scrtUrl")) + "/api/v1/route",
-    {
-      data: jsonData,
-      headers: requestHeader.headers
-    }
-  ).then(function (response) {
-    console.log(getTimeStampForLoglines() + 'Route api delete request completed successfully: ', response.data);
-    responseCache.set("success", response.data.success);
-    return response.data;
-  }).catch(function (error) {
-    let responseData = error.response.data;
-    console.log(getTimeStampForLoglines() + 'Route api delete request has error: ', responseData);
-    responseCache.set("message", responseData.message);
-    responseCache.set("code", responseData.code);
-    return responseData;
-  });
-
-  return responseData;
+  return payload;
 }
 
-// Function to get a value from the cache
-export function getResponseCache(key) {
-  return responseCache.get(key);
+/**
+ * Sends a DELETE request to the Salesforce route API to delete a route
+ * @param {Object} req - Express request object containing route data
+ * @param {Object} requestHeader - HTTP headers for the API request
+ * @returns {Promise<Object>} Response data from the API call
+ */
+export async function sendDeleteRouteAPIRequest(req, requestHeader) {
+    
+  const requestPayload = generateDeleteRoutePayload(req);
+  const requestId = requestHeader.headers.RequestId;
+  logger.info(`DELETE /route API with requestId ${requestId} and request payload: `, requestPayload);
+  const deleteRouteApiUrl = generateApiUrl(settingsCache, deleteRouteEndpoint);
+
+  try {
+    const response = await axios.delete(
+      deleteRouteApiUrl,
+      {
+        data: requestPayload,
+        headers: requestHeader.headers
+      }
+    );
+    logger.info(`DELETE /route API with requestId ${requestId} completed successfully: `, response.data);
+    return response.data;
+  } catch (error) {
+    let responseData = error.response?.data || { message: error.message, code: error.code || 'UNKNOWN_ERROR' };
+    logger.error(`DELETE /route API with requestId ${requestId} has error: `, responseData);
+    return responseData;
+  }
 }

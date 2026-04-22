@@ -1,47 +1,47 @@
 import axios from 'axios';
 import NodeCache from "node-cache" ;
 import { settingsCache } from '../ottAppServer.mjs';
-import { getTimeStampForLoglines } from '../util.mjs';
+import { logger, generateApiUrl } from '../util.mjs';
 
-// Get config metadata from .env
-const {
-  SF_SCRT_INSTANCE_URL
-} = process.env;
-const IS_LOCAL_CONFIG = process.env.IS_LOCAL_CONFIG === "true";
-const responseCache = new NodeCache();
+const consentEndpoint = "/api/v1/consent";
 
-export async function sendConsentAPIRequest(req, requestHeader) {
-    
-  let responseData = {};
-
-  let jsonData = {
+/**
+ * Generates the consent request payload object
+ * @param {Object} req - Express request object containing consent data in body
+ * @returns {Object} Payload object with endUserClientId, channelAddressIdentifier, and consentStatus
+ */
+function generateConsentPayload(req) {
+  return {
     "endUserClientId" : req.body.endUserClientIdentifier,
     "channelAddressIdentifier" : req.body.channelAddressIdentifier,
     "consentStatus" : req.body.consentStatus
-  }
-
-  jsonData = JSON.stringify(jsonData);
-
-  responseData = await axios.patch(
-    (IS_LOCAL_CONFIG ? SF_SCRT_INSTANCE_URL : settingsCache.get("scrtUrl")) + "/api/v1/consent",
-    jsonData,
-    requestHeader
-  ).then(function (response) {    
-    console.log(getTimeStampForLoglines() + 'Consent api patch request completed successfully: ', response.data);
-    responseCache.set("success", response.data.success);        
-    return response.data;
-  }).catch(function (error) {
-    let responseData = error.response.data;
-    console.log(getTimeStampForLoglines() + 'Consent api patch request has error: ', responseData);        
-    responseCache.set("message", responseData.message);
-    responseCache.set("code", responseData.code);
-    return responseData;
-  });
-  
-  return responseData;
+  };
 }
 
-// Function to get a value from the cache
-export function getResponseCache(key) {
-  return responseCache.get(key);
+/**
+ * Sends a PATCH request to the Salesforce consent API to update consent status
+ * @param {Object} req - Express request object containing consent data
+ * @param {Object} requestHeader - HTTP headers for the API request
+ * @returns {Promise<Object>} Response data from the API call
+ */
+export async function sendConsentAPIRequest(req, requestHeader) {
+    
+  const requestPayload = generateConsentPayload(req);
+  const requestId = requestHeader.headers.RequestId;
+  logger.info(`PATCH /consent API with requestId ${requestId} and request payload: `, requestPayload);
+  const consentApiUrl = generateApiUrl(settingsCache, consentEndpoint);
+
+  try {
+    const response = await axios.patch(
+      consentApiUrl,
+      JSON.stringify(requestPayload),
+      requestHeader
+    );
+    logger.info(`PATCH /consent API with requestId ${requestId} completed successfully: `, response.data);      
+    return response.data;
+  } catch (error) {
+    let responseData = error.response?.data || { message: error.message, code: error.code || 'UNKNOWN_ERROR' };
+    logger.error(`PATCH /consent API with requestId ${requestId} has error: `, responseData);
+    return responseData;
+  }
 }

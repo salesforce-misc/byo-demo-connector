@@ -1,15 +1,14 @@
 import axios from 'axios';
 import { parseString } from 'xml2js';
 import { promisify } from 'util';
-import { getTimeStampForLoglines } from '../util.mjs';
+import { logger } from '../util.mjs';
 
 const parseXml = promisify(parseString);
 
 const {
   SF_INSTANCE_URL,
   SF_SUBJECT,
-  SF_PASSWORD,
-  API_VERSION
+  SF_PASSWORD
 } = process.env;
 
 /**
@@ -19,7 +18,8 @@ const {
 */
 export async function getAccessToken() {
 
-  if (!SF_INSTANCE_URL || !SF_SUBJECT || !SF_PASSWORD || !API_VERSION) {
+  if (!SF_INSTANCE_URL || !SF_SUBJECT || !SF_PASSWORD) {
+    logger.error(`Missing required environment variables. Check if the SF_INSTANCE_URL, SF_SUBJECT, and SF_PASSWORD are correct in env file.`);
     return null;
   }
 
@@ -48,10 +48,10 @@ export async function getAccessToken() {
         result['soapenv:Envelope']['soapenv:Body'][0]['loginResponse']) {
       return result['soapenv:Envelope']['soapenv:Body'][0]['loginResponse'][0]['result'][0]['sessionId'][0];
     } else {
-      console.error(getTimeStampForLoglines() + 'Unexpected response structure from Salesforce');
+      logger.error('Unexpected response structure from Salesforce');
     }
   } catch (error) {
-    console.error(getTimeStampForLoglines() + 'Error getting Salesforce access token');
+    logger.error(`Error getting Salesforce access token. Check if the SF_INSTANCE_URL, SF_SUBJECT, and SF_PASSWORD are correct in env file. Error: ${error}.`);
     return null;
   }
 }

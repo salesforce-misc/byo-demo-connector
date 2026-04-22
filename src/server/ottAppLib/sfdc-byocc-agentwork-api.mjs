@@ -3,122 +3,113 @@ import {getAccessToken} from './sfdc-auth.mjs';
 import NodeCache from "node-cache" ;
 import { v4 as uuidv4} from 'uuid';
 import { settingsCache } from '../ottAppServer.mjs';
-import { getTimeStampForLoglines } from '../util.mjs';
+import { logger, generateApiUrl } from '../util.mjs';
 
-// Get config metadata from .env
-const {
-  SF_SCRT_INSTANCE_URL
-} = process.env;
-const IS_LOCAL_CONFIG = process.env.IS_LOCAL_CONFIG === "true";
 // AgentWorkCache will store mapping of workItemId and agentWorkId
 const agentWorkCache = new NodeCache();
-const responseCache = new NodeCache();
 
-const agentWorkApiUrl = '/api/v1/agentWork';
+const agentWorkEndpoint = '/api/v1/agentWork';
 
 /**
  * Sends a Salesforce create agent work request via Interaction Service api
  *
- * @param {string} orgId: The organization id for the login user
- * @param {string} authorizationContext: The AuthorizationContext which is ConversationChannelDefinition developer name for request authorization
- * @param {string} conversationIdentifier: The Conversation Id for the conversation
- * @param {string} workItemId: Id of workItems like (MessagingSession, ..)
- * @returns {object} result object from interaction service with successful status or error code
+ * @param {string} orgId - The organization id for the login user
+ * @param {string} authorizationContext - The AuthorizationContext which is ConversationChannelDefinition developer name for request authorization
+ * @param {string} conversationIdentifier - The Conversation Id for the conversation
+ * @param {string} workItemId - Id of workItems like (MessagingSession, ..)
+ * @param {string} agentActionVisibilities - JSON string of agent action visibilities
+ * @param {string} userId - The user ID
+ * @param {string} routingType - The routing type
+ * @param {string} routingCorrelationId - The routing correlation ID
+ * @param {boolean} useCache - Whether to use cache to avoid duplicate agent work creation
+ * @param {boolean} isCapacityWeight - Whether to use capacity weight
+ * @param {number} capacityNumber - The capacity number (weight or percentage)
+ * @returns {Promise<Object>} Result object from interaction service with successful status or error code
  */
 export async function agentWork(orgId, authorizationContext, conversationIdentifier, workItemId, 
   agentActionVisibilities, userId, routingType, routingCorrelationId, useCache, isCapacityWeight, capacityNumber) {
   // Agentwork creation should happen only one time so if it exist don't call this api
   // We are storing it in agentWorkCache and validating against it
   if (agentWorkCache.get(workItemId) && useCache){
-    // If agentWork was already created once then you don't need to call this funciton to create agentwork again
-    console.log(getTimeStampForLoglines() + `Agentwork was already creaed for this workItem: "${workItemId}" - AgentWorkId: "${agentWorkCache.get(workItemId)}"`);
+    // If agentWork was already created once then you don't need to call this function to create agentwork again
+    logger.info(`Agentwork was already created for this workItem: "${workItemId}" - AgentWorkId: "${agentWorkCache.get(workItemId)}"`);
     return;
   }
   
-  console.log(getTimeStampForLoglines() + `Start agentWork\nconversationIdentifier="${conversationIdentifier}"\nworkItemId="${workItemId}"`);
-  
   const accessToken = await getAccessToken();
-  let jsonData = {};
-  jsonData = getAgentWorkData(workItemId, conversationIdentifier, userId, agentActionVisibilities, routingType, routingCorrelationId, isCapacityWeight, capacityNumber);
-  jsonData = JSON.stringify(jsonData);
-  console.log(getTimeStampForLoglines() + `agentWork request payload: "${jsonData}"`);
   const requestHeader = getAgentWorkRequestHeader(accessToken, orgId, authorizationContext);
-  const responseData = await axios.post(
-    (IS_LOCAL_CONFIG ? SF_SCRT_INSTANCE_URL : settingsCache.get("scrtUrl")) + agentWorkApiUrl,
-    jsonData,
-    requestHeader
-  ).then(function (response) {
+  const requestId = requestHeader.headers.RequestId;
+  
+  const requestPayload = generateAgentWorkPayload(workItemId, conversationIdentifier, userId, agentActionVisibilities, routingType, routingCorrelationId, isCapacityWeight, capacityNumber, requestId);
+  logger.info(`POST /agentWork API with requestId ${requestId} and request payload: `, requestPayload);
+  const agentWorkApiUrl = generateApiUrl(settingsCache, agentWorkEndpoint);
+
+  try {
+    const response = await axios.post(
+      agentWorkApiUrl,
+      JSON.stringify(requestPayload),
+      requestHeader
+    );
     if (response.data !== null && response.data.agentWorkId){
       agentWorkCache.set(workItemId, response.data.agentWorkId);
     }
-    
-    console.log(getTimeStampForLoglines() + `agentWork request completed successfully  `, response.data);
+    logger.info(`POST /agentWork API with requestId ${requestId} completed successfully: `, response.data);
     return response.data;
-  })
-  .catch(function (error) {
-    let responseData = error.response.data;
-    console.log(getTimeStampForLoglines() + `agentWork request Failed: `, responseData);
-    responseCache.set("message", responseData.message);
-    responseCache.set("code", responseData.code);
+  } catch (error) {
+    let responseData = error.response?.data || { message: error.message, code: error.code || 'UNKNOWN_ERROR' };
+    logger.error(`POST /agentWork API with requestId ${requestId} has error: `, responseData);
     return responseData;
-  });
-
-  return responseData;
+  }
 }
 
 /**
  * Sends a Salesforce Patch agent work request via Interaction Service apis
  *
- * @returns {Promise<AxiosResponse<any>>} result object from interaction service with successful status or error code
- * @param orgId
- * @param authorizationContext
- * @param authorizationContextType
- * @param req
+ * @param {string} orgId - The organization id for the login user
+ * @param {string} authorizationContext - The AuthorizationContext which is ConversationChannelDefinition developer name for request authorization
+ * @param {string} authorizationContextType - The authorization context type
+ * @param {Object} req - Express request object containing patch agent work data in body
+ * @returns {Promise<Object>} Result object from interaction service with successful status or error code
  */
 export async function patchAgentWork(orgId, authorizationContext, authorizationContextType, req) {
 
-  console.log(getTimeStampForLoglines()
-      + `Start patchAgentWork for participantId: "${req.body.participantId}`);
-
   const accessToken = await getAccessToken();
-  let jsonData = getPatchAgentWorkData(req);
+  const requestHeader = getPatchAgentWorkRequestHeader(accessToken, orgId, authorizationContext, authorizationContextType);
+  const requestId = requestHeader.headers.RequestId;
 
-  jsonData = JSON.stringify(jsonData);
-  console.log(
-      getTimeStampForLoglines() + `patchAgentWork request payload: "${jsonData}"`);
+  const requestPayload = generatePatchAgentWorkPayload(req);
+  logger.info(`PATCH /agentWork API with requestId ${requestId} and request payload: `, requestPayload);
+  const agentWorkApiUrl = generateApiUrl(settingsCache, agentWorkEndpoint);
 
-  const requestHeader = getPatchAgentWorkRequestHeader(accessToken, orgId,
-      authorizationContext, authorizationContextType);
-
-  console.log(
-    getTimeStampForLoglines() + `patchAgentWork requestHeader payload: "${JSON.stringify(requestHeader)}"`);
-
-  const responseData = await axios.patch(
-      (IS_LOCAL_CONFIG ? SF_SCRT_INSTANCE_URL : settingsCache.get("scrtUrl"))
-      + agentWorkApiUrl,
-      jsonData,
+  try {
+    const response = await axios.patch(
+      agentWorkApiUrl,
+      JSON.stringify(requestPayload),
       requestHeader
-  ).then(function (response) {
-    if (response.data !== null && response.data.success) {
-      console.log(getTimeStampForLoglines()
-          + `patchAgentWork request completed successfully  `, response.data);
-    }
-
+    );
+    logger.info(`PATCH /agentWork API with requestId ${requestId} completed successfully: `, response.data);
     return response.data;
-  })
-  .catch(function (error) {
-    let responseData = error.response.data;
-    console.log(getTimeStampForLoglines() + `patchAgentWork request Failed: `,
-        responseData);
-    responseCache.set("message", responseData.message);
-    responseCache.set("code", responseData.code);
+  } catch (error) {
+    let responseData = error.response?.data || { message: error.message, code: error.code || 'UNKNOWN_ERROR' };
+    logger.error(`PATCH /agentWork API with requestId ${requestId} has error: `, responseData);
     return responseData;
-  });
-
-  return responseData;
+  }
 }
 
-function getAgentWorkData(workItemId, conversationIdentifier, userId, agentActionVisibilities, routingType, routingCorrelationId, isCapacityWeight, capacityNumber) {
+/**
+ * Generates the agent work request payload object
+ * @param {string} workItemId - Id of workItems like (MessagingSession, ..)
+ * @param {string} conversationIdentifier - The Conversation Id for the conversation
+ * @param {string} userId - The user ID
+ * @param {string} agentActionVisibilities - JSON string of agent action visibilities
+ * @param {string} routingType - The routing type
+ * @param {string} routingCorrelationId - The routing correlation ID
+ * @param {boolean} isCapacityWeight - Whether to use capacity weight
+ * @param {number} capacityNumber - The capacity number (weight or percentage)
+ * @param {string} requestId - The request ID for logging purposes
+ * @returns {Object} Payload object for agent work request
+ */
+function generateAgentWorkPayload(workItemId, conversationIdentifier, userId, agentActionVisibilities, routingType, routingCorrelationId, isCapacityWeight, capacityNumber, requestId) {
   let agentWorkData = {};
   if (conversationIdentifier) {
     if (isCapacityWeight) {
@@ -152,33 +143,50 @@ function getAgentWorkData(workItemId, conversationIdentifier, userId, agentActio
   }
 
   if (agentActionVisibilities) {
-    let agentActionVisibilitiesObj = JSON.parse(agentActionVisibilities);
-    if (agentActionVisibilitiesObj.length > 0) {
-      agentWorkData.agentActionVisibilities = agentActionVisibilitiesObj;
+    try {
+      const agentActionVisibilitiesObj = JSON.parse(agentActionVisibilities);
+      if (agentActionVisibilitiesObj.length > 0) {
+        agentWorkData.agentActionVisibilities = agentActionVisibilitiesObj;
+      }
+    } catch (e) {
+      logger.error(`POST /agentWork API with requestId ${requestId} has error: JSON.parse failed for agentActionVisibilities. Raw value: ${agentActionVisibilities}, Error: `, e);
     }
   }
 
   return agentWorkData;
 }
 
-function getPatchAgentWorkData(req) {
+/**
+ * Generates the patch agent work request payload object
+ * @param {Object} req - Express request object containing patch agent work data in body
+ * @returns {Object} Payload object for patch agent work request
+ */
+function generatePatchAgentWorkPayload(req) {
   let agentWorkData = {};
   let data = req.body;
 
-  if (data.participantId.startsWith("005")) {
-    agentWorkData = {
-      "contextType": "Agent",
-      "workId": data.workId,
-      "status": data.agentWorkStatus
+  if (data.participantId) {
+    if (data.participantId.startsWith("005")) {
+      agentWorkData = {
+        "contextType": "Agent",
+        "workId": data.workId,
+        "status": data.agentWorkStatus
+      };
+    } else if (data.participantId.startsWith("1JZ")) {
+      agentWorkData = {
+        "contextType": "Chatbot",
+        "workId": data.workId,
+        "workItemId": data.workItemId,
+        "botId": data.participantId,
+        "status": data.agentWorkStatus
+      };
     }
-  } else if (data.participantId.startsWith("1JZ")) {
+  } else {
     agentWorkData = {
-      "contextType": "Chatbot",
+      "contextType": data.contextType,
       "workId": data.workId,
-      "workItemId": data.workItemId,
-      "botId": data.participantId,
-      "status": data.agentWorkStatus
-    }
+      "status": data.status
+    };
   }
   return agentWorkData;
 }
@@ -209,11 +217,6 @@ function getPatchAgentWorkRequestHeader(accessToken, orgId,
       "RequestId": uuidv4()
     }
   };
-}
-
-// Function to get a value from the cache
-export function getResponseCache(key) {
-  return responseCache.get(key);
 }
 
 export { agentWorkCache };

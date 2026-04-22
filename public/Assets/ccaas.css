@@ -20,15 +20,50 @@
   min-height: 200px;
 }
 
-.health-check-card {
-  max-width: 600px;
-  margin-left: 1rem;
+.frequently-used-fields-card {
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .right-panel {
+    position: sticky;
+    top: 0;
+    max-height: 100vh;
+    overflow-y: scroll;
+    align-self: flex-start;
+    overscroll-behavior-y: contain;
+  }
 }
 
 .health-check-icon {
   width: 32px;
   height: 32px;
   display: block;
+}
+
+.frequent-fields-input {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  box-sizing: border-box;
+  background-color: #f1f1f1;
+  margin-right: 0.5rem;
+  width: calc(100% * 10/12 - 0.25rem); /* because we are using slds-size_10-of-12 utility class */
+}
+
+@media (max-width: 768px) {
+  .frequently-used-fields-card .slds-form-element__control {
+    flex-direction: column;
+  }
+  
+  .frequently-used-fields-card .slds-form-element__control .frequent-fields-input {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 0.5rem;
+  }
+  
+  .frequently-used-fields-card .slds-form-element__control .slds-button {
+    width: 100%;
+  }
 }
 
 .slds-card__header {
@@ -149,7 +184,7 @@ div.conversation-link-message__content {
   text-align: left;
 }
 
-.markedUL {
+.markedUL, .popup-info-ul {
   padding-left: 1.5em;
   list-style-type: disc;
   margin: 0.5em 0;
@@ -161,3 +196,44 @@ div.conversation-link-message__content {
   margin: 0.5em 0;
 }
 
+#api-lab-info-bubble {
+  position: absolute;
+  bottom: 2.5rem;
+  right: 0;
+  margin-top: -0.5rem;
+  width: max-content;
+  max-width: 24rem;
+  background-color: var(--slds-c-button-color-background);
+}
+
+.citation-source {
+  box-sizing: border-box;
+}
+
+.citation-source-highlight {
+  animation: citation-highlight-fade 2s ease-out forwards;
+  border-radius: 0.25rem;
+}
+
+@keyframes citation-highlight-fade {
+  0% {
+    background-color: rgba(0, 112, 210, 0.2);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.citation-link-icon {
+  width: 0.96rem;
+  height: 0.96rem;
+  border-radius: 0.2rem;
+}
+
+.citation-index {
+  margin-left: -1rem;
+}
+
+.demo-app-message-list {
+  height: 400px;
+}

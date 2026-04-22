@@ -1,17 +1,16 @@
 import axios from "axios";
-import NodeCache from "node-cache" ;
 import { settingsCache } from "../ottAppServer.mjs";
-import { getTimeStampForLoglines } from "../util.mjs";
+import { logger, generateApiUrl } from "../util.mjs";
 
-const { SF_SCRT_INSTANCE_URL } = process.env;
-const IS_LOCAL_CONFIG = process.env.IS_LOCAL_CONFIG === "true";
-const responseCache = new NodeCache();
+const messagingSessionEndpoint = "/api/v1/messagingSession";
 
-const postMessagingSessionEndpoint = "/api/v1/messagingSession";
-
-export async function sendPostMessagingSessionAPIRequest(req, requestHeader) {
-    let responseData = {};
-    let jsonData = {
+/**
+ * Generates the messaging session request payload object
+ * @param {Object} req - Express request object containing messaging session data in body
+ * @returns {Object} Payload object with channelAddressIdentifier, conversationIdentifier, endUserClientId, operation, operationBy, and optionally sessionId
+ */
+function generateMessagingSessionPayload(req) {
+    const payload = {
         "channelAddressIdentifier": req.body.channelAddressIdentifier,
         "conversationIdentifier": req.body.conversationIdentifier,
         "endUserClientId": req.body.endUserClientId,
@@ -20,29 +19,36 @@ export async function sendPostMessagingSessionAPIRequest(req, requestHeader) {
     };
     
     if (req.body.operation === "Inactivate") {
-        jsonData["sessionId"] = req.body.sessionId;
+        payload["sessionId"] = req.body.sessionId;
     }
 
-    console.log(getTimeStampForLoglines() + "Post Messaging Session json data: ");
-    console.dir(jsonData);
+    return payload;
+}
 
-    responseData = await axios.post(
-        (IS_LOCAL_CONFIG ? SF_SCRT_INSTANCE_URL : settingsCache.get("scrtUrl")) + postMessagingSessionEndpoint,
-        jsonData,
-        requestHeader
-    ).then(function (response) {
-        console.log(getTimeStampForLoglines() + "Post Messaging Session api request completed successfully: ");
-        console.dir(response.data);
-        responseCache.set("success", response.data.success);
+/**
+ * Sends a POST request to the Salesforce messaging session API
+ * @param {Object} req - Express request object containing messaging session data
+ * @param {Object} requestHeader - HTTP headers for the API request
+ * @returns {Promise<Object>} Response data from the API call
+ */
+export async function sendPostMessagingSessionAPIRequest(req, requestHeader) {
+    
+    const requestPayload = generateMessagingSessionPayload(req);
+    const requestId = requestHeader.headers.RequestId;
+    logger.info(`POST /messagingSession API with requestId ${requestId} and request payload: `, requestPayload);
+    const messagingSessionApiUrl = generateApiUrl(settingsCache, messagingSessionEndpoint);
+
+    try {
+        const response = await axios.post(
+            messagingSessionApiUrl,
+            JSON.stringify(requestPayload),
+            requestHeader
+        );
+        logger.info(`POST /messagingSession API with requestId ${requestId} completed successfully: `, response.data);
         return response.data;
-    }).catch(function (error) {
-        const errorResponseData = error.response.data;
-        console.log(getTimeStampForLoglines() + "Post Messaging Session api request has error: ");
-        console.dir(errorResponseData);
-        responseCache.set("message", errorResponseData.message);
-        responseCache.set("code", errorResponseData.code);
-        return errorResponseData;
-    });
-
-    return responseData;
+    } catch (error) {
+        let responseData = error.response?.data || { message: error.message, code: error.code || 'UNKNOWN_ERROR' };
+        logger.error(`POST /messagingSession API with requestId ${requestId} has error: `, responseData);
+        return responseData;
+    }
 }

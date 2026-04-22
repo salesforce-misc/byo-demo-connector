@@ -109,7 +109,20 @@ export const USER_MESSAGE = {
     AGENT_WORK_NOTIFICATION: "AGENT_WORK_NOTIFICATION",
     MUTE: "MUTE",
     UNMUTE: "UNMUTE",
-    MERGE: "MERGE"
+    MERGE: "MERGE",
+    HOLD_TOGGLE: "HOLD_TOGGLE"
+}
+
+export const STORAGE_KEY = {
+    ACTIVE_CALLS : 'activeCalls',
+    SHOW_LOGIN_PAGE : 'showLoginPage',
+    AGENT_CONFIG : 'agentConfig',
+    CAPABILITIES : 'capabilities',
+    CONTACT_TYPE : 'contactTypes',
+    THROW_ERROR : 'throwError',
+    CUSTOM_ERROR : 'customError',
+    CALL_INFO : 'callInfo',
+    CONNECTIONS : 'connections'
 }
 
 export const FILTER_TYPES_TO_CONTACT_TYPES = {

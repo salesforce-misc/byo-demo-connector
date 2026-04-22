@@ -20,11 +20,18 @@ let chatList;
 let output;
 let sfSubject = "Agent";
 let endUserClientName = "End User Client";
+let autoCreateAgentWork = false;
 let typingStartedReady = true;
 let indicatorStatus;
 var orgMode;
+let frequentlyUsedFields = {};
+// Unique id for each message; used for citation source anchors so IDs don't collide across messages.
+let nextMessageId = 0;
 
 window.addEventListener("load", () => {
+
+  initializeAccordion(document);
+  initCitationLinkHandler();
 
   // Register settings form submit event listener
   const settingsForm = document.getElementById("settingsForm");
@@ -63,7 +70,8 @@ window.addEventListener("load", () => {
           msgBanner.classList.remove(cssShow);
         }, 4000);
       }
-    }).catch((err) => {
+    }).then(() => updateFrequentlyUsedFields())
+    .catch((err) => {
       throw err;
     });
 
@@ -86,6 +94,9 @@ window.addEventListener("load", () => {
     if (!msg || msg.trim() === '') {
       return;
     }
+
+    // Generate timestamp early as it's needed for file naming
+    let timestamp = Date.now();
 
     // Add attachment for outbound message in chatList if any
     let originalFileName = null;
@@ -110,8 +121,6 @@ window.addEventListener("load", () => {
 
     // construct FormData object using html form
     let formData = new FormData(messageForm);
-
-    let timestamp = Date.now();
     if (messageForm.elements.attachment.value) {
       formData.append("interactionType", "AttachmentInteraction");
       formData.append("timestamp", timestamp);
@@ -129,22 +138,47 @@ window.addEventListener("load", () => {
     })
       .then((res) => {
         if (res.status === 200) {
+          console.log("====== /sendmessage POST completed with response data:", res.data);
+          updateFrequentlyUsedFields();
           return res;
         }
       })
       .catch((err) => {
+        console.log("====== /sendmessage POST completed with error:", err);
         return err;
       });
-    console.log("====== /sendmessage POST response:", sendMessageRes);
-    if (!!sendMessageRes && !!sendMessageRes.data && sendMessageRes.data.status === 500) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: sendMessageRes.data.message
-      });      
 
-      return;
-    }
+      if (!!sendMessageRes && !!sendMessageRes.data && sendMessageRes.data.status === 500) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: sendMessageRes.data.message
+        });      
+  
+        return;
+      }
+
+      if (!!sendMessageRes && !!sendMessageRes.data && sendMessageRes.data.status === 500) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: sendMessageRes.data.message
+        });      
+  
+        return;
+      }
+
+      if (autoCreateAgentWork && sendMessageRes.status === 200 && sendMessageRes.data && sendMessageRes.data.success === true) {
+        axios.post(SERVER_URL + "/createAgentWork", sendMessageRes.data)
+        .then((res) => {
+          console.log("====== /createAgentWork POST completed successfully with response data:", res.data);
+        }).then(() => updateFrequentlyUsedFields())
+        .catch((err) => {
+          console.log("====== /createAgentWork POST failed with error:", err);
+        }); 
+      } else {
+        console.log("====== /createAgentWork can not be called as the /sendmessage was not successful");
+      }
 
     // Insert ack badge elems to outbound message elem
     insertAckBadgeElemsToOutboundMessageHTMLElem(outboundMessageElem, sendMessageRes);
@@ -156,6 +190,11 @@ window.addEventListener("load", () => {
     typingStartedReady = true;
   }
 
+  const apiLabInfoButton = document.getElementById("api-lab-info-button");
+  apiLabInfoButton.addEventListener("click", () => {
+    const apiLabInfo = document.getElementById("api-lab-info-bubble");
+    apiLabInfo.classList.toggle("slds-hide");
+  });
   // Register api lab form submit event listener
   const apiLabForm = document.getElementById("apiLabForm");
   output = document.getElementById('api-lab-output');
@@ -253,6 +292,14 @@ window.addEventListener("load", () => {
           
           appendAgentActionVisibilities(formData);
           break;
+        case 'PATCH_AGENT_WORK':
+          formData = {
+            "apiName": document.getElementById("selected-api-name").value,
+            "workId": document.getElementById("patchAgentWorkId").value,
+            "status": document.getElementById("agentWorkStatusDropdown").value,
+            "contextType": document.getElementById("contextTypeDropdown").value,
+          };
+          break;
         case "POST_CONVERSATION":
           formData = {
             "apiName": document.getElementById("selected-api-name").value,
@@ -312,6 +359,7 @@ window.addEventListener("load", () => {
       // Only show success toast message when success, the rest renders error message
       if (response.data.success) {
         createAndAppendNotificationHTMLElem('success');
+        await updateFrequentlyUsedFields();
       } else {
         createAndAppendNotificationHTMLElem('error');
       }
@@ -329,6 +377,7 @@ window.addEventListener("load", () => {
   // Render api fields base on selected API
   const apiContainers = {
     CONSENT: document.getElementById("consentAPIContainer"),
+    PATCH_AGENT_WORK: document.getElementById("patchAgentWorkAPIContainer"),
     POST_ROUTE: document.getElementById("postRouteAPIContainer"),
     DELETE_ROUTE: document.getElementById("deleteRouteAPIContainer"),
     POST_ROUTING_RESULT: document.getElementById("postRouteResultAPIContainer"),
@@ -360,6 +409,11 @@ window.addEventListener("load", () => {
     hideAllContainers();
     showContainer(selectedAPI);
   });
+
+  // hide all containers and show the container for the selected API on initial page load
+  hideAllContainers();
+  showContainer(apiDropdown.value);
+
 
   const messagingSessionOperationDropdown = document.getElementById("messaging-session-operation");
   const inactivateSessionContainer = document.getElementById("inactivate-session-container");
@@ -590,7 +644,7 @@ window.addEventListener("load", () => {
 
   // Register custom event to retrieve the replied message from an agent in core app
   //let eventSourceUrl = "" + window.location.origin + "/replyMessage";
-  let eventSourceUrl = "/api/replyMessage";
+  let eventSourceUrl = SERVER_URL + "/replyMessage";
   const evtSource = new EventSource(eventSourceUrl);
   evtSource.addEventListener("replymsg", (e) => {
     if (!orgMode) {
@@ -798,19 +852,21 @@ function displayResults(results) {
   `;
 
   resultsContainer.style.display = 'block';
-  initializeAccordion();
+  initializeAccordion(resultsContainer);
 }
 
-function initializeAccordion() {
-  document.querySelectorAll('.slds-accordion__summary-action').forEach(button => {
-      button.addEventListener('click', () => {
-          const section = button.closest('.slds-accordion__section');
-          const content = section.querySelector('.slds-accordion__content');
-          const isExpanded = button.getAttribute('aria-expanded') === 'true';
+function initializeAccordion(element) {
+  if (!element) return;
 
-          button.setAttribute('aria-expanded', !isExpanded);
+  element.querySelectorAll('.slds-accordion__summary-action').forEach(accordion => {
+      accordion.addEventListener('click', () => {
+          const section = accordion.closest('.slds-accordion__section');
+          const content = section.querySelector('.slds-accordion__content');
+          const isExpanded = accordion.getAttribute('aria-expanded') === 'true';
+
+          accordion.setAttribute('aria-expanded', !isExpanded);
           content.hidden = isExpanded;
-          section.classList.toggle('slds-is-open');
+          section.classList.toggle('slds-is-open', !isExpanded);
       });
   });
 }
@@ -837,6 +893,7 @@ function getSettingsForApp() {
       if (res.status === 200) {
         // set settings fields with values retrieved from middleware server
         let settings = res.data;
+        autoCreateAgentWork = settings.autoCreateAgentWork === "true";
         document.getElementById("authorizationContext").value = settings.authorizationContext;
         document.getElementById("channelAddressIdentifier").value = settings.channelAddressIdentifier;
         document.getElementById("endUserClientIdentifier").value = settings.endUserClientIdentifier;
@@ -864,16 +921,14 @@ function getSettingsForApp() {
         } else {
           return axios({
             method: "get",
-            url: SERVER_URL + "/getConversationChannelDefinitions",
+            url: SERVER_URL + "/getConversationChannelDefinition",
           });
         }
       }
     }).then((ccdResponse) => {
       if (ccdResponse && ccdResponse.status && ccdResponse.status === 200) {
-        let ccdData = ccdResponse.data;
-
-        if (ccdData && ccdData.records && ccdData.records.length > 0) {
-          const ccdDataRecord = ccdData.records[0];
+        let ccdDataRecord = ccdResponse.data;
+        if (ccdDataRecord) {
           document.getElementById("authorizationContext").value = ccdDataRecord.DeveloperName;
           document.getElementById("isInboundReceiptsPartnerEnabled").value = ccdDataRecord.IsInboundReceiptsEnabled;
           document.getElementById("isTypingIndicatorPartnerEnabled").value = !ccdDataRecord.IsTypingIndicatorDisabled;
@@ -926,12 +981,65 @@ function getSettingsForApp() {
         }
       } else {
         console.log("Invalid CCD response");
+        if (orgMode !== 'VOICE_ONLY') {
+          Swal.fire({
+            icon: 'info',
+            title: 'Info',
+            html: "<div class=\"slds-text-align_left\">An error occurred while retrieving CCD data, either because the server is down for maintenance or no records were found in the CCD table.</div><br/>"+
+              "<ul class=\"popup-info-ul slds-text-align_left\">"+
+              "  <li>The demo connector won't work properly for Messaging features.</li><br/>"+
+              "  <li>The demo connector works fine for Voice features if it is enabled.</li>"+
+              "</ul>"
+          });
+        }
       }
     })
     .catch((err) => {
         throw err;
     });
   }
+
+  // Frequent Fields Implementation
+  document.querySelectorAll('.frequent-fields-copy-button').forEach(button => {
+    button.addEventListener('click', async () => {
+      const targetId = button.getAttribute('copy-target');
+      const inputElement = document.getElementById(targetId);
+      if (inputElement) {
+        try {
+          const originalText = button.textContent;
+          button.disabled = true;
+          button.textContent = 'Copied';
+          await navigator.clipboard.writeText(inputElement.value);
+          // if successful, change the button to 'Copied' and reset in 1.5 seconds
+          setTimeout(() => {
+            button.textContent = originalText;
+            button.disabled = false;
+          }, 1500);
+        } catch (error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to copy to clipboard'
+          });
+        }
+      }
+    });
+  });
+
+  document.querySelectorAll('.auto-fill-button').forEach(button => {
+    button.addEventListener('click', async (event) => {
+      event.preventDefault();
+      const targetId = button.getAttribute('auto-fill-target-id');
+      const inputElement = document.getElementById(targetId);
+      const cacheKey = inputElement?.getAttribute('with-ff-cache-key');
+      if (inputElement && cacheKey) {
+        inputElement.value = frequentlyUsedFields[cacheKey] ?? '';
+      }
+    });
+  });
+
+  // update frequently used fields initially on page load
+  (async () => { await updateFrequentlyUsedFields(); })();
 });
 
 chatList = document.getElementById('chatList');
@@ -1402,7 +1510,6 @@ document.getElementById('chatList').addEventListener('click', function(event) {
   }
 });
 
-
 function appendInboundMessageToChatList(message, attachmentName, attachmentUrl, payloadField,
     previewImageUrl, inputPayload) {
   if (attachmentName && attachmentUrl) {
@@ -1413,16 +1520,147 @@ function appendInboundMessageToChatList(message, attachmentName, attachmentUrl, 
   }
   if (!message && !attachmentName && !attachmentUrl && !inputPayload.url) return;
 
-  let inboundMessageHTMLElem = generateInboundMessageHTMLElem(message);
+  const messageId = nextMessageId;
+  nextMessageId += 1;
 
-  if (message) {
+  const citations = inputPayload.citationContent?.citations ?? [];
+  // Sort by smallest inline offset so source list order matches reading order.
+  // without doing this, the first citation you encounter may be [3] instead of [1]
+  const sortedCitations = [...citations].sort((a, b) => getCitationMinOffset(a) - getCitationMinOffset(b));
+  const updatedMessage = updateMessageWithInlineCitation(message, sortedCitations, messageId);
+  const citationSourcesSectionHTMLText = generateCitationSourcesSectionHTMLText(sortedCitations, messageId);
+  // for aesthetics
+  const citationLinkIcon = createSVGElement('/assets/symbols.svg#link', {
+    'class': 'citation-link-icon slds-icon slds-icon_small slds-button_icon-brand  slds-m-right_xx-small slds-m-top_xxx-small',
+    'aria-hidden': 'true',
+  });
+  let inboundMessageHTMLElem = generateInboundMessageHTMLElem(updatedMessage, citationSourcesSectionHTMLText);
+  // the two clean up functions below are a result of DOM Purify's sanitizing behavior
+  inboundMessageHTMLElem.querySelectorAll(".citation-link-icon-placeholder").forEach(element => {
+    element.replaceWith(citationLinkIcon.cloneNode(true))
+  })
+  inboundMessageHTMLElem.querySelectorAll(".citation-source-link-label").forEach(element => {
+    element.setAttribute("target", "_blank");
+  })
+  
+  if (updatedMessage) {
     appendMessageToChatList(inboundMessageHTMLElem);
   }
 
   document.getElementById("eventLog").value = JSON.stringify(JSON.parse(payloadField.string), undefined, 4);
 }
 
-function generateInboundMessageHTMLElem(message) {
+/** Returns the smallest citedLocationOffset for this citation (reading order); Infinity if none. */
+function getCitationMinOffset(citation) {
+  const meta = citation?.citedDetails?.inlineMetadata;
+  if (!meta?.length) return Infinity;
+  return Math.min(...meta.map(m => m.citedLocationOffset));
+}
+
+/**
+ * We need to update the message with the inline citation text (example: [1]) since the schema does not account for it in the text
+ * 
+ * @param {String} message the message text to update
+ * @param {Object} sortedCitations the citations object sorted by smallest inline offset
+ * @param {Number} messageId the global message id for the current message
+ * @returns {String} the updated message text
+ */
+function updateMessageWithInlineCitation(message, sortedCitations, messageId){
+  let updatedMessage = message || '';
+  if (sortedCitations?.length <= 0) { return updatedMessage; }
+  let citationAnchors = [];
+
+  // for each citation, extract the anchor for the inline citation
+  sortedCitations.forEach((citation, citationIdx) => {
+    const citedDetails = citation?.citedDetails ?? {};
+    if (citedDetails.citedDetailsType === "InlineMetadata") {
+      citedDetails.inlineMetadata.forEach(meta => {
+        const oneBasedIndex = citationIdx + 1;
+        citationAnchors.push({
+          citedLocationOffset: meta.citedLocationOffset,
+          inlineCitationLabel: `[${oneBasedIndex}]`, // this is the inline citation displayed in the relevant positions in the message
+          inPageTarget: `#citation-source-${messageId}-${oneBasedIndex}`
+        })
+      })
+    }
+    })
+    // Insert anchors from end to start so offsets remain valid
+    citationAnchors.sort((a, b) => b.citedLocationOffset - a.citedLocationOffset);
+    citationAnchors.forEach(anchor => {
+    updatedMessage = updatedMessage.slice(0, anchor.citedLocationOffset) + 
+    '<span class="citation-anchor">' +
+      `<a href="${anchor.inPageTarget}" class="citation-inline-link">${anchor.inlineCitationLabel}</a>`+
+    '</span>'
+    + updatedMessage.slice(anchor.citedLocationOffset);
+    })
+  return updatedMessage;
+}
+
+/**
+ * Generates the MTL text for the Sources section.
+ * @param {Array} sortedCitations the citations object sorted by smallest inline offset
+ * @param {Number} messageId the message id for the current message
+ * @returns {String} the HTML string for the 'Sources' Section. This includes the section header and the list of citation sources.
+ */
+function generateCitationSourcesSectionHTMLText(sortedCitations, messageId){
+  let citationSourcesSectionHTMLText = '';
+  if (sortedCitations?.length <= 0) { return citationSourcesSectionHTMLText; }
+  let citationSourcesHTMLTextList = [];
+
+  // for each citation, we want to create a row in the 'Sources' Section
+  sortedCitations.forEach((citation, citationIdx) => {
+    const citedReference = citation?.citedReference ?? {};
+
+    if (citedReference.citedReferenceType === 'Link') {
+      citationSourcesHTMLTextList.push(generateCitationSourceHTMLText(citedReference.link, citedReference.recordId, citedReference.label, citationIdx, messageId));
+    }
+  })
+
+    citationSourcesSectionHTMLText = `
+    <div class="slds-m-top_large slds-m-bottom_small"> 
+      <strong>Sources</strong>
+      <div class="citation-sources-list">${citationSourcesHTMLTextList.join('')}</div>
+    </div>
+    `;
+  return citationSourcesSectionHTMLText;
+}
+
+/**
+ * Generates the HTML String for the Sources
+ * each source is given an id citation-source-{messageId}-{index}. The message id tell us which chat message the citation is for
+ * the index tells us which particular citation. This combination gives us a unique id
+ * @param {Object} link The link object containing the url
+ * @param {String} recordId The asssociated record Id
+ * @param {*} label The UI text for the hyperlink. If not provided, we use the link itself
+ * @param {*} citationIndex The citation index position for the current message
+ * @param {*} messageId the current message id
+ * @returns the html string for each source
+ */
+function generateCitationSourceHTMLText(link, recordId, label, citationIndex, messageId){
+  const oneBasedIndex = citationIndex + 1;
+  let text = `
+  <div class="citation-source slds-grid  slds-m-vertical_xx-small slds-size_12-of-12"
+    id="citation-source-${messageId}-${oneBasedIndex}">
+    <span class="citation-index slds-col slds-size_1-of-12 slds-m-right_xx-small slds-text-align_right">
+      <p>${oneBasedIndex}.</p>
+    </span>
+    <div class="citation-link slds-size_11-of-12 slds-col">
+      <span class="slds-grid" style="justify-content: space-around;">
+        <div class="citation-link-icon-container"><span class="citation-link-icon-placeholder"></span></div>
+        <a class="citation-source-link-label slds-truncate slds-col slds-size_11-of-12" style="text-decoration: none; text-wrap: auto;" href="${link.url}" target="_blank">
+        ${label ?? link.url ?? ''}
+        </a>
+      </span>
+      <strong class="slds-m-left_x-small" style="display: ${recordId ? 'inline-block' : 'none'};">
+      Record ID: &bull;${recordId}
+      </strong>
+     </div>
+  </div>
+  `
+  return text;
+}
+
+function generateInboundMessageHTMLElem(message, citationSourcesHTML) {
   let now = new Date();
   let dateTime = now.toLocaleString();
   let html =
@@ -1432,6 +1670,7 @@ function generateInboundMessageHTMLElem(message) {
     '      <div class="slds-chat-message__text slds-chat-message__text_inbound">' +
     '        <div>' + parseMarkdown(message) +
     '        </div>' +
+    '        <div style="white-space: normal;">' + citationSourcesHTML + '</div>' +
     '      </div>' +
     '      <div class="slds-chat-message__meta" aria-label="said ' + sfSubject + ' at ' + dateTime + '">' + sfSubject + ' • ' + dateTime + '</div>' +
     '    </div>' +
@@ -1556,3 +1795,58 @@ function beep() {
   bell.play();
 }
 
+// should be called after every major interaction eg after sending a message or making an API lab request
+async function updateFrequentlyUsedFields() {
+  console.log('====== updating frequently used fields...')
+  axios.get(`${SERVER_URL}/fetchFrequentlyUsedFields`).then(response => {
+    frequentlyUsedFields = response.data;
+    // we use the custom attribute 'with-ff-cache-key' to simplify the lookup process
+    // for this to work, the value of this custom attribute should match the field names in the response
+    for(const key of Object.keys(frequentlyUsedFields)){
+      const uiTextField = document.querySelector(` .frequent-fields-input[with-ff-cache-key=${key}]`)
+      if (uiTextField) uiTextField.value = frequentlyUsedFields[key] ?? '';
+    }
+  }).catch(error => {
+    console.error("An error occurred while fetching frequently used fields", error);
+  })
+}
+
+// since DOMPurify cleans svgs up, this creates the svg nodes directly 
+function createSVGElement(useFilePath, svgAttributes ) {
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const xlinkNS = 'http://www.w3.org/1999/xlink';
+  const svg = document.createElementNS(svgNS, 'svg');
+  Object.keys(svgAttributes).forEach(attribute => {
+    svg.setAttribute(attribute, svgAttributes[attribute])
+  })
+  const use = document.createElementNS(svgNS, 'use');
+  use.setAttributeNS(xlinkNS, 'xlink:href', useFilePath);
+  svg.appendChild(use);
+  return svg;
+}
+
+// Handle citation link clicks: scroll to source within the chat container and show a brief highlight
+function initCitationLinkHandler() {
+  const chatList = document.getElementById('chatList');
+  chatList.addEventListener('click', e => {
+    const link = e.target.closest('a[href^="#citation-source-"]');
+    if (!link) return;
+    e.preventDefault();
+    const id = link.getAttribute('href');
+    const target = document.querySelector(id);
+    if (!target) return;
+    const containerRect = chatList.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    let scrollTop = chatList.scrollTop
+    const scrollPadding = 24;
+    // if the target is above the visible area, scroll up. If it is below, scroll down
+    if (targetRect.top < containerRect.top) {
+      scrollTop -= (containerRect.top - targetRect.top) + scrollPadding;
+    } else if (targetRect.bottom > containerRect.bottom) {
+      scrollTop += (targetRect.bottom - containerRect.bottom) + scrollPadding;
+    }
+    chatList.scrollTo({ top: scrollTop, behavior: 'smooth' });
+    target.classList.add('citation-source-highlight');
+    setTimeout(() => target.classList.remove('citation-source-highlight'), 2000);
+  })
+}

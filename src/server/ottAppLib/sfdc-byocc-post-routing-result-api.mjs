@@ -1,46 +1,49 @@
 import axios from 'axios';
-import NodeCache from "node-cache" ;
 import { settingsCache } from '../ottAppServer.mjs';
-import { getTimeStampForLoglines } from '../util.mjs';
+import { logger, generateApiUrl } from '../util.mjs';
 
-// Get config metadata from .env
-const {
-    SF_SCRT_INSTANCE_URL,
-  } = process.env;
-const IS_LOCAL_CONFIG = process.env.IS_LOCAL_CONFIG === "true";
-const responseCache = new NodeCache();
+const routingResultEndpoint = "/api/v1/routingResult";
 
-export async function sendPostRoutingResultAPIRequest(req, requestHeader) {
-
-  let responseData = {};
-
-  let jsonData = {
+/**
+ * Generates the routing result request payload object
+ * @param {Object} req - Express request object containing routing result data in body
+ * @returns {Object} Payload object with conversationIdentifier, routingType, workItemId, success, externallyRouted, and errorMessage
+ */
+function generateRoutingResultPayload(req) {
+  return {
     "conversationIdentifier" : req.body.conversationIdentifier,
     "routingType": req.body.routingType,
-    "workItemId":req.body.workItemId,
+    "workItemId": req.body.workItemId,
     "success": req.body.success,
     "externallyRouted": req.body.externallyRouted,
-    "errorMessage":req.body.errorMessage
-  }
+    "errorMessage": req.body.errorMessage
+  };
+}
 
-  console.log(getTimeStampForLoglines() + "Post Routing result json data: ");
-  console.dir(jsonData);
+/**
+ * Sends a POST request to the Salesforce routing result API
+ * @param {Object} req - Express request object containing routing result data
+ * @param {Object} requestHeader - HTTP headers for the API request
+ * @returns {Promise<Object>} Response data from the API call
+ */
+export async function sendPostRoutingResultAPIRequest(req, requestHeader) {
+    
+  const requestPayload = generateRoutingResultPayload(req);
+  const requestId = requestHeader.headers.RequestId;
+  logger.info(`POST /routingResult API with requestId ${requestId} and request payload: `, requestPayload);
+  const routingResultApiUrl = generateApiUrl(settingsCache, routingResultEndpoint);
 
-  responseData = await axios.post(
-    (IS_LOCAL_CONFIG ? SF_SCRT_INSTANCE_URL: settingsCache.get("scrtUrl")) + "/api/v1/routingResult",
-    jsonData,
-    requestHeader
-  ).then(function (response) {
-    console.log(getTimeStampForLoglines() + 'Routing Result API post request completed successfully: ', response.data);
-    responseCache.set("success", response.data.success);
+  try {
+    const response = await axios.post(
+      routingResultApiUrl,
+      JSON.stringify(requestPayload),
+      requestHeader
+    );
+    logger.info(`POST /routingResult API with requestId ${requestId} completed successfully: `, response.data);
     return response.data;
-  }).catch(function (error) {
-    let responseData = error.response.data;
-    console.log(getTimeStampForLoglines() + 'Routing Result API post request has error: ', responseData);
-    responseCache.set("message", responseData.message);
-    responseCache.set("code", responseData.code);
+  } catch (error) {
+    let responseData = error.response?.data || { message: error.message, code: error.code || 'UNKNOWN_ERROR' };
+    logger.error(`POST /routingResult API with requestId ${requestId} has error: `, responseData);
     return responseData;
-  });
-
-  return responseData;
+  }
 }

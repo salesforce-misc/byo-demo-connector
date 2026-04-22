@@ -7,6 +7,7 @@
 
 import Constants from '../common/constants';
 import { io } from "socket.io-client";
+import { getFlowConfigForStartInboundCall, getRoutingConfigVisibility } from './routingHelpers';
 const MAX_PARTICIPANTS_INDEX = 6;
 const showLoginPageCheckbox = document.getElementById('showLoginPageCheckbox');
 const throwErrorCheckbox = document.getElementById('throwErrorCheckbox');
@@ -129,8 +130,11 @@ const softphoneRadio = document.getElementById('softphone');
 const unifiedRoutingFlowParamsDiv = document.getElementById('unifiedRoutingFlowParams');
 const federatedRoutingRadio = document.getElementById('federatedRouting');
 const unifiedRoutingRadio = document.getElementById('unifiedRouting');
+const useRouteFlowApiCheckbox = document.getElementById('useRouteFlowApi');
 const flowDevNameInput = document.getElementById('flowDevName');
 const fallbackQueueInput = document.getElementById('fallbackQueue');
+const callbackNumberInput = document.getElementById('callbackNumber');
+const isPreviewCallbackInput = document.getElementById('isPreviewCallback');
 const allowRemovingPrimaryCallParticipantDropdown = document.getElementById('allow-removing-primary-call-participant');
 const allowRemovingTransferCallParticipantDropdown = document.getElementById('allow-removing-transfer-call-participant');
 const agentContactType = document.getElementById('agentContactType');
@@ -387,7 +391,7 @@ function handleMessageFromConnector(event) {
                 agentName.innerText = `Agent (${event.data.agentId})`;
                 multipartyAllowedCheckbox.checked = event.data.isMultipartyAllowed;
                 consultAllowedCheckbox.checked = event.data.isConsultAllowed;
-                if(event.data.value.selectedPhone.type  === 'DESK_PHONE') {
+                if(event.data.value.selectedPhone && event.data.value.selectedPhone.type  === 'DESK_PHONE') {
                     hardphoneRadio.checked = true;
                     softphoneRadio.checked = false;
                 } else {
@@ -486,7 +490,9 @@ function populateStatusesDropdown(userPresenceStatuses){
     defaultOption.disabled = true;
     statusDropdown.add(defaultOption);
     statusDropdown.selectedIndex = 0;
-    const data = JSON.parse(userPresenceStatuses);
+    const data = typeof userPresenceStatuses === 'string'
+        ? JSON.parse(userPresenceStatuses)
+        : userPresenceStatuses;
     let option;
     for (const [key, value] of Object.entries(data)) {
         option = document.createElement('option');
@@ -628,6 +634,11 @@ hardphoneRadio.addEventListener('change', setAgentConfig);
 softphoneRadio.addEventListener('change', setAgentConfig);
 unifiedRoutingRadio.addEventListener('change', setRoutingConfig);
 federatedRoutingRadio.addEventListener('change',setRoutingConfig);
+if (callbackNumberInput) {
+    callbackNumberInput.addEventListener('input', function () {
+        this.value = this.value.replace(/\D/g, '');
+    });
+}
 multipartyAllowedCheckbox.addEventListener('change', setAgentConfig);
 consultAllowedCheckbox.addEventListener('change', setAgentConfig);
 startOutboundCallButton.addEventListener('click', startOutboundCall);
@@ -731,11 +742,12 @@ function setAgentConfig() {
 }
 
 //This function is used to show/hide unifiedRoutingFlowParms
-//When Unified Routing is enabled, then we will show Flow Input Parameters
+//When Unified Routing is enabled, then we will show Flow Input Parameters (and Use Route Flow API checkbox below CallBack Information)
 function setRoutingConfig() {
-    if(federatedRoutingRadio.checked) {
+    const visibility = getRoutingConfigVisibility({ federatedRoutingRadio, unifiedRoutingRadio });
+    if (visibility === 'hide') {
         unifiedRoutingFlowParamsDiv.classList.add('slds-hide');
-    } else if(unifiedRoutingRadio.checked) {
+    } else if (visibility === 'show') {
         unifiedRoutingFlowParamsDiv.classList.remove('slds-hide');
     }
 }
@@ -877,14 +889,19 @@ function callError() {
 
 function startInboundCall() {
     phoneNumber = phoneNumberInput.value;
-    const flowDevName = flowDevNameInput.value;
-    const fallbackQueue = fallbackQueueInput.value;
-    const isUnifiedRoutingEnabled = unifiedRoutingRadio.checked;
+    const flowConfig = getFlowConfigForStartInboundCall({
+        phoneNumberInput,
+        flowDevNameInput,
+        fallbackQueueInput,
+        callbackNumberInput,
+        unifiedRoutingRadio,
+        useRouteFlowApiCheckbox
+    });
     sendMessageToConnector({
         type: Constants.START_INBOUND_CALL,
         phoneNumber,
         callInfo: getCallInfo(Constants.CALL_TYPE.INBOUND),
-        flowConfig: {dialedNumber:phoneNumber, flowDevName:flowDevName, fallbackQueue:fallbackQueue, isUnifiedRoutingEnabled:isUnifiedRoutingEnabled}
+        flowConfig
     });
 }
 
@@ -900,9 +917,22 @@ function addParticipant() {
 
 function requestCallback() {
     phoneNumber = phoneNumberInput.value;
+    const callbackNumber = callbackNumberInput ? callbackNumberInput.value.replace(/\D/g, '') : '';
+    const isUnifiedRouting = unifiedRoutingRadio.checked;
+    const isPreviewCallback = isPreviewCallbackInput ? isPreviewCallbackInput.checked : false;
+
+    if (isUnifiedRouting && !callbackNumber) {
+        showError('Callback number is required when Unified Routing is selected.');
+        return;
+    }
+    showError('');
+
+    const payload = isUnifiedRouting && callbackNumber
+        ? { phoneNumber, callbackNumber, isUnifiedRouting: true, ...(isPreviewCallback && { isPreviewCallback: true }) }
+        : { phoneNumber };
     sendMessageToConnector({
         type: Constants.REQUEST_CALLBACK,
-        payload: { phoneNumber }
+        payload
     });
 }
 

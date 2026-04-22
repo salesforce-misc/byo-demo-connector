@@ -14,7 +14,7 @@ export default {
     },
     DIGITS_KEY: "1234",
     AGENT_STATUS: {agentStatus: 'Available'},
-    CALL_CENTER_CONFIG: { config: 'sso_config' },
+    CALL_CENTER_CONFIG: { config: 'sso_config' , userName : 'userName'},
     CONTAINER_DIV_KEY: 'CONTAINER_DIV',
     GENERIC_ERROR_KEY: 'GENERIC_ERROR',
     USER_MESSAGE : {

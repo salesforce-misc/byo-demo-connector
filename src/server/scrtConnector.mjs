@@ -56,6 +56,10 @@ export const ScrtConnector = {
         onlineUserIds[userEmail] = user;
     },
 
+    removeOnlineUserIds(userEmail) {
+        delete onlineUserIds[userEmail];
+    },
+
     configureTenantInfo(params) {
         tenantInfo.scrtBaseUrl = params.scrtBaseUrl;
         tenantInfo.orgId = params.orgId;
@@ -345,5 +349,84 @@ export const ScrtConnector = {
         });
 
         */
+    },
+
+    requestCallback(params) {
+        const voiceCallIdParam = params.voiceCallId || voiceCallId;
+        const callbackNumber = params.callbackNumber;
+        const vendorCallKey = params.vendorCallKey;
+        const isPreviewCallback = params.isPreviewCallback;
+        const telephonyProviderName = params.telephonyProviderName || 'demo-connector';
+
+        if (!callbackNumber) {
+            return Promise.reject(new Error('callbackNumber is required'));
+        }
+
+        const fieldValues = { callbackNumber, ...(vendorCallKey && { vendorCallKey }), ...(isPreviewCallback === true && { isPreviewCallback: true }) };
+        const headers = {
+            headers: {
+                'Authorization': `Bearer ${getToken()}`,
+                'Content-Type': 'application/json',
+                'Telephony-Provider-Name': telephonyProviderName
+            }
+        };
+
+        console.log("Field Values for requestCallback: " + JSON.stringify(fieldValues));
+        return voiceCallIdParam ?
+            getAxiosClient(tenantInfo).post(`/voiceCalls/${voiceCallIdParam}/requestCallback`, fieldValues, headers).then((response) => {
+                console.log("Request callback response: " + JSON.stringify(response.data));
+                return response;
+            }) : Promise.reject(new Error('voiceCallId is required for requestCallback'));
+    },
+
+    clearRouting(params) {
+        const voiceCallIdParam = params.voiceCallId || voiceCallId;
+        const telephonyProviderName = params.telephonyProviderName || 'demo-connector';
+
+        const headers = {
+            headers: {
+                'Authorization': `Bearer ${getToken()}`,
+                'Content-Type': 'application/json',
+                'Telephony-Provider-Name': telephonyProviderName
+            }
+        };
+
+        return voiceCallIdParam ?
+            getAxiosClient(tenantInfo).patch(`/voiceCalls/${voiceCallIdParam}/clearRouting`, null, headers).then((response) => {
+                console.log("Clear routing response: " + JSON.stringify(response.data));
+                return response;
+            }) : Promise.reject(new Error('voiceCallId is required for clearRouting'));
+    },
+
+    routeVoiceCall(params) {
+        const voiceCallIdParam = params.voiceCallId || voiceCallId;
+        const { routingTarget, fallbackQueue, flowInputParameters } = params;
+        const telephonyProviderName = params.telephonyProviderName || 'demo-connector';
+
+        if (!voiceCallIdParam) {
+            return Promise.reject(new Error('voiceCallId is required for routeVoiceCall'));
+        }
+        if (!routingTarget) {
+            return Promise.reject(new Error('routingTarget is required for routeVoiceCall'));
+        }
+
+        const fieldValues = {
+            routingTarget,
+            ...(fallbackQueue != null && { fallbackQueue }),
+            ...(flowInputParameters != null && { flowInputParameters })
+        };
+        const headers = {
+            headers: {
+                'Authorization': `Bearer ${getToken()}`,
+                'Content-Type': 'application/json',
+                'Telephony-Provider-Name': telephonyProviderName
+            }
+        };
+
+        console.log("Field Values for routeVoiceCall: " + JSON.stringify(fieldValues));
+        return getAxiosClient(tenantInfo).patch(`/voiceCalls/route/${voiceCallIdParam}`, fieldValues, headers).then((response) => {
+            console.log("Route voice call response: " + JSON.stringify(response.data));
+            return response;
+        });
     }
 };

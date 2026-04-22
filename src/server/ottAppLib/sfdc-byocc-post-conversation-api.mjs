@@ -1,23 +1,31 @@
 import axios from 'axios';
-import NodeCache from "node-cache" ;
 import { settingsCache } from '../ottAppServer.mjs';
-import { getTimeStampForLoglines } from '../util.mjs';
-
-const {
-    SF_SCRT_INSTANCE_URL
-} = process.env;
-const IS_LOCAL_CONFIG = process.env.IS_LOCAL_CONFIG === "true";
-const responseCache = new NodeCache();
+import { logger, generateApiUrl } from '../util.mjs';
 
 const conversationEndpoint = '/api/v1/conversation';
 const appType = 'custom';
 const role = 'EndUser';
 
-export async function sendConversationAPIRequest(req, requestHeader) {
+/**
+ * Validates if the parsed value is a valid map/object
+ * @param {any} parsed - The parsed value to validate
+ * @returns {boolean} True if valid map, false otherwise
+ */
+function isValidMap(parsed) {
+    return typeof parsed === "object" &&
+        parsed !== null &&
+        !Array.isArray(parsed) &&
+        Object.keys(parsed).length > 0;
+}
 
-    let responseData = {};
-
-    let jsonData = {
+/**
+ * Generates the conversation request payload object
+ * @param {Object} req - Express request object containing conversation data in body
+ * @param {string} requestId - The request ID for logging purposes
+ * @returns {Object} Payload object with channelAddressIdentifier, participants, and optionally routingAttributes
+ */
+function generateConversationPayload(req, requestId) {
+    const payload = {
         "channelAddressIdentifier" : req.body.channelAddressIdentifier,
         "participants" : [
             {
@@ -28,46 +36,45 @@ export async function sendConversationAPIRequest(req, requestHeader) {
         ]
     };
 
-    let routingAttributes;
     if (req.body.routingAttributes) {
         try {
             const parsed = JSON.parse(req.body.routingAttributes);
-
             if (isValidMap(parsed)) {
-                routingAttributes = parsed;
-                jsonData["routingAttributes"] = routingAttributes;
+                payload["routingAttributes"] = parsed;
             }
         } catch (e) {
-            console.error("Invalid JSON in routingAttributes:", e);
+            logger.error(`POST /conversation API with requestId ${requestId} has error: JSON.parse failed for routingAttributes. Raw value: ${req.body.routingAttributes}, Error: `, e);
         }
     }
 
-    jsonData = JSON.stringify(jsonData);
-    console.log(getTimeStampForLoglines() + "post conversation json data: ");
-    console.dir(jsonData);
+    return payload;
+}
 
-    responseData = await axios.post(
-        (IS_LOCAL_CONFIG ? SF_SCRT_INSTANCE_URL : settingsCache.get("scrtUrl")) + conversationEndpoint,
-        jsonData,
-        requestHeader
-    ).then(function (response) {
-        console.log(getTimeStampForLoglines() + 'Conversation api post request completed successfully: ', response.data);
-        responseCache.set("success", response.data.success);
+/**
+ * Sends a POST request to the Salesforce conversation API to create a conversation
+ * @param {Object} req - Express request object containing conversation data
+ * @param {Object} requestHeader - HTTP headers for the API request
+ * @returns {Promise<Object>} Response data from the API call
+ */
+export async function sendConversationAPIRequest(req, requestHeader) {
+    
+    const requestId = requestHeader.headers.RequestId;
+    const requestPayload = generateConversationPayload(req, requestId);
+    logger.info(`POST /conversation API with requestId ${requestId} and request payload: `, requestPayload);
+    const conversationApiUrl = generateApiUrl(settingsCache, conversationEndpoint);
+
+    try {
+        const response = await axios.post(
+            conversationApiUrl,
+            JSON.stringify(requestPayload),
+            requestHeader
+        );
+        logger.info(`POST /conversation API with requestId ${requestId} completed successfully: `, response.data);
         return response.data;
-    }).catch(function (error) {
-    let responseData = error.response.data;
-        console.log(getTimeStampForLoglines() + 'Conversation api post request has error: ', responseData);
-        responseCache.set("message", responseData.message);
-        responseCache.set("code", responseData.code);
+    } catch (error) {
+        let responseData = error.response?.data || { message: error.message, code: error.code || 'UNKNOWN_ERROR' };
+        logger.error(`POST /conversation API with requestId ${requestId} has error: `, responseData);
         return responseData;
-    })
-    return responseData;
-
-    function isValidMap(parsed) {
-        return typeof parsed === "object" &&
-            parsed !== null &&
-            !Array.isArray(parsed) &&
-            Object.keys(parsed).length > 0
     }
 }
 

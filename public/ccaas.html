@@ -19,14 +19,14 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
 <head>
     <title>SCV Simulator</title>
     <!-- uncomment and replace with line below for use in visualforce page <link rel="stylesheet" type="text/css" href="{!$Resource.slds_stylesheet}" media="screen"/> -->
-    <link rel="stylesheet" type="text/css" href="/Assets/slds-stylesheet.css" media="screen"></link>
-    <link rel="stylesheet" type="text/css" href="/Assets/ottapp.css" media="screen"></link>
-    <link rel="stylesheet" type="text/css" href="/Assets/ccaas.css" media="screen"></link>
+    <link rel="stylesheet" type="text/css" href="/Assets/slds-stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="/Assets/ottapp.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="/Assets/ccaas.css" media="screen">
 </head>
 
 <body>
     <div class="slds-grid slds-wrap">
-        <div class="slds-card slds-size_1-of-2" style="max-width:800px;">
+        <div class="slds-col slds-card slds-size_1-of-1 slds-medium-size_3-of-5">
 
             <!--------------------------------------------------------------->
             <!----- CCaaS demo app title & commont components - Begin: ------>
@@ -71,7 +71,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                             <td>
                                 <div class="slds-form-element__control slds-p-left_x-large">
                                     <div class="slds-checkbox">
-                                        <input type="checkbox" name="options" id="throwErrorCheckbox"></input>
+                                        <input type="checkbox" name="options" id="throwErrorCheckbox">
                                         <label class="slds-checkbox__label" for="throwErrorCheckbox">
                                             <span class="slds-checkbox_faux"></span>
                                             <span class="slds-form-element__label">Display an error</span>
@@ -87,7 +87,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                             <div class="slds-form-element">
                                 <div class="slds-form-element__control">
                                     <div class="slds-checkbox">
-                                        <input type="checkbox" name="options" id="hasContactSearchCheckbox" checked=""></input>
+                                        <input type="checkbox" name="options" id="hasContactSearchCheckbox" checked>
                                         <label class="slds-checkbox__label" for="hasContactSearchCheckbox">
                                             <span class="slds-checkbox_faux"></span>
                                             <span class="slds-form-element__label">Support contact search</span>
@@ -120,7 +120,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                             <div class="slds-form-element">
                                 <div class="slds-form-element__control">
                                     <div class="slds-checkbox">
-                                        <input type="checkbox" name="options" id="hasAgentAvailabilityCheckbox" checked="" />
+                                        <input type="checkbox" name="options" id="hasAgentAvailabilityCheckbox" checked />
                                         <label class="slds-checkbox__label" for="hasAgentAvailabilityCheckbox">
                                             <span class="slds-checkbox_faux"></span>
                                             <span class="slds-form-element__label">Vendor Provides Agent Availability</span>
@@ -131,7 +131,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                             <div class="slds-form-element">
                                 <div class="slds-form-element__control">
                                     <div class="slds-checkbox">
-                                        <input type="checkbox" name="options" id="hasQueueWaitTimeCheckbox" checked="" />
+                                        <input type="checkbox" name="options" id="hasQueueWaitTimeCheckbox" checked />
                                         <label class="slds-checkbox__label" for="hasQueueWaitTimeCheckbox">
                                             <span class="slds-checkbox_faux"></span>
                                             <span class="slds-form-element__label">Vendor Provides Queue Wait Time</span>
@@ -142,7 +142,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                             <div class="slds-form-element">
                                 <div class="slds-form-element__control">
                                     <div class="slds-checkbox">
-                                        <input type="checkbox" name="options" id="hasDebugLoggingCheckbox" checked="" />
+                                        <input type="checkbox" name="options" id="hasDebugLoggingCheckbox" checked />
                                         <label class="slds-checkbox__label" for="hasDebugLoggingCheckbox">
                                             <span class="slds-checkbox_faux"></span>
                                             <span class="slds-form-element__label" title="When it is checked file logging is enabled, otherwise logs to console">Enable logging</span>
@@ -215,7 +215,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                     <div class="slds-form-element">
                         <div class="slds-form-element__control">
                             <div class="slds-checkbox">
-                                <input type="checkbox" name="options" id="hasMuteCheckbox" checked=""></input>
+                                <input type="checkbox" name="options" id="hasMuteCheckbox" checked>
                                 <label class="slds-checkbox__label" for="hasMuteCheckbox">
                                     <span class="slds-checkbox_faux"></span>
                                     <span class="slds-form-element__label">Let agents mute calls</span>
@@ -226,7 +226,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                     <div class="slds-form-element">
                         <div class="slds-form-element__control">
                             <div class="slds-checkbox">
-                                <input type="checkbox" name="options" id="hasRecordCheckbox" checked=""></input>
+                                <input type="checkbox" name="options" id="hasRecordCheckbox" checked>
                                 <label class="slds-checkbox__label" for="hasRecordCheckbox">
                                     <span class="slds-checkbox_faux"></span>
                                     <span class="slds-form-element__label">Let agents record calls</span>
@@ -237,7 +237,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                     <div class="slds-form-element">
                         <div class="slds-form-element__control">
                             <div class="slds-checkbox">
-                                <input type="checkbox" name="options" id="hasSwapCheckbox" checked=""></input>
+                                <input type="checkbox" name="options" id="hasSwapCheckbox" checked>
                                 <label class="slds-checkbox__label" for="hasSwapCheckbox">
                                     <span class="slds-checkbox_faux"></span>
                                     <span class="slds-form-element__label">Let agents swap calls</span>
@@ -248,7 +248,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                     <div class="slds-form-element">
                         <div class="slds-form-element__control">
                             <div class="slds-checkbox">
-                                <input type="checkbox" name="options" id="hasMergeCheckbox" checked=""></input>
+                                <input type="checkbox" name="options" id="hasMergeCheckbox" checked>
                                 <label class="slds-checkbox__label" for="hasMergeCheckbox">
                                     <span class="slds-checkbox_faux"></span>
                                     <span class="slds-form-element__label">Let agents merge calls</span>
@@ -259,7 +259,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                     <div class="slds-form-element">
                         <div class="slds-form-element__control">
                             <div class="slds-checkbox">
-                                <input type="checkbox" name="options" id="supportsMosCheckbox" checked=""></input>
+                                <input type="checkbox" name="options" id="supportsMosCheckbox" checked>
                                 <label class="slds-checkbox__label" for="supportsMosCheckbox">
                                     <span class="slds-checkbox_faux"></span>
                                     <span class="slds-form-element__label">Support MOS</span>
@@ -270,7 +270,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                     <div class="slds-form-element">
                         <div class="slds-form-element__control">
                             <div class="slds-checkbox">
-                                <input type="checkbox" name="options" id="isDialPadDisabled" checked=""></input>
+                                <input type="checkbox" name="options" id="isDialPadDisabled" checked>
                                 <label class="slds-checkbox__label" for="isDialPadDisabled">
                                     <span class="slds-checkbox_faux"></span>
                                     <span class="slds-form-element__label">Disable Dial Pad</span>
@@ -281,7 +281,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                     <div class="slds-form-element">
                         <div class="slds-form-element__control">
                             <div class="slds-checkbox">
-                                <input type="checkbox" name="options" id="isPhoneBookDisabled" checked=""></input>
+                                <input type="checkbox" name="options" id="isPhoneBookDisabled" checked>
                                 <label class="slds-checkbox__label" for="isPhoneBookDisabled">
                                     <span class="slds-checkbox_faux"></span>
                                     <span class="slds-form-element__label">Disable Phone Book</span>
@@ -292,7 +292,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                     <div class="slds-form-element">
                         <div class="slds-form-element__control">
                             <div class="slds-checkbox">
-                                <input type="checkbox" name="options" id="isHidSupported"></input>
+                                <input type="checkbox" name="options" id="isHidSupported">
                                 <label class="slds-checkbox__label" for="isHidSupported">
                                     <span class="slds-checkbox_faux"></span>
                                     <span class="slds-form-element__label">Support HID</span>
@@ -303,7 +303,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                     <div class="slds-form-element">
                         <div class="slds-form-element__control">
                             <div class="slds-checkbox">
-                                <input type="checkbox" name="options" id="hasSetExternalMicrophoneDeviceSetting"></input>
+                                <input type="checkbox" name="options" id="hasSetExternalMicrophoneDeviceSetting">
                                 <label class="slds-checkbox__label" for="hasSetExternalMicrophoneDeviceSetting">
                                     <span class="slds-checkbox_faux"></span>
                                     <span class="slds-form-element__label">Set Ext Mic</span>
@@ -314,7 +314,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                     <div class="slds-form-element">
                         <div class="slds-form-element__control">
                             <div class="slds-checkbox">
-                                <input type="checkbox" name="options" id="hasSetExternalSpeakerDeviceSetting"></input>
+                                <input type="checkbox" name="options" id="hasSetExternalSpeakerDeviceSetting">
                                 <label class="slds-checkbox__label" for="hasSetExternalSpeakerDeviceSetting">
                                     <span class="slds-checkbox_faux"></span>
                                     <span class="slds-form-element__label">Set Ext Speaker</span>
@@ -327,7 +327,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                     <div class="slds-form-element">
                         <div class="slds-form-element__control">
                             <div class="slds-checkbox">
-                                <input type="checkbox" name="options" id="hasSupervisorListenInCheckbox" checked="" />
+                                <input type="checkbox" name="options" id="hasSupervisorListenInCheckbox" checked />
                                 <label class="slds-checkbox__label" for="hasSupervisorListenInCheckbox">
                                     <span class="slds-checkbox_faux"></span>
                                     <span class="slds-form-element__label">Agent can listen in as supervisor</span>
@@ -338,7 +338,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                     <div class="slds-form-element">
                         <div class="slds-form-element__control">
                             <div class="slds-checkbox">
-                                <input type="checkbox" name="options" id="hasSupervisorBargeInCheckbox" checked="" />
+                                <input type="checkbox" name="options" id="hasSupervisorBargeInCheckbox" checked />
                                 <label class="slds-checkbox__label" for="hasSupervisorBargeInCheckbox">
                                     <span class="slds-checkbox_faux"></span>
                                     <span class="slds-form-element__label">Agent can barge in as supervisor</span>
@@ -349,7 +349,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                     <div class="slds-form-element">
                         <div class="slds-form-element__control">
                             <div class="slds-checkbox">
-                                <input type="checkbox" name="options" id="hasBlindTransferCheckbox" checked="" />
+                                <input type="checkbox" name="options" id="hasBlindTransferCheckbox" checked />
                                 <label class="slds-checkbox__label" for="hasBlindTransferCheckbox">
                                     <span class="slds-checkbox_faux"></span>
                                     <span class="slds-form-element__label">Support Blind Transfers</span>
@@ -360,7 +360,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                     <div class="slds-form-element">
                         <div class="slds-form-element__control">
                             <div class="slds-checkbox">
-                                <input type="checkbox" name="options" id="hasPhoneBookCheckbox" checked=""/>
+                                <input type="checkbox" name="options" id="hasPhoneBookCheckbox" checked/>
                                 <label class="slds-checkbox__label" for="hasPhoneBookCheckbox">
                                     <span class="slds-checkbox_faux"></span>
                                     <span class="slds-form-element__label">Support Phone Book</span>
@@ -371,7 +371,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                     <div class="slds-form-element">
                         <div class="slds-form-element__control">
                             <div class="slds-checkbox">
-                                <input type="checkbox" name="options" id="canConsultCheckbox" checked=""/>
+                                <input type="checkbox" name="options" id="canConsultCheckbox" checked/>
                                 <label class="slds-checkbox__label" for="canConsultCheckbox">
                                     <span class="slds-checkbox_faux"></span>
                                     <span class="slds-form-element__label">Support multi-party consult calls</span>
@@ -395,7 +395,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                                             Signed Recording URL
                                         </label>
                                         <div class="slds-form-element__control">
-                                            <input type="text" id="signed-recording-url" placeholder="" maxlength="1000" required="" class="slds-input"></input>
+                                            <input type="text" id="signed-recording-url" placeholder="" maxlength="1000" required="" class="slds-input">
                                         </div>
                                     </div>
                                     <div class="slds-col slds-size_1-of-3">
@@ -403,7 +403,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                                             Recording Duration (Seconds)
                                         </label>
                                         <div class="slds-form-element__control">
-                                            <input type="number" id="signed-recording-duration" placeholder="" required="" class="slds-input"></input>
+                                            <input type="number" id="signed-recording-duration" placeholder="" required="" class="slds-input">
                                         </div>
                                     </div>
                                 </div>
@@ -430,7 +430,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
         <div class="slds-form-element">
             <div id="agentPhones" class="slds-form-element__control slds-grid slds-container--small  slds-m-top_medium">
                 <span class="slds-radio">
-                    <input type="radio" id="softphone" value="softphone" name="default" checked=""></input>
+                    <input type="radio" id="softphone" value="softphone" name="default" checked>
                     <label class="slds-radio__label" for="softphone">
                         <span class="slds-radio_faux"></span>
                         <span class="slds-form-element__label">Soft Phone</span>
@@ -464,14 +464,14 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
 <div id="error-span"></div>
 <div class="slds-card__body slds-card__body_inner">
     <div class="slds-checkbox">
-        <input type="checkbox" name="options" id="isMultipartyAllowed" disabled></input>
+        <input type="checkbox" name="options" id="isMultipartyAllowed" disabled>
         <label class="slds-checkbox__label" for="isMultipartyAllowed">
             <span class="slds-checkbox_faux"></span>
             <span class="slds-form-element__label">&nbsp;Multi Party Enabled</span>
         </label>
     </div>
     <div class="slds-checkbox">
-        <input type="checkbox" name="options" id="isConsultAllowed" disabled></input>
+        <input type="checkbox" name="options" id="isConsultAllowed" disabled>
         <label class="slds-checkbox__label" for="isConsultAllowed">
             <span class="slds-checkbox_faux"></span>
             <span class="slds-form-element__label">&nbsp;Consult Enabled</span>
@@ -480,35 +480,35 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
     
     <div class="slds-form-element">
         <span class="slds-form-element__label">Call initial state: </span> <div class="slds-checkbox">
-            <input type="checkbox" name="options" id="callIsRecordingPaused"></input>
+            <input type="checkbox" name="options" id="callIsRecordingPaused">
             <label class="slds-checkbox__label" for="callIsRecordingPaused">
                 <span class="slds-checkbox_faux"></span>
                 <span class="slds-form-element__label">recording paused</span>
             </label>
         </div>
         <div class="slds-checkbox">
-            <input type="checkbox" name="options" id="callIsMuted"></input>
+            <input type="checkbox" name="options" id="callIsMuted">
             <label class="slds-checkbox__label" for="callIsMuted">
                 <span class="slds-checkbox_faux"></span>
                 <span class="slds-form-element__label">muted</span>
             </label>
         </div>
         <div class="slds-checkbox">
-            <input type="checkbox" name="options" id="callIsOnHold"></input>
+            <input type="checkbox" name="options" id="callIsOnHold">
             <label class="slds-checkbox__label" for="callIsOnHold">
                 <span class="slds-checkbox_faux"></span>
                 <span class="slds-form-element__label">on hold</span>
             </label>
         </div>
         <div class="slds-checkbox">
-            <input type="checkbox" name="options" id="callIsExternalTransfer"></input>
+            <input type="checkbox" name="options" id="callIsExternalTransfer">
             <label class="slds-checkbox__label" for="callIsExternalTransfer">
                 <span class="slds-checkbox_faux"></span>
                 <span class="slds-form-element__label">external transfer</span>
             </label>
         </div>
         <div class="slds-checkbox">
-            <input type="checkbox" name="options" id="callIsAutoMergeOn"></input>
+            <input type="checkbox" name="options" id="callIsAutoMergeOn">
             <label class="slds-checkbox__label" for="callIsAutoMergeOn">
                 <span class="slds-checkbox_faux"></span>
                 <span class="slds-form-element__label">auto merge</span>
@@ -517,71 +517,75 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
     </div>
     <div class="slds-form-element">
         <span class="slds-form-element__label">Add participant contact types: </span> <div class="slds-checkbox">
-            <input type="checkbox" name="options" id="agentContactType" checked="true"></input>
+            <input type="checkbox" name="options" id="agentContactType" checked>
             <label class="slds-checkbox__label" for="agentContactType">
                 <span class="slds-checkbox_faux"></span>
                 <span class="slds-form-element__label">Agent</span>
             </label>
         </div>
         <div class="slds-checkbox">
-            <input type="checkbox" name="options" id="queueContactType" checked="true"></input>
+            <input type="checkbox" name="options" id="queueContactType" checked>
             <label class="slds-checkbox__label" for="queueContactType">
                 <span class="slds-checkbox_faux"></span>
                 <span class="slds-form-element__label">Queue</span>
             </label>
         </div>
         <div class="slds-checkbox">
-            <input type="checkbox" name="options" id="phoneBookContactType" checked="true"></input>
+            <input type="checkbox" name="options" id="phoneBookContactType" checked>
             <label class="slds-checkbox__label" for="phoneBookContactType">
                 <span class="slds-checkbox_faux"></span>
                 <span class="slds-form-element__label">Phone Book</span>
             </label>
         </div>
         <div class="slds-checkbox">
-            <input type="checkbox" name="options" id="phoneNumberContactType" checked="true"></input>
+            <input type="checkbox" name="options" id="phoneNumberContactType" checked>
             <label class="slds-checkbox__label" for="phoneNumberContactType">
-                <span class="slds-checkbox_faux"></span>Phone Number</span>
+                <span class="slds-checkbox_faux"></span>
+                <span class="slds-form-element__label">Phone Number</span>
             </label>
         </div>
     </div>
     <div class="slds-form-element">
         <span class="slds-form-element__label">Show/Hide Omni Phone Controls: </span> <div class="slds-checkbox">
-            <input type="checkbox" name="options" id="showMuteButton" checked="true"></input>
+            <input type="checkbox" name="options" id="showMuteButton" checked>
             <label class="slds-checkbox__label" for="showMuteButton">
                 <span class="slds-checkbox_faux"></span>
                 <span class="slds-form-element__label">Mute</span>
             </label>
         </div>
         <div class="slds-checkbox">
-            <input type="checkbox" name="options" id="showRecordButton" checked="true"></input>
+            <input type="checkbox" name="options" id="showRecordButton" checked>
             <label class="slds-checkbox__label" for="showRecordButton">
                 <span class="slds-checkbox_faux"></span>
                 <span class="slds-form-element__label">Record</span>
             </label>
         </div>
         <div class="slds-checkbox">
-            <input type="checkbox" name="options" id="showAddCallerButton" checked="true"></input>
+            <input type="checkbox" name="options" id="showAddCallerButton" checked>
             <label class="slds-checkbox__label" for="showAddCallerButton">
                 <span class="slds-checkbox_faux"></span>
                 <span class="slds-form-element__label">Add Caller</span>
             </label>
         </div>
         <div class="slds-checkbox">
-            <input type="checkbox" name="options" id="showAddBlindTransferButton" checked="true"></input>
+            <input type="checkbox" name="options" id="showAddBlindTransferButton" checked>
             <label class="slds-checkbox__label" for="showAddBlindTransferButton">
-                <span class="slds-checkbox_faux"></span>Blind Transfer</span>
+                <span class="slds-checkbox_faux"></span>
+                <span class="slds-form-element__label">Blind Transfer</span>
             </label>
         </div>
         <div class="slds-checkbox">
-            <input type="checkbox" name="options" id="showMergeButton" checked="true"></input>
+            <input type="checkbox" name="options" id="showMergeButton" checked>
             <label class="slds-checkbox__label" for="showMergeButton">
-                <span class="slds-checkbox_faux"></span>Merge</span>
+                <span class="slds-checkbox_faux"></span>
+                <span class="slds-form-element__label">Merge</span>
             </label>
         </div>
         <div class="slds-checkbox">
-            <input type="checkbox" name="options" id="showSwapButton" checked="true"></input>
+            <input type="checkbox" name="options" id="showSwapButton" checked>
             <label class="slds-checkbox__label" for="showSwapButton">
-                <span class="slds-checkbox_faux"></span>Swap</span>
+                <span class="slds-checkbox_faux"></span>
+                <span class="slds-form-element__label">Swap</span>
             </label>
         </div>
     </div>
@@ -591,7 +595,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
             <div class="slds-form-element">
                 <div class="slds-form-element__control">
                     <div class="slds-checkbox">
-                        <input type="checkbox" name="options" id="callHasAccept" checked=""></input>
+                        <input type="checkbox" name="options" id="callHasAccept" checked>
                         <label class="slds-checkbox__label" for="callHasAccept">
                             <span class="slds-checkbox_faux"></span>
                             <span class="slds-form-element__label">Accept Call</span>
@@ -602,7 +606,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
             <div class="slds-form-element">
                 <div class="slds-form-element__control">
                     <div class="slds-checkbox">
-                        <input type="checkbox" name="options" id="callHasDecline" checked=""></input>
+                        <input type="checkbox" name="options" id="callHasDecline" checked>
                         <label class="slds-checkbox__label" for="callHasDecline">
                             <span class="slds-checkbox_faux"></span>
                             <span class="slds-form-element__label">Decline Call</span>
@@ -613,7 +617,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
             <div class="slds-form-element">
                 <div class="slds-form-element__control">
                     <div class="slds-checkbox">
-                        <input type="checkbox" name="options" id="callHasAddParticipant" checked=""></input>
+                        <input type="checkbox" name="options" id="callHasAddParticipant" checked>
                         <label class="slds-checkbox__label" for="callHasAddParticipant">
                             <span class="slds-checkbox_faux"></span>
                             <span class="slds-form-element__label">Add Participant</span>
@@ -638,7 +642,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
             <div class="slds-form-element">
                 <div class="slds-form-element__control">
                     <div class="slds-checkbox">
-                        <input type="checkbox" name="options" id="callHasMute" checked=""></input>
+                        <input type="checkbox" name="options" id="callHasMute" checked>
                         <label class="slds-checkbox__label" for="callHasMute">
                             <span class="slds-checkbox_faux"></span>
                             <span class="slds-form-element__label">Mute</span>
@@ -649,7 +653,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
             <div class="slds-form-element">
                 <div class="slds-form-element__control">
                     <div class="slds-checkbox">
-                        <input type="checkbox" name="options" id="callHasHold" checked=""></input>
+                        <input type="checkbox" name="options" id="callHasHold" checked>
                         <label class="slds-checkbox__label" for="callHasHold">
                             <span class="slds-checkbox_faux"></span>
                             <span class="slds-form-element__label">Hold</span>
@@ -660,7 +664,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
             <div class="slds-form-element">
                 <div class="slds-form-element__control">
                     <div class="slds-checkbox">
-                        <input type="checkbox" name="options" id="callHasRecord" checked=""></input>
+                        <input type="checkbox" name="options" id="callHasRecord" checked>
                         <label class="slds-checkbox__label" for="callHasRecord">
                             <span class="slds-checkbox_faux"></span>
                             <span class="slds-form-element__label">Record</span>
@@ -685,7 +689,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
             <div class="slds-form-element">
                 <div class="slds-form-element__control">
                     <div class="slds-checkbox">
-                        <input type="checkbox" name="options" id="callHasExtensionToggle" checked=""></input>
+                        <input type="checkbox" name="options" id="callHasExtensionToggle" checked>
                         <label class="slds-checkbox__label" for="callHasExtensionToggle">
                             <span class="slds-checkbox_faux"></span>
                             <span class="slds-form-element__label">Extension</span>
@@ -696,7 +700,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
             <div class="slds-form-element">
                 <div class="slds-form-element__control">
                     <div class="slds-checkbox">
-                        <input type="checkbox" name="options" id="callHasSwap" checked=""></input>
+                        <input type="checkbox" name="options" id="callHasSwap" checked>
                         <label class="slds-checkbox__label" for="callHasSwap">
                             <span class="slds-checkbox_faux"></span>
                             <span class="slds-form-element__label">Swap</span>
@@ -707,7 +711,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
             <div class="slds-form-element">
                 <div class="slds-form-element__control">
                     <div class="slds-checkbox">
-                        <input type="checkbox" name="options" id="callHasConference" checked=""></input>
+                        <input type="checkbox" name="options" id="callHasConference" checked>
                         <label class="slds-checkbox__label" for="callHasConference">
                             <span class="slds-checkbox_faux"></span>
                             <span class="slds-form-element__label">Conference</span>
@@ -719,7 +723,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
     </div>
 </div>
 <div class="slds-card__body slds-card__body_inner slds-form-element__control slds-input-has-fixed-addon slds-m-bottom_small">
-    <input type="text" id="phoneNumber-input" placeholder="Enter a participant phone number..." aria-labelledby="fixed-text-label fixed-text-addon-pre fixed-text-addon-post" class="slds-input"></input>
+    <input type="text" id="phoneNumber-input" placeholder="Enter a participant phone number..." aria-labelledby="fixed-text-label fixed-text-addon-pre fixed-text-addon-post" class="slds-input">
 </div>
 <div class="slds-card__body slds-card__body_inner slds-input-has-fixed-addon slds-form-element__control slds-m-bottom_small">
     <button class="slds-button slds-button_outline-brand" id="new-inbound-call">Inbound&nbsp;Call</button>
@@ -828,7 +832,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
 <div class="slds-grid"> 
     <div class="slds-col slds-form-element slds-m-bottom_medium">
         <div class="slds-form-element__control">
-            <textarea readonly="true" rows="5" id="active-calls-text0" class="slds-textarea"></textarea>
+            <textarea readonly rows="5" id="active-calls-text0" class="slds-textarea"></textarea>
         </div>
     </div>
 </div>
@@ -855,7 +859,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
     <div class="slds-grid"> 
         <div class="slds-col slds-form-element slds-m-bottom_medium">
             <div class="slds-form-element__control">
-                <textarea readonly="true" rows="5" id="active-calls-text1" class="slds-textarea"></textarea>
+                <textarea readonly rows="5" id="active-calls-text1" class="slds-textarea"></textarea>
             </div>
         </div>
     </div>
@@ -884,7 +888,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
     <div class="slds-grid"> 
         <div class="slds-col slds-form-element slds-m-bottom_medium">
             <div class="slds-form-element__control">
-                <textarea readonly="true" rows="5" id="active-calls-text2" class="slds-textarea"></textarea>
+                <textarea readonly rows="5" id="active-calls-text2" class="slds-textarea"></textarea>
             </div>
         </div>
     </div>
@@ -913,7 +917,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
     <div class="slds-grid"> 
         <div class="slds-col slds-form-element slds-m-bottom_medium">
             <div class="slds-form-element__control">
-                <textarea readonly="true" rows="5" id="active-calls-text3" class="slds-textarea"></textarea>
+                <textarea readonly rows="5" id="active-calls-text3" class="slds-textarea"></textarea>
             </div>
         </div>
     </div>
@@ -942,7 +946,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
     <div class="slds-grid"> 
         <div class="slds-col slds-form-element slds-m-bottom_medium">
             <div class="slds-form-element__control">
-                <textarea readonly="true" rows="5" id="active-calls-text4" class="slds-textarea"></textarea>
+                <textarea readonly rows="5" id="active-calls-text4" class="slds-textarea"></textarea>
             </div>
         </div>
     </div>
@@ -971,7 +975,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
     <div class="slds-grid"> 
         <div class="slds-col slds-form-element slds-m-bottom_medium">
             <div class="slds-form-element__control">
-                <textarea readonly="true" rows="5" id="active-calls-text5" class="slds-textarea"></textarea>
+                <textarea readonly rows="5" id="active-calls-text5" class="slds-textarea"></textarea>
             </div>
         </div>
     </div>
@@ -999,7 +1003,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
     <div class="slds-grid"> 
         <div class="slds-col slds-form-element slds-m-bottom_medium">
             <div class="slds-form-element__control">
-                <textarea readonly="true" rows="5" id="active-calls-text6" class="slds-textarea"></textarea>
+                <textarea readonly rows="5" id="active-calls-text6" class="slds-textarea"></textarea>
             </div>
         </div>
     </div>
@@ -1017,7 +1021,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
         <div class="slds-form-element">
             <div class="slds-form-element__control">
                 <div class="slds-checkbox">
-                    <input type="checkbox" name="options" id="endCallDisabled"></input>
+                    <input type="checkbox" name="options" id="endCallDisabled">
                     <label class="slds-checkbox__label" for="endCallDisabled">
                         <span class="slds-checkbox_faux"></span>
                         <span class="slds-form-element__label">Disable end call button</span>
@@ -1034,7 +1038,13 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
     </div>
 
 
-
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 </article>
 <article class="slds-card">
     <div class="slds-card__header slds-grid">
@@ -1053,7 +1063,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
         <div class="slds-form-element">
             <div id="routingSettings" class="slds-form-element__control slds-grid slds-container--small  slds-m-top_medium">
                 <span class="slds-radio">
-                    <input type="radio" id="federatedRouting" value="federatedRouting" name="routing" checked=""></input>
+                    <input type="radio" id="federatedRouting" value="federatedRouting" name="routing" checked>
                     <label class="slds-radio__label" for="federatedRouting">
                         <span class="slds-radio_faux"></span>
                         <span class="slds-form-element__label">Federated Routing</span>
@@ -1075,7 +1085,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                             Omni Flow Dev Name/API Name: 
                         </label>
                         <div class="slds-form-element__control">
-                            <input type="text" id="flowDevName" placeholder="" required="true" class="slds-input"></input>
+                            <input type="text" id="flowDevName" placeholder="" required="true" class="slds-input">
                         </div>
                     </div>
                     <div class="slds-form-element">
@@ -1083,7 +1093,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                             Salesforce Fallback Queue ID: 
                         </label>
                         <div class="slds-form-element__control">
-                            <input type="text" id="fallbackQueue" placeholder="" required="true" class="slds-input"></input>
+                            <input type="text" id="fallbackQueue" placeholder="" required="true" class="slds-input">
                         </div>
                     </div>
                 </div>
@@ -1107,21 +1117,21 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
     <div class="slds-card__body slds-card__body_inner">Simulate a real-time call transcript. Select a speaker and enter or record a statement or question. For example, select Agent and enter "Hello, how can I help you?". Build out the transcript by switching between speakers. Comments appear in the Conversation component on the Voice Call record.</div>
     <div class="slds-card__body slds-card__body_inner">
         <div class="slds-form-element">
-            <label class="slds-form-element__label" for="form-element-01">Voice Call <strong>vendorCallKey</strong> (Not Required for Inbound Calls)</label>
+            <label class="slds-form-element__label" for="transcription-vendor-call-key">Voice Call <strong>vendorCallKey</strong> (Not Required for Inbound Calls)</label>
             <div class="slds-form-element__control">
-                <input type="text" id="transcription-vendor-call-key" placeholder="Voice Call vendorCallKey" class="slds-input"></input>
+                <input type="text" id="transcription-vendor-call-key" placeholder="Voice Call vendorCallKey" class="slds-input">
             </div>
         </div>
         <div class="slds-form-element">
-            <label class="slds-form-element__label" for="form-element-01">Customer Phone Number (Not Required for Inbound Calls)</label>
+            <label class="slds-form-element__label" for="transcription-customer-phone-number">Customer Phone Number (Not Required for Inbound Calls)</label>
             <div class="slds-form-element__control">
-                <input type="text" id="transcription-customer-phone-number" placeholder="Customer Phone Number" class="slds-input"></input>
+                <input type="text" id="transcription-customer-phone-number" placeholder="Customer Phone Number" class="slds-input">
             </div>
         </div>
         <div class="slds-form-element">
-            <label class="slds-form-element__label" for="form-element-01">External User ID (Only use when selecting External User)</label>
+            <label class="slds-form-element__label" for="transcription-external-user-id">External User ID (Only use when selecting External User)</label>
             <div class="slds-form-element__control">
-                <input type="text" id="transcription-external-user-id" placeholder="External User ID" class="slds-input"></input>
+                <input type="text" id="transcription-external-user-id" placeholder="External User ID" class="slds-input">
             </div>
         </div>
     </div>
@@ -1170,7 +1180,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                         </div>
                     </div>
                 </div>
-                <input type="text" id="transcription-text-view" placeholder="Write a message..." aria-labelledby="fixed-text-label fixed-text-addon-pre fixed-text-addon-post" class="slds-input"></input>
+                <input type="text" id="transcription-text-view" placeholder="Write a message..." aria-labelledby="fixed-text-label fixed-text-addon-pre fixed-text-addon-post" class="slds-input">
                 <button class="slds-button slds-button_outline-brand slds-button_stretch" id="send-transcription">Add to Transcript</button>
             </div>
         </div>
@@ -1203,15 +1213,15 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
   <div class="slds-card__body slds-card__body_inner">Simulate a real-time consult call transcript. Select a speaker and enter a statement or question. For example, select Human agent and enter "Hello, how can I help you?". Build out the transcript by switching between speakers. Comments appear in the Conversation Body component on the Consult Voice Call record.</div>
   <div class="slds-card__body slds-card__body_inner">
       <div class="slds-form-element">
-          <label class="slds-form-element__label" for="form-element-01">Consult Voice Call <strong>vendorCallKey</strong>
+          <label class="slds-form-element__label" for="consult-transcription-vendor-call-key">Consult Voice Call <strong>vendorCallKey</strong></label>
               <div class="slds-form-element__control">
-                  <input type="text" id="consult-transcription-vendor-call-key" placeholder="Consult Voice Call vendorCallKey" class="slds-input"></input>
+                  <input type="text" id="consult-transcription-vendor-call-key" placeholder="Consult Voice Call vendorCallKey" class="slds-input">
               </div>
       </div>
       <div class="slds-form-element">
-          <label class="slds-form-element__label" for="form-element-01">External User ID (Only use when selecting External User)</label>
+          <label class="slds-form-element__label" for="consult-transcription-external-user-id">External User ID (Only use when selecting External User)</label>
           <div class="slds-form-element__control">
-              <input type="text" id="consult-transcription-external-user-id" placeholder="Consult External User ID" class="slds-input"></input>
+              <input type="text" id="consult-transcription-external-user-id" placeholder="Consult External User ID" class="slds-input">
           </div>
       </div>
   </div>
@@ -1255,7 +1265,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                       </div>
                   </div>
               </div>
-              <input type="text" id="consult-transcription-text-view" placeholder="Write a message..." aria-labelledby="fixed-text-label fixed-text-addon-pre fixed-text-addon-post" class="slds-input"></input>
+              <input type="text" id="consult-transcription-text-view" placeholder="Write a message..." aria-labelledby="fixed-text-label fixed-text-addon-pre fixed-text-addon-post" class="slds-input">
               <button class="slds-button slds-button_outline-brand slds-button_stretch" id="consult-send-transcription">Add to Transcript</button>
           </div>
       </div>
@@ -1280,7 +1290,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                 Voice Call ID (Not Required for Inbound Calls)
             </label>
             <div class="slds-form-element__control">
-                <input type="text" id="voice-id" placeholder="" maxlength="18" required="" class="slds-input"></input>
+                <input type="text" id="voice-id" placeholder="" maxlength="18" required="" class="slds-input">
             </div>
         </div>
         <div class="slds-form-element">
@@ -1288,7 +1298,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                 Recording Length (Seconds)
             </label>
             <div class="slds-form-element__control">
-                <input type="number" id="interaction-duration" placeholder="" required="" class="slds-input"></input>
+                <input type="number" id="interaction-duration" placeholder="" required="" class="slds-input">
             </div>
         </div>
         <div class="slds-form-element">
@@ -1296,7 +1306,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                 On-Hold Time (Seconds)
             </label>
             <div class="slds-form-element__control">
-                <input type="number" id="hold-duration" placeholder="" required="" class="slds-input"></input>
+                <input type="number" id="hold-duration" placeholder="" required="" class="slds-input">
             </div>
         </div>
         <div class="slds-form-element slds-m-bottom_medium">
@@ -1304,7 +1314,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                 Recording URL
             </label>
             <div class="slds-form-element__control">
-                <input type="text" id="recording-link" required="" class="slds-input"></input>
+                <input type="text" id="recording-link" required="" class="slds-input">
             </div>
         </div>
         <button class="slds-button slds-button_outline-brand" id="send-post-call-recording">Publish</button>
@@ -1331,7 +1341,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                 Dialed Phone Number
             </label>
             <div class="slds-form-element__control">
-                <input type="text" id="voicemail-dialedphone"   placeholder="Enter dialed phone number" required="" class="slds-input"></input>
+                <input type="text" id="voicemail-dialedphone"   placeholder="Enter dialed phone number" required="" class="slds-input">
             </div>
         </div>
         <div class="slds-form-element slds-m-bottom_medium">
@@ -1347,7 +1357,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                 Recording URL
             </label>
             <div class="slds-form-element__control">
-                <input type="text" id="voicemail-recording" required="" class="slds-input"></input>
+                <input type="text" id="voicemail-recording" required="" class="slds-input">
             </div>
         </div>
         <div class="slds-form-element slds-m-bottom_medium">
@@ -1355,7 +1365,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                 Recording Length (Seconds)
             </label>
             <div class="slds-form-element__control">
-                <input type="number" id="voicemail-length" placeholder="" required="" class="slds-input"></input>
+                <input type="number" id="voicemail-length" placeholder="" required="" class="slds-input">
             </div>
         </div>
         <div class="slds-form-element slds-m-bottom_medium">
@@ -1363,7 +1373,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                 Caller Number
             </label>
             <div class="slds-form-element__control">
-                <input type="text" id="voicemail-caller"   placeholder="Enter Caller Number" required="" class="slds-input"></input>
+                <input type="text" id="voicemail-caller"   placeholder="Enter Caller Number" required="" class="slds-input">
             </div>
         </div>
         <button class="slds-button slds-button_outline-brand" id="send-voice-mail">Send Voice Mail</button>
@@ -1421,7 +1431,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
         <div class="slds-form-element slds-m-bottom_medium">
             <label class="slds-form-element__label" for="sendRealtimeConversationEvents-vendor-call-key">Voice Call <strong>vendorCallKey</strong></label>
             <div class="slds-form-element__control">
-                <input type="text" id="sendRealtimeConversationEvents-vendor-call-key" placeholder="Voice Call vendorCallKey" class="slds-input"></input>
+                <input type="text" id="sendRealtimeConversationEvents-vendor-call-key" placeholder="Voice Call vendorCallKey" class="slds-input">
             </div>
         </div>
         <div class="slds-form-element slds-m-bottom_medium">
@@ -1429,11 +1439,11 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                 Service
             </label>
             <div class="slds-form-element__control">
-                <input type="text" id="sendRealtimeConversationEvents-service" required="" class="slds-input"></input>
+                <input type="text" id="sendRealtimeConversationEvents-service" required="" class="slds-input">
             </div>
         </div>
         <div class="slds-checkbox slds-m-bottom_medium">
-            <input type="checkbox" name="options" id="sendRealtimeConversationEvents-persist"></input>
+            <input type="checkbox" name="options" id="sendRealtimeConversationEvents-persist">
             <label class="slds-checkbox__label" for="sendRealtimeConversationEvents-persist">
                 <span class="slds-checkbox_faux"></span>
                 <span class="slds-form-element__label">Persist Intelligence Signal</span>
@@ -1481,7 +1491,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
         <div class="slds-form-element slds-m-bottom_medium">
             <div class="slds-form-element__control">
                 <div class="slds-checkbox slds-m-bottom_medium">
-                    <input type="checkbox" name="options" id="showLoginPageCheckbox"></input>
+                    <input type="checkbox" name="options" id="showLoginPageCheckbox">
                     <label class="slds-checkbox__label" for="showLoginPageCheckbox">
                         <span class="slds-checkbox_faux"></span>
                         <span class="slds-form-element__label"><b>Show telephony login screen</b></span>
@@ -1651,29 +1661,6 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
 
                         </div>
                     </article>
-                    <article class="slds-card">
-                        <article class="slds-card">
-                            <div class="slds-card__header slds-grid slds-border_bottom slds-p-bottom_small">
-                                <header class="slds-media slds-media_center slds-has-flexi-truncate">
-                                    <div class="slds-media__figure">
-                                        <span class="slds-icon_container slds-icon-standard-events" title="Event Log">
-                                            <svg class="slds-icon slds-icon_small" aria-hidden="true">
-                                                <use xlink:href="/Assets/symbols.svg#events"></use>
-                                            </svg>
-                                            <span class="slds-assistive-text">Event Log</span>
-                                        </span>
-                                    </div>
-                                    <div class="slds-media__body">
-                                        <h2 class="slds-card__header-title">
-                                            <span>Event Log</span>
-                                        </h2>
-                                    </div>
-                                </header>
-                            </div>
-                            <div class="slds-card__body slds-card__body_inner slds-p-bottom--small">
-                                <textarea id="eventLog" disabled="" placeholder="Response body" class="slds-textarea event-log"></textarea>
-                            </div>
-                        </article>
                         <!-- Settings -->
                         <article class="slds-card">
                             <div class="demo-app-setup-msg-banner" id="demo-app-setup-msg-banner">
@@ -1694,27 +1681,26 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                             </div>
 
                             <div class="slds-p-top_x-large slds-p-left_xx-small slds-p-right_small slds-p-bottom_x-large demo-app-setup-form">
-                                <article class="slds-card">
-                                    <div class="slds-card__header slds-grid slds-p-bottom_small">
-                                        <header class="slds-media slds-media_center slds-has-flexi-truncate">
-                                            <div class="slds-media__figure">
-                                                <span class="slds-icon_container slds-icon-standard-settings" title="Settings">
-                                                    <svg class="slds-icon slds-icon_small" aria-hidden="true">
-                                                        <use xlink:href="/Assets/symbols.svg#settings"></use>
-                                                    </svg>
-                                                    <span class="slds-assistive-text">Settings</span>
-                                                </span>
+                                <ul class="slds-accordion">
+                                    <li class="slds-accordion__list-item">
+                                        <section class="slds-accordion__section slds-is-open">
+                                            <div class="slds-accordion__summary slds-card__header slds-grid slds-p-bottom_small">
+                                                <button class="slds-accordion__summary-action slds-button"
+                                                    aria-expanded="true" title="Toggle Expanded" aria-controls="settingsForm">
+                                                    <span class="slds-icon_container slds-icon-standard-settings slds-m-right_small" title="Settings">
+                                                        <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                                                            <use xlink:href="/Assets/symbols.svg#settings"></use>
+                                                        </svg>
+                                                        <span class="slds-assistive-text">Settings</span>
+                                                    </span>
+                                                    <span class="slds-accordion__summary-heading slds-card__header-title slds-truncate">
+                                                        Settings
+                                                    </span>
+                                                    <img src="/assets/healthCheckIcons/switch.svg" alt="" aria-hidden="true" class="slds-button__icon slds-button__icon_right">
+                                                    <span class="slds-assistive-text slds-accordion__summary-content">Toggle Expanded</span>
+                                                </button>
                                             </div>
-                                            <div class="slds-media__body">
-                                                <h2 class="slds-card__header-title">
-                                                    <span>Settings</span>
-                                                </h2>
-                                            </div>
-                                        </header>
-                                    </div>
-                                </article>
-
-                                <form id="settingsForm"> 
+                                <form id="settingsForm" class="slds-accordion__content"> 
                                     <div class="slds-form slds-p-left_small">
                                       <div class="slds-form-element slds-form-element_stacked">
                                         <label class="slds-form-element__label slds-truncate" for="authorizationContext">ConversationChannelDefinition API Name:</label>
@@ -1809,7 +1795,11 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
     </div>
 </div>
 </div>
+</div>
 </form>
+</section>
+</li>
+</ul>
 </div>
 </article>
 
@@ -1828,9 +1818,33 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                     </span>
                 </div>
                 <div class="slds-media__body">
-                    <h2 class="slds-card__header-title">
-                        <span>API Lab</span>
-                    </h2>
+                    <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                        <h2 class="slds-card__header-title">
+                            <span>API Lab</span>
+                        </h2>
+                        <div style="position:relative;margin-left:0.5rem;">
+                            <button class="slds-button slds-button_icon slds-button_icon-medium" id="api-lab-info-button" aria-describedby="api lab help"
+                                aria-disabled="true" title="API Lab Help">
+                                <svg class="slds-button__icon" aria-hidden="true">
+                                    <use xlink:href="/Assets/info.svg"></use>
+                                </svg>
+                                <span class="slds-assistive-text">API Lab Help</span>
+                            </button>
+                            <div id="api-lab-info-bubble" class="slds-popover slds-popover_tooltip slds-nubbin_bottom-right slds-slide-from-right-to-left slds-button_brand slds-hide" role="tooltip">
+                                <div class="slds-popover__body">
+                                    <p>Use the magicwand [
+                                        <span class="slds-icon_container slds-icon-utility-info" title="API Lab Help">
+                                            <svg class="slds-icon slds-icon slds-icon_xx-small" aria-hidden="true">
+                                                <use xlink:href="/Assets/magicwand.svg"></use>
+                                            </svg>
+                                            <span class="slds-assistive-text">API Lab Help</span>
+                                            ] button to autofill the fields.
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </header>
         </div>
@@ -1839,31 +1853,34 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
     <form id="apiLabForm">
         <div class="slds-form slds-p-left_small">
             <div class="slds-form-element slds-form-element_stacked">
-                <div class="slds-grid slds-wrap slds-p-top_small ">
+                <div class="slds-grid slds-wrap slds-p-vertical_small ">
                     <!-- left panel for input -->
                     <div class="slds-col slds-size_1-of-2 slds-p-right_x-small grid-item">
                         <div class="slds-box-input">
 
                             <div class="slds-form-element slds-form-element_stacked">
                                 <div class="slds-form-element__control">
-                                    <label class="slds-form-element__label slds-truncate" for="apiName"><b>API Name</b></label>
+                                    <label class="slds-form-element__label slds-truncate" for="selected-api-name"><b>API Name</b></label>
                                     <div class="slds-form-element__control">
                                         <select class="slds-select" id="selected-api-name">
-                                            <option value="CONSENT" selected>PATCH Consent</option>
+                                            <option value="POST_MESSAGING_SESSION" selected>POST Messaging Session</option>
                                             <option value="POST_ROUTE">POST Route</option>
-                                            <option value="DELETE_ROUTE">DELETE Route</option>
-                                            <option value="POST_ROUTING_RESULT">POST RoutingResult</option>
-                                            <option value="PATCH_REGISTER_CAPABILITIES">PATCH Capabilities</option>
                                             <option value="POST_AGENT_WORK">POST AgentWork</option>
-                                            <option value="POST_CONVERSATION_HISTORY">POST Conversation History</option>
-                                            <option value="POST_CONVERSATION">POST Conversation</option>
+                                            <option value="POST_ROUTING_RESULT">POST RoutingResult</option>
+                                            <option value="DELETE_ROUTE">DELETE Route</option>
                                             <option value="POST_PARTICIPANT">POST Participant</option>
-                                            <option value="POST_MESSAGING_SESSION">POST Messaging Session</option>
+                                            <option value="POST_CONVERSATION">POST Conversation</option>
+                                            <option value="POST_CONVERSATION_HISTORY">POST Conversation History</option>
+                                            <option value="PATCH_AGENT_WORK">PATCH AgentWork</option>
+                                            <option value="CONSENT">PATCH Consent</option>
+                                            <option value="PATCH_REGISTER_CAPABILITIES">PATCH Capabilities</option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
                             <div class="slds-form-element slds-form-element_stacked">
+
+                                <!-- Begin: consentAPIContainer -->
                                 <div id = "consentAPIContainer">
                                     <label class="slds-form-element__label slds-truncate" for="consentStatus">Consent Status</label>
                                     <div class="slds-form-element__control">
@@ -1875,17 +1892,32 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                                         </select>
                                     </div>
                                 </div>
+                                <!-- End: consentAPIContainer -->
+
+                                <!-- Begin: postAgentWorkAPIContainer -->
                                 <div id="postAgentWorkAPIContainer" class="slds-hide">
                                     <div class="slds-form-element slds-form-element_stacked">
-                                        <label class="slds-form-element__label" for="userId"><abbr class="slds-required" title="required">* </abbr>User Id</label>
-                                        <div class="slds-form-element__control">
-                                            <input type="text" id="userIdForAgentWork" placeholder="Salesforce User Id or External User Id" class="slds-input" />
+                                        <label class="slds-form-element__label" for="userIdForAgentWork"><abbr class="slds-required" title="required">* </abbr>User Id</label>
+                                        <div class="slds-form-element__control slds-grid">
+                                            <input type="text" id="userIdForAgentWork" placeholder="Salesforce User Id or External User Id" class="slds-input slds-col slds-size_10-of-12" with-ff-cache-key="userId" />
+                                            <button class="slds-col slds-size_2-of-12 slds-button slds-button_icon slds-button_icon-brand auto-fill-button" title="Auto Fill" auto-fill-target-id="userIdForAgentWork">
+                                                <svg class="slds-button__icon" aria-hidden="true">
+                                                  <use xlink:href="/Assets/magicwand.svg"></use>
+                                                </svg>
+                                                <span class="slds-assistive-text">Auto Fill</span>
+                                              </button>
                                         </div>
                                     </div>
                                     <div class="slds-form-element slds-form-element_stacked">
                                         <label class="slds-form-element__label" for="workItemIdForAgentWork"><abbr class="slds-required" title="required">* </abbr>Work Item Id</label>
-                                        <div class="slds-form-element__control">
-                                            <input type="text" id="workItemIdForAgentWork" placeholder="Salesforce WorkItem Id" class="slds-input" />
+                                        <div class="slds-form-element__control slds-grid">
+                                            <input type="text" id="workItemIdForAgentWork" placeholder="Salesforce WorkItem Id" class="slds-input slds-col slds-size_10-of-12" with-ff-cache-key="workItemId" />
+                                            <button class="slds-col slds-size_2-of-12 slds-button slds-button_icon slds-button_icon-brand auto-fill-button" title="Auto Fill" auto-fill-target-id="workItemIdForAgentWork">
+                                                <svg class="slds-button__icon" aria-hidden="true">
+                                                  <use xlink:href="/Assets/magicwand.svg"></use>
+                                                </svg>
+                                                <span class="slds-assistive-text">Auto Fill</span>
+                                              </button>
                                         </div>
                                     </div>
                                     <div class="slds-form-element slds-form-element_stacked">
@@ -1901,7 +1933,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                                                 <tr>
                                                     <td class="slds-p-left_medium demo-app-agentWorkAction">
                                                         <div class="slds-checkbox" id="transferActionContainer">
-                                                            <input type="checkbox" name="options" id="transferAction"></input>
+                                                            <input type="checkbox" name="options" id="transferAction">
                                                             <label class="slds-checkbox__label" for="transferAction">
                                                                 <span class="slds-checkbox_faux"></span>
                                                                 <span class="slds-form-element__label">Transfer</span>
@@ -1923,7 +1955,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                                                 <tr>
                                                     <td class="slds-p-left_medium demo-app-agentWorkAction">
                                                         <div class="slds-checkbox" id="conferenceActionContainer">
-                                                            <input type="checkbox" name="options" id="conferenceAction"></input>
+                                                            <input type="checkbox" name="options" id="conferenceAction">
                                                             <label class="slds-checkbox__label" for="conferenceAction">
                                                                 <span class="slds-checkbox_faux"></span>
                                                                 <span class="slds-form-element__label">Conference</span>
@@ -1964,8 +1996,14 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                                         </div>
                                         <div class="slds-form-element slds-form-element_stacked">
                                             <label class="slds-form-element__label" for="conversationId"><abbr class="slds-required" title="required">* </abbr>Conversation Identifier</label>
-                                            <div class="slds-form-element__control">
-                                                <input type="text" id="conversationIdForAgentWorkCP" placeholder="The conversation identifier associated with the work." class="slds-input" />
+                                            <div class="slds-form-element__control slds-grid">
+                                                <input type="text" id="conversationIdForAgentWorkCP" placeholder="The conversation identifier associated with the work." class="slds-input slds-col slds-size_10-of-12" with-ff-cache-key="conversationIdentifier" />
+                                                <button class="slds-col slds-size_2-of-12 slds-button slds-button_icon slds-button_icon-brand auto-fill-button" title="Auto Fill" auto-fill-target-id="conversationIdForAgentWorkCP">
+                                                    <svg class="slds-button__icon" aria-hidden="true">
+                                                      <use xlink:href="/Assets/magicwand.svg"></use>
+                                                    </svg>
+                                                    <span class="slds-assistive-text">Auto Fill</span>
+                                                  </button>
                                             </div>
                                         </div>
                                         <div class="slds-form-element slds-form-element_stacked">
@@ -1994,8 +2032,14 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                                         </div>
                                         <div class="slds-form-element slds-form-element_stacked">
                                             <label class="slds-form-element__label" for="conversationId"><abbr class="slds-required" title="required">* </abbr>Conversation Identifier</label>
-                                            <div class="slds-form-element__control">
-                                                <input type="text" id="conversationIdForAgentWorkCW" placeholder="The conversation identifier associated with the work." class="slds-input" />
+                                            <div class="slds-form-element__control slds-grid">
+                                                <input type="text" id="conversationIdForAgentWorkCW" placeholder="The conversation identifier associated with the work." class="slds-input slds-col slds-size_10-of-12" with-ff-cache-key="conversationIdentifier" />
+                                                <button class="slds-col slds-size_2-of-12 slds-button slds-button_icon slds-button_icon-brand auto-fill-button" title="Auto Fill" auto-fill-target-id="conversationIdForAgentWorkCW">
+                                                    <svg class="slds-button__icon" aria-hidden="true">
+                                                      <use xlink:href="/Assets/magicwand.svg"></use>
+                                                    </svg>
+                                                    <span class="slds-assistive-text">Auto Fill</span>
+                                                  </button>
                                             </div>
                                         </div>
                                         <div class="slds-form-element slds-form-element_stacked">
@@ -2016,11 +2060,54 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                                         </div>
                                     </div>
                                 </div>
+                                <!-- End: postAgentWorkAPIContainer -->
+
+                                <!-- Begin: patchAgentWorkAPIContainer -->
+                                <div id="patchAgentWorkAPIContainer" class="slds-hide">
+                                    <div class="slds-form-element slds-form-element_stacked">
+                                        <label class="slds-form-element__label" for="patchAgentWorkId"><abbr class="slds-required" title="required">* </abbr>AgentWork Id</label>
+                                        <div class="slds-form-element__control slds-grid">
+                                            <input type="text" id="patchAgentWorkId" placeholder="Salesforce AgentWork Id" class="slds-input slds-col slds-size_10-of-12" with-ff-cache-key="workId" />
+                                            <button class="slds-col slds-size_2-of-12 slds-button slds-button_icon slds-button_icon-brand auto-fill-button" title="Auto Fill" auto-fill-target-id="patchAgentWorkId">
+                                                <svg class="slds-button__icon" aria-hidden="true">
+                                                  <use xlink:href="/Assets/magicwand.svg"></use>
+                                                </svg>
+                                                <span class="slds-assistive-text">Auto Fill</span>
+                                              </button>
+                                        </div>
+                                    </div>
+                                    <div class="slds-form-element slds-form-element_stacked">
+                                        <label class="slds-form-element__label slds-truncate" for="agentWorkStatusDropdown">Agent Work Status</label>
+                                        <div class="slds-form-element__control">
+                                            <select class="slds-select" id="agentWorkStatusDropdown">
+                                                <option value="Cancel">Cancel</option>
+                                                <option value="Close">Close</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="slds-form-element slds-form-element_stacked">
+                                        <label class="slds-form-element__label slds-truncate" for="contextTypeDropdown">Context Type</label>
+                                        <div class="slds-form-element__control">
+                                            <select class="slds-select" id="contextTypeDropdown">
+                                                <option value="Agent">Agent</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- End: patchAgentWorkAPIContainer -->
+
+                                <!-- Begin: postRouteAPIContainer -->
                                 <div id = "postRouteAPIContainer" class="slds-hide" >
                                     <div class="slds-form-element slds-form-element_stacked">
                                         <label class="slds-form-element__label" for="conversationId">Conversation Id</label>
-                                        <div class="slds-form-element__control">
-                                            <input type="text" id="conversationId" placeholder="Please enter conversation id" class="slds-input" />
+                                        <div class="slds-form-element__control slds-grid">
+                                            <input type="text" id="conversationId" placeholder="Please enter conversation id" class="slds-input slds-col slds-size_10-of-12" with-ff-cache-key="conversationIdentifier" />
+                                            <button class="slds-col slds-size_2-of-12 slds-button slds-button_icon slds-button_icon-brand auto-fill-button" title="Auto Fill" auto-fill-target-id="conversationId">
+                                                <svg class="slds-button__icon" aria-hidden="true">
+                                                  <use xlink:href="/Assets/magicwand.svg"></use>
+                                                </svg>
+                                                <span class="slds-assistive-text">Auto Fill</span>
+                                              </button>
                                         </div>
                                     </div>
                                     <div class="slds-form-element slds-form-element_stacked">
@@ -2071,10 +2158,19 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                                         </div>
                                     </div>
                                 </div>
+                                <!-- End: postRouteAPIContainer -->
+
+                                <!-- Begin: deleteRouteAPIContainer -->
                                 <div id = "deleteRouteAPIContainer" class="slds-hide">
                                     <label class="slds-form-element__label slds-truncate" for="ConversationIdForDelete">Conversation Id</label>
-                                    <div class="slds-form-element__control">
-                                        <input type="text" id="ConversationIdForDelete" placeholder="Please enter conversation id" class="slds-input" />
+                                    <div class="slds-form-element__control slds-grid">
+                                        <input type="text" id="ConversationIdForDelete" placeholder="Please enter conversation id" class="slds-input slds-col slds-size_10-of-12" with-ff-cache-key="conversationIdentifier" />
+                                        <button class="slds-col slds-size_2-of-12 slds-button slds-button_icon slds-button_icon-brand auto-fill-button" title="Auto Fill" auto-fill-target-id="ConversationIdForDelete">
+                                            <svg class="slds-button__icon" aria-hidden="true">
+                                              <use xlink:href="/Assets/magicwand.svg"></use>
+                                            </svg>
+                                            <span class="slds-assistive-text">Auto Fill</span>
+                                          </button>
                                     </div>
                                     <label class="slds-form-element__label slds-truncate" for="CancelReasonForDelete">Cancel reason</label>
                                     <div class="slds-form-element__control">
@@ -2087,17 +2183,32 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                                         </select>
                                     </div>
                                 </div>
+                                <!-- End: deleteRouteAPIContainer -->
+
+                                <!-- Begin: postRouteResultAPIContainer -->
                                 <div id = "postRouteResultAPIContainer" class="slds-hide">
                                     <div class="slds-form-element slds-form-element_stacked">
                                         <label class="slds-form-element__label" for="workItemIdForPostRoutingResult"><abbr class="slds-required" title="required">* </abbr>Work Item Id</label>
-                                        <div class="slds-form-element__control">
-                                            <input type="text" id="workItemIdForPostRoutingResult" placeholder="Please enter work time id, e.g.: 0MwLT0000000BEn" class="slds-input" />
+                                        <div class="slds-form-element__control slds-grid">
+                                            <input type="text" id="workItemIdForPostRoutingResult" placeholder="Please enter work time id, e.g.: 0MwLT0000000BEn" class="slds-input slds-col slds-size_10-of-12" with-ff-cache-key="workItemId" />
+                                            <button class="slds-col slds-size_2-of-12 slds-button slds-button_icon slds-button_icon-brand auto-fill-button" title="Auto Fill" auto-fill-target-id="workItemIdForPostRoutingResult">
+                                                <svg class="slds-button__icon" aria-hidden="true">
+                                                  <use xlink:href="/Assets/magicwand.svg"></use>
+                                                </svg>
+                                                <span class="slds-assistive-text">Auto Fill</span>
+                                              </button>
                                         </div>
                                     </div>
                                     <div class="slds-form-element slds-form-element_stacked">
                                         <label class="slds-form-element__label" for="conversationIdForPostRoutingResult"><abbr class="slds-required" title="required">* </abbr>Conversation Id</label>
-                                        <div class="slds-form-element__control">
-                                            <input type="text" id="conversationIdForPostRoutingResult" placeholder="e.g.: e587ff1f-ef6c-4373-a020-a57af78414ac" class="slds-input" />
+                                        <div class="slds-form-element__control slds-grid">
+                                            <input type="text" id="conversationIdForPostRoutingResult" placeholder="e.g.: e587ff1f-ef6c-4373-a020-a57af78414ac" class="slds-input slds-col slds-size_10-of-12" with-ff-cache-key="conversationIdentifier" />
+                                            <button class="slds-col slds-size_2-of-12 slds-button slds-button_icon slds-button_icon-brand auto-fill-button" title="Auto Fill" auto-fill-target-id="conversationIdForPostRoutingResult">
+                                                <svg class="slds-button__icon" aria-hidden="true">
+                                                  <use xlink:href="/Assets/magicwand.svg"></use>
+                                                </svg>
+                                                <span class="slds-assistive-text">Auto Fill</span>
+                                              </button>
                                         </div>
                                     </div>
                                     <div class="slds-form-element slds-form-element_stacked">
@@ -2113,7 +2224,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                                     </div>
                                     <div class="slds-form-element">
                                         <div class="slds-checkbox">
-                                            <input type="checkbox" name="options" id="successCheckbox" checked=""></input>
+                                            <input type="checkbox" name="options" id="successCheckbox" checked>
                                             <label class="slds-checkbox__label" for="successCheckbox">
                                                 <span class="slds-checkbox_faux"></span>
                                                 <span class="slds-form-element__label">Success</span>
@@ -2122,7 +2233,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                                     </div>
                                     <div class="slds-form-element slds-form-element_stacked">                                                        
                                         <div class="slds-checkbox">
-                                            <input type="checkbox" name="options" id="externallyRoutedCheckbox" checked=""></input>
+                                            <input type="checkbox" name="options" id="externallyRoutedCheckbox" checked>
                                             <label class="slds-checkbox__label" for="externallyRoutedCheckbox">
                                                 <span class="slds-checkbox_faux"></span>
                                                 <span class="slds-form-element__label">Externally Routed</span>
@@ -2138,6 +2249,9 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                                         </div>
                                     </div>
                                 </div>
+                                <!-- End: postRouteResultAPIContainer -->
+
+                                <!-- Begin: patchRegisterCapabilitiesAPIContainer -->
                                 <div id = "patchRegisterCapabilitiesAPIContainer" class="slds-hide">                                                    
                                     <div class="slds-form-element slds-form-element_stacked">
                                         <abbr class="slds-required" title="required">* </abbr><label class="slds-form-element__label" for="channelCapabilities">Register Capabilities (Upload Payload with a JSON File)</label>
@@ -2149,11 +2263,20 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                                         </div>
                                     </div>
                                 </div>
+                                <!-- End: patchRegisterCapabilitiesAPIContainer -->
+
+                                <!-- Begin: postConversationAPIContainer -->
                                 <div id = "postConversationAPIContainer" class="slds-hide">
                                     <div class="slds-form-element slds-form-element_stacked">
                                         <label class="slds-form-element__label" for="channelAddressIdentifierConv"><abbr class="slds-required" title="required">* </abbr>Channel Address Identifier</label>
-                                        <div class="slds-form-element__control">
-                                            <input type="text" id="channelAddressIdentifierConv" placeholder="Channel Address Identifier" class="slds-input" />
+                                        <div class="slds-form-element__control slds-grid">
+                                            <input type="text" id="channelAddressIdentifierConv" placeholder="Channel Address Identifier" class="slds-input slds-col slds-size_10-of-12" with-ff-cache-key="channelAddressIdentifier" />
+                                            <button class="slds-col slds-size_2-of-12 slds-button slds-button_icon slds-button_icon-brand auto-fill-button" title="Auto Fill" auto-fill-target-id="channelAddressIdentifierConv">
+                                                <svg class="slds-button__icon" aria-hidden="true">
+                                                  <use xlink:href="/Assets/magicwand.svg"></use>
+                                                </svg>
+                                                <span class="slds-assistive-text">Auto Fill</span>
+                                              </button>
                                         </div>
                                     </div>
                                     <div class="slds-form-element slds-form-element_stacked">
@@ -2170,15 +2293,24 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                                         </div>
                                     </div>
                                 </div>
+                                <!-- End: postConversationAPIContainer -->
+
+                                <!-- Begin: postConversationHistoryAPIContainer -->
                                 <div id = "postConversationHistoryAPIContainer" class="slds-hide">
                                     <div class="slds-form-element slds-form-element_stacked">
                                         <label class="slds-form-element__label" for="channelAddressIdentifierHistory"><abbr class="slds-required" title="required">* </abbr>Channel Address Identifier</label>
-                                        <div class="slds-form-element__control">
-                                            <input type="text" id="channelAddressIdentifierHistory" placeholder="Channel Address Identifier" class="slds-input" />
+                                        <div class="slds-form-element__control slds-grid">
+                                            <input type="text" id="channelAddressIdentifierHistory" placeholder="Channel Address Identifier" class="slds-input slds-col slds-size_10-of-12" with-ff-cache-key="channelAddressIdentifier" />
+                                            <button class="slds-col slds-size_2-of-12 slds-button slds-button_icon slds-button_icon-brand auto-fill-button" title="Auto Fill" auto-fill-target-id="channelAddressIdentifierHistory">
+                                                <svg class="slds-button__icon" aria-hidden="true">
+                                                  <use xlink:href="/Assets/magicwand.svg"></use>
+                                                </svg>
+                                                <span class="slds-assistive-text">Auto Fill</span>
+                                              </button>
                                         </div>
                                     </div>
                                     <div class="slds-form-element slds-form-element_stacked">
-                                        <abbr class="slds-required" title="required">* </abbr><label class="slds-form-element__label" for="ConversationHistory">Conversation Participants</label>
+                                        <abbr class="slds-required" title="required">* </abbr><label class="slds-form-element__label" for="conversationParticipants">Conversation Participants</label>
                                         <div class="slds-form-element__control">
                                             <input type="file" id="conversationParticipants" name="conversationParticipants"  accept=".json">
                                         </div>
@@ -2187,7 +2319,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                                         </div>
                                     </div>
                                     <div class="slds-form-element slds-form-element_stacked">
-                                        <abbr class="slds-required" title="required">* </abbr><label class="slds-form-element__label" for="ConversationHistory">Conversation Entries</label>
+                                        <abbr class="slds-required" title="required">* </abbr><label class="slds-form-element__label" for="conversationEntries">Conversation Entries</label>
                                         <div class="slds-form-element__control">
                                             <input type="file" id="conversationEntries" name="conversationEntries"  accept=".json">
                                         </div>
@@ -2196,11 +2328,20 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                                         </div>
                                     </div>
                                 </div>
+                                <!-- End: postConversationHistoryAPIContainer -->
+
+                                <!-- Begin: postParticipantAPIContainer -->
                                 <div id = "postParticipantAPIContainer" class="slds-hide" >
                                     <div class="slds-form-element slds-form-element_stacked">
                                         <label class="slds-form-element__label" for="conversationId"><abbr class="slds-required" title="required">* </abbr>Conversation Id</label>
-                                        <div class="slds-form-element__control">
-                                            <input type="text" id="conversationIdForPostParticipant" placeholder="Please enter conversation id" class="slds-input" />
+                                        <div class="slds-form-element__control slds-grid">
+                                            <input type="text" id="conversationIdForPostParticipant" placeholder="Please enter conversation id" class="slds-input slds-col slds-size_10-of-12" with-ff-cache-key="conversationIdentifier" />
+                                            <button class="slds-col slds-size_2-of-12 slds-button slds-button_icon slds-button_icon-brand auto-fill-button" title="Auto Fill" auto-fill-target-id="conversationIdForPostParticipant">
+                                                <svg class="slds-button__icon" aria-hidden="true">
+                                                  <use xlink:href="/Assets/magicwand.svg"></use>
+                                                </svg>
+                                                <span class="slds-assistive-text">Auto Fill</span>
+                                              </button>
                                         </div>
                                     </div>
                                     <div class="slds-form-element slds-form-element_stacked">
@@ -2219,14 +2360,23 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                                         </div>
                                     </div>
                                 </div>
+                                <!-- End: postParticipantAPIContainer -->
+
+                                <!-- Begin: post-messaging-session-container -->
                                 <div id="post-messaging-session-container" class="slds-hide">
                                     <div class="slds-form-element slds-form-element_stacked">
                                         <label class="slds-form-element__label" for="messaging-session-channel-address-id">
                                             <abbr class="slds-required" title="required">* </abbr>
                                             Channel Address Identifier
                                         </label>
-                                        <div class="slds-form-element__control">
-                                            <input type="text" id="messaging-session-channel-address-id" placeholder="Please enter Channel Address Identifier" class="slds-input" />
+                                        <div class="slds-form-element__control slds-grid">
+                                            <input type="text" id="messaging-session-channel-address-id" placeholder="Please enter Channel Address Identifier" class="slds-input slds-col slds-size_10-of-12" with-ff-cache-key="channelAddressIdentifier" />
+                                            <button class="slds-col slds-size_2-of-12 slds-button slds-button_icon slds-button_icon-brand auto-fill-button" title="Auto Fill" auto-fill-target-id="messaging-session-channel-address-id">
+                                                <svg class="slds-button__icon" aria-hidden="true">
+                                                  <use xlink:href="/Assets/magicwand.svg"></use>
+                                                </svg>
+                                                <span class="slds-assistive-text">Auto Fill</span>
+                                              </button>
                                         </div>
                                     </div>
                                     <div class="slds-form-element slds-form-element_stacked">
@@ -2234,8 +2384,14 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                                             <abbr class="slds-required" title="required">* </abbr>
                                             Conversation Identifier
                                         </label>
-                                        <div class="slds-form-element__control">
-                                            <input type="text" id="messaging-session-conversation-id" placeholder="Please enter Conversation Identifier" class="slds-input" />
+                                        <div class="slds-form-element__control slds-grid">
+                                            <input type="text" id="messaging-session-conversation-id" placeholder="Please enter Conversation Identifier" class="slds-input slds-col slds-size_10-of-12" with-ff-cache-key="conversationIdentifier" />
+                                            <button class="slds-col slds-size_2-of-12 slds-button slds-button_icon slds-button_icon-brand auto-fill-button" title="Auto Fill" auto-fill-target-id="messaging-session-conversation-id">
+                                                <svg class="slds-button__icon" aria-hidden="true">
+                                                  <use xlink:href="/Assets/magicwand.svg"></use>
+                                                </svg>
+                                                <span class="slds-assistive-text">Auto Fill</span>
+                                              </button>
                                         </div>
                                     </div>
                                     <div class="slds-form-element slds-form-element_stacked">
@@ -2243,8 +2399,14 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                                             <abbr class="slds-required" title="required">* </abbr>
                                             End User Client Identifier
                                         </label>
-                                        <div class="slds-form-element__control">
-                                            <input type="text" id="messaging-session-end-user-client-id" placeholder="Please enter End User Client Identifier" class="slds-input" />
+                                        <div class="slds-form-element__control slds-grid">
+                                            <input type="text" id="messaging-session-end-user-client-id" placeholder="Please enter End User Client Identifier" class="slds-input slds-col slds-size_10-of-12" with-ff-cache-key="endUserClientIdentifier" />
+                                            <button class="slds-col slds-size_2-of-12 slds-button slds-button_icon slds-button_icon-brand auto-fill-button" title="Auto Fill" auto-fill-target-id="messaging-session-end-user-client-id">
+                                                <svg class="slds-button__icon" aria-hidden="true">
+                                                  <use xlink:href="/Assets/magicwand.svg"></use>
+                                                </svg>
+                                                <span class="slds-assistive-text">Auto Fill</span>
+                                              </button>
                                         </div>
                                     </div>
                                     <div class="slds-form-element slds-form-element_stacked">
@@ -2276,12 +2438,20 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                                                 <abbr class="slds-required" title="required">* </abbr>
                                                 Messaging Session Id
                                             </label>
-                                            <div class="slds-form-element__control">
-                                                <input type="text" id="messaging-session-id" placeholder="Please enter Session Id" class="slds-input" />
+                                            <div class="slds-form-element__control slds-grid">
+                                                <input type="text" id="messaging-session-id" placeholder="Please enter Session Id" class="slds-input slds-col slds-size_10-of-12" with-ff-cache-key="workItemId" />
+                                                <button class="slds-col slds-size_2-of-12 slds-button slds-button_icon slds-button_icon-brand auto-fill-button" title="Auto Fill" auto-fill-target-id="messaging-session-id">
+                                                    <svg class="slds-button__icon" aria-hidden="true">
+                                                      <use xlink:href="/Assets/magicwand.svg"></use>
+                                                    </svg>
+                                                    <span class="slds-assistive-text">Auto Fill</span>
+                                                  </button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                                <!-- End: post-messaging-session-container -->
+
                                 <div class="slds-form-element slds-form-element_stacked">
                                     <div class="slds-p-top_small slds-p-bottom_small ">
                                         <button type="submit" class="slds-button slds-button_brand slds-button_stretch" id="run-selected-api-button">Run</button>
@@ -2313,7 +2483,6 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
             </div>
         </div>
     </form>
-</div>
 </article>
 <!----- Messaging Tab Content - End:  ------>
 <!------------------------------------------>
@@ -2324,51 +2493,174 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
 <!-- ------------------------------- -->
  
 </div>
-<div class="slds-card health-check-card slds-hide" id="healthCheckTab">
-    <div class="slds-card__header slds-grid">
-        <header class="slds-media slds-media_center slds-has-flexi-truncate">
-            <div class="slds-media__figure">
-                <span class="slds-icon_container slds-icon-utility-health">
-                    <img src="/Assets/healthCheckIcons/health.svg" alt="Health check icon" />
-                </span>
-            </div>
-            <div class="slds-media__body">
-                <h2 class="slds-card__header-title">
-                    <span class="slds-text-heading_small">Setup Health Check</span>
-                </h2>
-            </div>
-        </header>
-    </div>
-    <div class="slds-card__body slds-card__body_inner">
-        <p class="slds-text-body_small">Simulate a real-time Health Check for BYO Setup.</p>
-        <button id="healthCheckButton" class="slds-button slds-button_brand slds-m-top_small slds-button_stretch">
-            Run Health Check
-        </button>
-        
-        <div id="healthCheckResults" style="display: none;">
-            <div class="slds-grid slds-gutters slds-m-top_medium">
-                <div class="slds-col">
-                    <p>Initiated Checks</p>
-                    <p class="slds-text-heading_medium" id="initiatedChecks"></p>
-                </div>
-                <div class="slds-col">
-                    <p>Passed Checks</p>
-                    <p class="slds-text-heading_medium" id="passedChecks"></p>
-                </div>
-                <div class="slds-col">
-                    <p>Failed Checks</p>
-                    <p class="slds-text-heading_medium" id="failedChecks"></p>
-                </div>
-            </div>
-            
-            <div class="slds-accordion" id="checkAccordion">
-                <!-- Accordion sections will be dynamically inserted here -->
-            </div>
-        </div>
-    </div>
-</div>
 </div>
 
+<!-- right panel for health check and frequently used fields -->
+<div class="right-panel slds-size_1-of-1 slds-medium-size_2-of-5 slds-col slds-p-horizontal_medium slds-p-vertical_medium">
+    <article class="slds-card health-check-card slds-hide" id="healthCheckTab">
+        <ul class="slds-accordion">
+            <li class="slds-accordion__list-item">
+                <section class="slds-accordion__section">
+                    <div class="slds-accordion__summary slds-card__header slds-grid">
+                        <button class="slds-accordion__summary-action slds-button slds-p-left_none"
+                            aria-expanded="false" title="Toggle Expanded" aria-controls="health-check-content">
+                            <span class="slds-icon_container slds-icon-utility-health" title="Setup Health Check">
+                                <img src="/Assets/healthCheckIcons/health.svg" alt="Health check icon" />
+                            </span>
+                            <span class="slds-accordion__summary-heading slds-card__header-title slds-truncate">
+                                Setup Health Check
+                            </span>
+                            <img src="/assets/healthCheckIcons/switch.svg" alt="" aria-hidden="true" class="slds-button__icon slds-button__icon_right">
+                            <span class="slds-assistive-text slds-accordion__summary-content">Toggle Expanded</span>
+                        </button>
+                    </div>
+                    <div id="health-check-content" class="slds-accordion__content slds-card__body slds-card__body_inner">
+            <p class="slds-text-body_small">Simulate a real-time Health Check for BYO Setup.</p>
+            <button id="healthCheckButton" class="slds-button slds-button_brand slds-m-top_small slds-button_stretch">
+                Run Health Check
+            </button>
+            
+            <div id="healthCheckResults" style="display: none;">
+                <div class="slds-grid slds-gutters slds-m-top_medium">
+                    <div class="slds-col">
+                        <p>Initiated Checks</p>
+                        <p class="slds-text-heading_medium" id="initiatedChecks"></p>
+                    </div>
+                    <div class="slds-col">
+                        <p>Passed Checks</p>
+                        <p class="slds-text-heading_medium" id="passedChecks"></p>
+                    </div>
+                    <div class="slds-col">
+                        <p>Failed Checks</p>
+                        <p class="slds-text-heading_medium" id="failedChecks"></p>
+                    </div>
+                </div>
+                
+                <div class="slds-accordion" id="checkAccordion">
+                    <!-- Accordion sections will be dynamically inserted here -->
+                </div>
+            </div>
+            </div>
+            </section>
+            </li>
+        </ul>
+    </article>
+    <article class="slds-card">
+        <ul class="slds-accordion">
+            <li class="slds-accordion__list-item">
+                <section class="slds-accordion__section">
+                    <div class="slds-accordion__summary slds-card__header slds-grid">
+                        <button class="slds-accordion__summary-action slds-button"
+                            aria-expanded="false" title="Toggle Expanded" aria-controls="event-log-content">
+                            <span class="slds-icon_container slds-icon-standard-events slds-m-right_small" title="Event Log">
+                                <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                                    <use xlink:href="/Assets/symbols.svg#events"></use>
+                                </svg>
+                                <span class="slds-assistive-text">Event Log</span>
+                            </span>
+                            <span class="slds-accordion__summary-heading slds-card__header-title slds-truncate">
+                                Event Log
+                            </span>
+                            <img src="/assets/healthCheckIcons/switch.svg" alt="" aria-hidden="true" class="slds-button__icon slds-button__icon_right">
+                            <span class="slds-assistive-text slds-accordion__summary-content">Toggle Expanded</span>
+                        </button>
+                    </div>
+                    <div id="event-log-content" class="slds-accordion__content slds-card__body slds-card__body_inner slds-p-bottom--small">
+                        <textarea id="eventLog" disabled placeholder="Response body" class="slds-textarea event-log"></textarea>
+                    </div>
+                </section>
+            </li>
+        </ul>
+    </article>
+    <!-- Frequently Used Fields -->
+    <article class="slds-card frequently-used-fields-card slds-p-bottom_x-small" id="frequentlyUsedFieldsCard">
+        <ul class="slds-accordion">
+            <li class="slds-accordion__list-item">
+                <section class="slds-accordion__section">
+                    <div class="slds-accordion__summary slds-card__header slds-grid">
+                        <button class="slds-accordion__summary-action slds-button"
+                            aria-expanded="false" title="Toggle Expanded" aria-controls="frequently-used-fields-form">
+                            <span class="slds-icon_container slds-icon-standard-account slds-m-right_small" title="Frequently Used Fields">
+                                <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                                    <use xlink:href="/Assets/symbols.svg#entity"></use>
+                                </svg>
+                                <span class="slds-assistive-text">Frequently Used Fields</span>
+                            </span>
+                            <span class="slds-accordion__summary-heading slds-card__header-title slds-truncate">
+                                Frequently Used Fields
+                            </span>
+                            <img src="/assets/healthCheckIcons/switch.svg" alt="" aria-hidden="true" class="slds-button__icon slds-button__icon_right">
+                            <span class="slds-assistive-text slds-accordion__summary-content">Toggle Expanded</span>
+                        </button>
+                    </div>
+                    <div id="frequently-used-fields-form" class="slds-accordion__content slds-card__body slds-card__body_inner slds-form">
+            <div class="slds-form-element slds-form-element_stacked">
+                <label class="slds-form-element__label" for="frequent-fields-userId-id">User Id:</label>
+                <div class="slds-form-element__control slds-grid slds-grid_align-space">
+                    <input type="text" id="frequent-fields-userId-id" readonly placeholder="User Id"
+                        class="slds-input frequent-fields-input slds-col slds-size_10-of-12" with-ff-cache-key="userId" />
+                    <button copy-target="frequent-fields-userId-id"
+                        class="slds-button slds-button_brand slds-col slds-size_2-of-12 frequent-fields-copy-button"
+                        title="Copy User Id">Copy</button>
+                </div>
+            </div>
+            <div class="slds-form-element slds-form-element_stacked">
+                <label class="slds-form-element__label" for="frequent-fields-channel-address-id">Channel Address Identifier:</label>
+                <div class="slds-form-element__control slds-grid">
+                    <input type="text" id="frequent-fields-channel-address-id" readonly placeholder="Channel Address Identifier"
+                        class="slds-input frequent-fields-input slds-col slds-size_10-of-12" with-ff-cache-key="channelAddressIdentifier" />
+                    <button copy-target="frequent-fields-channel-address-id"
+                        class="slds-button slds-button_brand slds-col slds-size_2-of-12 frequent-fields-copy-button"
+                        title="Copy Channel Address Identifier">Copy</button>
+                </div>
+            </div>
+            <div class="slds-form-element slds-form-element_stacked">
+                <label class="slds-form-element__label" for="frequent-fields-end-user-client-id">End User Client Identifier:</label>
+                <div class="slds-form-element__control slds-grid slds-grid_align-space">
+                    <input type="text" id="frequent-fields-end-user-client-id" readonly placeholder="End User Client Identifier"
+                        class="slds-input frequent-fields-input slds-col slds-size_10-of-12" with-ff-cache-key="endUserClientIdentifier" />
+                    <button copy-target="frequent-fields-end-user-client-id"
+                        class="slds-button slds-button_brand slds-col slds-size_2-of-12 frequent-fields-copy-button"
+                        title="Copy End User Client Identifier">Copy</button>
+                </div>
+            </div>
+            <div class="slds-form-element slds-form-element_stacked">
+                <label class="slds-form-element__label" for="frequent-fields-conversation-id">Conversation Identifier:</label>
+                <div class="slds-form-element__control slds-grid slds-grid_align-space">
+                    <input type="text" id="frequent-fields-conversation-id" readonly placeholder="Conversation Identifier"
+                        class="slds-input frequent-fields-input slds-col slds-size_10-of-12" with-ff-cache-key="conversationIdentifier" />
+                    <button copy-target="frequent-fields-conversation-id"
+                        class="slds-button slds-button_brand slds-col slds-size_2-of-12 frequent-fields-copy-button"
+                        title="Copy Conversation Identifier">Copy</button>
+                </div>
+            </div>
+            <div class="slds-form-element slds-form-element_stacked">
+                <label class="slds-form-element__label" for="frequent-fields-work-item-id">Work Item Id:</label>
+                <div class="slds-form-element__control slds-grid slds-grid_align-space">
+                    <input type="text" id="frequent-fields-work-item-id" readonly placeholder="Work Item Id"
+                        class="slds-input frequent-fields-input slds-col slds-size_10-of-12" with-ff-cache-key="workItemId" />
+                    <button copy-target="frequent-fields-work-item-id"
+                        class="slds-button slds-button_brand slds-col slds-size_2-of-12 frequent-fields-copy-button"
+                        title="Copy Work Item Id">Copy</button>
+                </div>
+            </div>
+            <div class="slds-form-element slds-form-element_stacked">
+                <label class="slds-form-element__label" for="frequent-fields-agentwork-id">Agent Work Id:</label>
+                <div class="slds-form-element__control slds-grid slds-grid_align-space">
+                    <input type="text" id="frequent-fields-agentwork-id" readonly placeholder="Agent Work Id"
+                        class="slds-input frequent-fields-input slds-col slds-size_10-of-12" with-ff-cache-key="agentWorkId" />
+                    <button copy-target="frequent-fields-agentwork-id"
+                        class="slds-button slds-button_brand slds-col slds-size_2-of-12 frequent-fields-copy-button"
+                        title="Copy Agent Work Id">Copy</button>
+                </div>
+            </div>
+        </div>
+        </section>
+        </li>
+        </ul>
+        <!-- <footer class="slds-card__footer"></footer> -->
+    </article>
+</div>
 </div>
 <!-- uncomment and replace with line below for use in visualforce page <script src="{!$Resource.remote_control}"></script> -->
 <script src="/assets/remote.bundle.js"></script>

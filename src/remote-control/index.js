@@ -61,11 +61,12 @@ export function  initializeRemoteController(connector) {
                         connector.sdk.updateCallInfoObj(event);
                     break;
                     case Constants.GET_ACTIVE_CALLS: {
+                        const activeCalls = await connector.sdk.getActiveCallsObj();
                         connector.sdk.messageUser(event.fromUsername,
                                                  Constants.ACTIVE_CALLS,
                                                  {
                                                     type: Constants.ACTIVE_CALLS,
-                                                    value: Object.values(connector.sdk.getActiveCallsObj())
+                                                    value: Object.values(activeCalls)
                                                  })
                     }
                     break;
@@ -317,15 +318,21 @@ export function  initializeRemoteController(connector) {
                     case Constants.SHARED_EVENT_TYPE.AFTER_CONVERSATION_WORK_ENDED:
                         publishEvent({eventType: event.data.type, payload: new ACWInfo(event.data.acwInfo)});
                     break;
-                    case Constants.CALL_UPDATED:
-                        call = new PhoneCall({
-                            callInfo: new CallInfo(event.data.payload)
-                        })
+                    case Constants.CALL_UPDATED: {
+                        // Persist the updated callInfo to ALL active calls so subsequent events have correct values
+                        const activeCalls = connector.sdk.getActiveCallsList();
+                        activeCalls.forEach(activeCall => {
+                            Object.assign(activeCall.callInfo, event.data.payload);
+                            connector.sdk.addCall(activeCall);
+                        });
+                        // Use the first active call for the response
+                        call = activeCalls.length > 0 ? activeCalls[0] : new PhoneCall({ callInfo: new CallInfo(event.data.payload) });
                         callResult = new CallResult({call});
                         publishEvent({
                             eventType: event.data.eventType, payload: callResult
                         });
                         break;
+                    }
                     default:
                         publishEvent({eventType: event.data.type});
                     break;

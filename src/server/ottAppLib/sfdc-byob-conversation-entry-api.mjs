@@ -6,7 +6,7 @@ import {getAccessToken} from './sfdc-auth.mjs';
 import path from 'path';
 import {fileURLToPath} from 'url';
 import {convEntryIdsCache, settingsCache} from '../ottAppServer.mjs';
-import {getTimeStampForLoglines} from '../util.mjs';
+import {logger} from '../util.mjs';
 
 // Get config metadata from .env
 const {
@@ -34,8 +34,7 @@ export async function sendSFConversationEntry(orgId,
   let messageType = req.body.messageType;
   const senderRole = authorizationContextType === "ExternalConversationParticipant" ? "Chatbot" : "EndUser";
 
-  console.log(getTimeStampForLoglines()
-    + `Start sendSFConversationEntry().\nmessage="${message}"\ntimestamp=${timestamp}\nmessageType=${messageType}`);
+  logger.info(`Start sendSFConversationEntry().\nmessage="${message}"\ntimestamp=${timestamp}\nmessageType=${messageType}`);
 
   // Send 'TypingStoppedIndicator' request before send the message in order to remove typing indicator if any
   //sendSFTypingIndicatorConversationEntry(orgId,
@@ -71,34 +70,27 @@ export async function sendSFConversationEntry(orgId,
 
   // Node Cache does not support array, so have to put dummy empty string as placeholder
   convEntryIdsCache.set(entryId, '');
-  console.log(getTimeStampForLoglines() + 'headers: ', JSON.stringify(requestHeader));
-  console.log(getTimeStampForLoglines() + 'jsonData: ', JSON.stringify(jsonData));
+  logger.info('sendSFConversationEntry request', { headers: requestHeader, jsonData });
 
-  const responseData = await axios.post(
-    (IS_LOCAL_CONFIG ? SF_SCRT_INSTANCE_URL : settingsCache.get("scrtUrl"))
-    + '/api/v1/conversationEntry',
-    JSON.stringify(jsonData),
-    requestHeader
-  ).then(function (response) {
-    console.log(getTimeStampForLoglines()
-      + `sendSFConversationEntry() success for interactionType "${interactionType}": `,
-      response.data);
+  try {
+    const response = await axios.post(
+      (IS_LOCAL_CONFIG ? SF_SCRT_INSTANCE_URL : settingsCache.get("scrtUrl"))
+      + '/api/v1/conversationEntry',
+      JSON.stringify(jsonData),
+      requestHeader
+    );
+    logger.info(`sendSFConversationEntry() success for interactionType "${interactionType}"`, response.data);
 
     return response.data;
-  })
-    .catch(function (error) {
-      let responseData = error.response.data;
-      console.log(getTimeStampForLoglines()
-        + `sendSFInboundMessageInteraction() error for interactionType "${interactionType}": `,
-        responseData);
+  } catch (error) {
+    let responseData = error.response?.data || { message: error.message, code: error.code || 'UNKNOWN_ERROR' };
+    logger.error(`sendSFInboundMessageInteraction() error for interactionType "${interactionType}"`, responseData);
 
-      getSFMessageDeliveryFailedFormData(entryId, conversationIdentifier,
-        senderIdentifier, senderRole, responseData.code);
+    getSFMessageDeliveryFailedFormData(entryId, conversationIdentifier,
+      senderIdentifier, senderRole, responseData.code);
 
-      return error;
-    });
-
-  return responseData;
+    return error;
+  }
 }
 
 /**
@@ -115,8 +107,7 @@ export async function sendSFConversationEntry(orgId,
 export async function fetchSFConversationEntries(orgId,
                                                  authorizationContext, authorizationContextType, req) {
 
-  console.log(getTimeStampForLoglines()
-    + `Start fetchSFConversationEntries().\nmessage="${message}"\nattachment=${attachment}\ntimestamp=${timestamp}\nmessageType=${messageType}`);
+  logger.info('Start fetchSFConversationEntries()');
 
   const accessToken = await getAccessToken();
   let jsonData = {
@@ -129,25 +120,22 @@ export async function fetchSFConversationEntries(orgId,
   const requestHeader = getInboundMessageRequestHeader(accessToken, orgId,
     authorizationContext, authorizationContextType);
 
-  console.log(getTimeStampForLoglines() + 'jsonData: ', JSON.stringify(jsonData));
+  logger.info('fetchSFConversationEntries request', { jsonData });
 
-  const responseData = await axios.get(
-    (IS_LOCAL_CONFIG ? SF_SCRT_INSTANCE_URL : settingsCache.get("scrtUrl"))
-    + '/api/v1/conversationEntry',
-    JSON.stringify(jsonData),
-    requestHeader
-  ).then(function (response) {
-    console.log(getTimeStampForLoglines()
-      + `fetchConversationEntries() success`, response.data);
+  try {
+    const response = await axios.get(
+      (IS_LOCAL_CONFIG ? SF_SCRT_INSTANCE_URL : settingsCache.get("scrtUrl"))
+      + '/api/v1/conversationEntry',
+      JSON.stringify(jsonData),
+      requestHeader
+    );
+    logger.info('fetchConversationEntries() success', response.data);
 
     return response.data;
-  })
-    .catch(function (error) {
-      console.log(getTimeStampForLoglines() + 'error: ', error);    
-      return error;
-    });
-
-  return responseData;
+  } catch (error) {
+    logger.error('fetchConversationEntries() error', error);    
+    return error;
+  }
 }
 
 /**
@@ -165,8 +153,7 @@ export async function fetchSFConversationEntries(orgId,
 export async function sendSFTypingIndicatorConversationEntry(orgId,
                                                              authorizationContext, authorizationContextType, conversationIdentifier,
                                                              senderRole, senderSubject, entryType) {
-  console.log(getTimeStampForLoglines()
-    + `Start sendSFTypingIndicatorConversationEntry() with entryType: ${entryType}.`);
+  logger.info(`Start sendSFTypingIndicatorConversationEntry() with entryType: ${entryType}.`);
 
   const accessToken = await getAccessToken();
   let jsonData = getSFTypingIndicatorFormData(conversationIdentifier,
@@ -175,31 +162,26 @@ export async function sendSFTypingIndicatorConversationEntry(orgId,
   const requestHeader = getInboundMessageRequestHeader(accessToken, orgId,
     authorizationContext, authorizationContextType);
 
-  const responseData = await axios.post(
-    (IS_LOCAL_CONFIG ? SF_SCRT_INSTANCE_URL : settingsCache.get("scrtUrl"))
-    + '/api/v1/conversationEntry',
-    JSON.stringify(jsonData),
-    requestHeader
-  ).then(function (response) {
+  try {
+    const response = await axios.post(
+      (IS_LOCAL_CONFIG ? SF_SCRT_INSTANCE_URL : settingsCache.get("scrtUrl"))
+      + '/api/v1/conversationEntry',
+      JSON.stringify(jsonData),
+      requestHeader
+    );
     if (response && response.data) {
-      console.log(getTimeStampForLoglines()
-        + 'sendSFTypingIndicatorConversationEntry() success: ',
-        response.data);
+      logger.info('sendSFTypingIndicatorConversationEntry() success', response.data);
     }
 
     return response;
-  })
-    .catch(function (error) {
-      if (error && error.response && error.response.data) {
-        let responseData = error.response.data;
-        console.log(getTimeStampForLoglines()
-          + 'sendSFTypingIndicatorConversationEntry() error: ', responseData);
-      }
+  } catch (error) {
+    if (error && error.response && error.response.data) {
+      let responseData = error.response.data;
+      logger.error('sendSFTypingIndicatorConversationEntry() error', responseData);
+    }
 
-      return error;
-    });
-
-  return responseData;
+    return error;
+  }
 }
 
 /**
@@ -215,7 +197,7 @@ export async function sendSFTypingIndicatorConversationEntry(orgId,
 async function sendSFInboundMessageDeliveryFailedInteraction(entryId,
                                                              interactionType, orgId, authorizationContext, channelAddressIdentifier,
                                                              endUserClientIdentifier, errorCode) {
-  console.log(getTimeStampForLoglines()
+  logger.info(
     + `Start sendSFInboundMessageDeliveryFailedInteraction() for interactionType: "${interactionType}" and entryId: "${entryId}".`);
   const accessToken = await getAccessToken();
   let jsonData = getSFInboundMessageDeliveryFailedFormData(entryId,
@@ -228,28 +210,22 @@ async function sendSFInboundMessageDeliveryFailedInteraction(entryId,
   formData.append('json', JSON.stringify(jsonData),
     {contentType: 'application/json'});
 
-  const responseData = await axios.post(
-    (IS_LOCAL_CONFIG ? SF_SCRT_INSTANCE_URL : settingsCache.get("scrtUrl"))
-    + '/api/v1/interactions',
-    formData,
-    requestHeader
-  ).then(function (response) {
-    console.log(getTimeStampForLoglines()
-      + 'sendSFInboundMessageDeliveryFailedInteraction() success: ',
-      response.data);
+  try {
+    const response = await axios.post(
+      (IS_LOCAL_CONFIG ? SF_SCRT_INSTANCE_URL : settingsCache.get("scrtUrl"))
+      + '/api/v1/interactions',
+      formData,
+      requestHeader
+    );
+    logger.info('sendSFInboundMessageDeliveryFailedInteraction() success', response.data);
     return response.data;
-  })
-    .catch(function (error) {
-      if (error && error.response && error.response.data) {
-        console.log(getTimeStampForLoglines()
-          + 'sendSFInboundMessageDeliveryFailedInteraction() error: ',
-          error.response.data);
-      }
+  } catch (error) {
+    if (error && error.response && error.response.data) {
+      logger.error('sendSFInboundMessageDeliveryFailedInteraction() error', error.response.data);
+    }
 
-      return error;
-    });
-
-  return responseData;
+    return error;
+  }
 }
 
 function getSFTextMessageFormData(entryId, conversationIdentifier,
