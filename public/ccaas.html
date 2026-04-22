@@ -1097,6 +1097,41 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
                         </div>
                     </div>
                 </div>
+                <h4 class="slds-card__header-title slds-m-top_medium">CallBack Information</h4>
+                <div>
+                    <div class="slds-form-element">
+                        <label class="slds-form-element__label" for="callbackNumber">
+                            <abbr class="slds-required" title="required">* </abbr>Callback Number:
+                        </label>
+                        <div class="slds-form-element__control">
+                            <input type="text" id="callbackNumber" placeholder="At least one digit required" inputmode="numeric" pattern="[0-9]+" maxlength="20" class="slds-input" title="Callback number (digits only, required when using Callback with Unified Routing)" required>
+                        </div>
+                        <div class="slds-form-element__help slds-form-element__help_text" id="callbackNumberHelp">Required when using Callback with Unified Routing</div>
+                    </div>
+                </div>
+                <div class="slds-form-element slds-m-top_small">
+                    <div class="slds-form-element__control">
+                        <div class="slds-checkbox">
+                            <input type="checkbox" id="isPreviewCallback" title="Check to set isPreviewCallback to true">
+                            <label class="slds-checkbox__label" for="isPreviewCallback">
+                                <span class="slds-checkbox_faux"></span>
+                                <span class="slds-form-element__label">Is Preview Callback</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="slds-form-element__help slds-form-element__help_text">Check when auto dial should not be triggered</div>
+                </div>
+                <div class="slds-form-element slds-m-top_medium">
+                    <div class="slds-form-element__control">
+                        <div class="slds-checkbox">
+                            <input type="checkbox" id="useRouteFlowApi" name="useRouteFlowApi" title="Use Route Voice Call API for routing">
+                            <label class="slds-checkbox__label" for="useRouteFlowApi">
+                                <span class="slds-checkbox_faux"></span>
+                                <span class="slds-form-element__label">Use Route Flow API</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
