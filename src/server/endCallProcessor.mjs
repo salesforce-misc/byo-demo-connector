@@ -10,8 +10,11 @@
  * Handles all business logic for ending calls, notifications, and storage cleanup
  */
 
+import scvConnectorBase from '@salesforce/scv-connector-base';
 import { getAllParticipants } from './upsertCallProcessor.mjs';
 import { USER_MESSAGE } from './server.mjs';
+
+const { Constants } = scvConnectorBase;
 
 // =============================================================================
 // VALIDATION
@@ -98,7 +101,7 @@ function notifyConsultCallEnded(consultUser, consultCall, reason, sendMessageFn,
  */
 export function notifyCallEnded(username, call, type, reason, storage, sendMessageFn) {
     // Get all participants from all active calls
-    const participants = getAllParticipants(username, storage);
+    const participants = getAllParticipants(storage, username);
 
     if (participants.size === 0) {
         return;
@@ -106,12 +109,12 @@ export function notifyCallEnded(username, call, type, reason, storage, sendMessa
 
     // Check if this is an unmerged consult call (isConsultCall flag is still true)
     const isConsultCall = call.callAttributes?.isConsultCall === true;
-    
+
     if (isConsultCall) {
         // For UNMERGED consult calls, handle initiator and consult user differently
         const initiator = call.fromContact?.id;
         const consultUser = call.toContact?.id; // Use toContact to identify consult user
-        
+
         // Notify initiator - just remove consult card (PARTICIPANT_REMOVED)
         if (initiator && initiator !== username && storage[initiator]) {
             const callToInitiator = { ...call, target: consultUser };
@@ -123,22 +126,26 @@ export function notifyCallEnded(username, call, type, reason, storage, sendMessa
             });
             console.log(`[endCall] Notified initiator ${initiator} about consult call ${call.callId} (PARTICIPANT_REMOVED)`);
         }
-        
+
         // Notify consult user - hangup all (HANGUP)
         if (consultUser && consultUser !== username && storage[consultUser]) {
             notifyConsultCallEnded(consultUser, call, reason, sendMessageFn, storage);
         }
     } else {
         // For merged consult or regular calls, notify all participants
-        call.target = type === 'HANGUP' ? username : call.contact?.id;
-        
+        // INTERNAL_CALL : When we have internal call , we need to flip the target to end the call .
+        // lets say ag1 and ag2 are in a call, and ag1 ends ag2, so it is a HANGUP for ag1 and target becomes ag1.
+        // The target should be ag2, so we flipped it with the additional check.
+        const isInternalCall = call.callType?.toLowerCase() === Constants.CALL_TYPE.INTERNAL_CALL.toLowerCase();
+        call.target = type === 'HANGUP' && !isInternalCall ? username : call.contact?.id;
+
         sendMessageFn({
             targetUsernames: [...participants],
             eventType: USER_MESSAGE.CALL_DESTROYED,
             fromUsername: username,
             data: { call, reason, isHangup: type === 'HANGUP' }
         });
-        
+
         console.log(`[endCall] Notified ${participants.size} participants about ${username} leaving (type: ${type}, callId: ${call.callId})`);
 
         // If hanging up and there's an unmerged consult call, notify consult user separately
