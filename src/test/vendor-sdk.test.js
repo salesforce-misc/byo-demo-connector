@@ -1443,6 +1443,23 @@ describe('Vendor Sdk tests', () => {
 
             expect(vendorSdk.messageUser).not.toBeCalled();
         });
+        it('Should fall back to first active call when call is undefined (global/HID mute path)', async () => {
+            // Covers the `if (!call)` branch in processMute (the global-mute fallback).
+            vendorSdk.state.isMultipartyAllowed = false;
+            const fallbackCall = {
+                callId: 'fallbackCall',
+                callAttributes: { participantType: Constants.PARTICIPANT_TYPE.INITIAL_CALLER },
+                contact: { id: 'contactId123' },
+                callInfo: { renderContactId: 'otherUser' }
+            };
+            jest.spyOn(vendorSdk, 'getActiveCallsList').mockReturnValue([fallbackCall]);
+
+            const result = await vendorSdk.processMute(undefined, true);
+
+            expect(vendorSdk.getActiveCallsList).toHaveBeenCalled();
+            expect(result.isMuted).toBeTruthy();
+        });
+
         it('Should not broadcast the mute message if supervisor', async () => {
             vendorSdk.state.isMultipartyAllowed = true;
             const call = {
