@@ -36,6 +36,7 @@ const app = express();
 app.use(express.json());
 let onlineUsers = new Map(); // username -> socket.id
 let userFullNames = new Map(); // username -> FullName
+let usernameToUserId = new Map(); // username -> userId
 let connectors = new Set();
 
 const server = app.listen(process.env.SERVER_PORT, () => {
@@ -66,8 +67,9 @@ io.on('connection', socket => {
             if (value === socket.id) {
                 console.log('User disconnected: ' + key);
                 onlineUsers.delete(key);
-                connectors.delete(key);
                 userFullNames.delete(key);
+                usernameToUserId.delete(key);
+                connectors.delete(key);
                 ScrtConnector.removeOnlineUserIds(key);
             }
         }
@@ -79,14 +81,14 @@ io.on('connection', socket => {
             onlineUsers.set(data.username, socket.id);
             onlineUsers.set(data.userId, socket.id);
             userFullNames.set(data.username, data.fullName);
-            userFullNames.set(data.userId, data.fullName);
+            usernameToUserId.set(data.username, data.userId);
             ScrtConnector.setOnlineUserIds(data.username, data);
         } else {
             console.log('User went offline: ' + data.username);
             onlineUsers.delete(data.username);
             onlineUsers.delete(data.userId);
             userFullNames.delete(data.username);
-            userFullNames.delete(data.userId);
+            usernameToUserId.delete(data.username);
             ScrtConnector.removeOnlineUserIds(data.username);
         }
         socket.broadcast.emit('onlineUsers', {'users' : Array.from(onlineUsers.keys()), 'userNames' : JSON.stringify(Array.from(userFullNames))});
@@ -250,9 +252,12 @@ app.post('/api/call/upsertCall', (req, res) => {
 
     const callObj = JSON.parse(JSON.stringify(call));
 
-    storage[username]['activeCalls'][call.callId] = call;
-
-    syncConnectionsWithActiveCalls(username, storage[username]['activeCalls'], storage);
+    // Blind transfer: ag1 sets isBlindTransfer=true on the call to signal the server to skip
+    // storing it in ag1's storage, while still triggering CALL_STARTED notification to ag2.
+    if (!call.isBlindTransfer) {
+        storage[username]['activeCalls'][call.callId] = call;
+        syncConnectionsWithActiveCalls(username, storage[username]['activeCalls'], storage);
+    }
 
     res.status(200).json({
         success: true,
@@ -262,8 +267,9 @@ app.post('/api/call/upsertCall', (req, res) => {
     });
 
     if (!skipNotification) {
+        const userId = usernameToUserId.get(username);
         setImmediate(() => {
-            processCallUpdateBusinessLogic(username, callObj, existingCall, storage, sendServerMessage);
+            processCallUpdateBusinessLogic({ username, userId }, callObj, existingCall, storage, sendServerMessage);
         });
     } else {
         console.log(`[Upsert] User ${username} updated call ${callObj.callId} with skipNotification=true (storage updated, no notifications)`);

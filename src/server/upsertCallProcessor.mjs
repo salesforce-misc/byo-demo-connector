@@ -62,14 +62,15 @@ function isCallFromMerge(callObj) {
 // =============================================================================
 
 /**
- * Get participants from a single call (excluding username)
+ * Get participants from a single call (excluding the calling user by both username and userId)
  */
-function getCallParticipants(call, username) {
+function getCallParticipants(call, username, userId) {
+    const isSelf = (id) => id === username || id === userId;
     const participants = new Set();
-    if (call.fromContact?.id && call.fromContact.id !== username) {
+    if (call.fromContact?.id && !isSelf(call.fromContact.id)) {
         participants.add(call.fromContact.id);
     }
-    if (call.toContact?.id && call.toContact.id !== username) {
+    if (call.toContact?.id && !isSelf(call.toContact.id)) {
         participants.add(call.toContact.id);
     }
     return participants;
@@ -78,10 +79,10 @@ function getCallParticipants(call, username) {
 /**
  * Gather all participants from user's active calls
  */
-function getAllParticipants(username, storage) {
+function getAllParticipants(storage, username, userId) {
     const allParticipants = new Set();
     for (let storedCall of Object.values(storage[username]['activeCalls'])) {
-        const callParticipants = getCallParticipants(storedCall, username);
+        const callParticipants = getCallParticipants(storedCall, username, userId);
         callParticipants.forEach(id => allParticipants.add(id));
     }
     return allParticipants;
@@ -98,9 +99,7 @@ function notifyMuteChange(username, callObj, allParticipants, sendMessageFn) {
     const eventType = callObj.callInfo.isMuted ? USER_MESSAGE.MUTE : USER_MESSAGE.UNMUTE;
 
     callObj.callAttributes.target = callObj.callInfo.isGlobal ? username : callObj.contact.id;
-    const usersToNotify = [...allParticipants].filter(userId => {
-        return userId !== username;
-    });
+    const usersToNotify = [...allParticipants];
 
     if (usersToNotify.length > 0) {
         console.log(`${username} sending ${eventType} to ${usersToNotify.length} user(s): ${usersToNotify.join(', ')}`);
@@ -120,9 +119,7 @@ function notifyMuteChange(username, callObj, allParticipants, sendMessageFn) {
  * Notify users about hold toggle
  */
 function notifyHoldChange(username, callObj, allParticipants, sendMessageFn) {
-    const usersToNotify = [...allParticipants].filter(userId => {
-        return userId !== username;
-    });
+    const usersToNotify = [...allParticipants];
 
     if (usersToNotify.length > 0) {
         console.log(`${username} sending ${USER_MESSAGE.HOLD_TOGGLE} to ${usersToNotify.length} user(s): ${usersToNotify.join(', ')}`);
@@ -138,7 +135,7 @@ function notifyHoldChange(username, callObj, allParticipants, sendMessageFn) {
 /**
  * Notify users about state change (typically PARTICIPANT_CONNECTED)
  */
-function notifyStateChange(username, callObj, allParticipants, storage, sendMessageFn) {
+function notifyStateChange(username, userId, callObj, allParticipants, storage, sendMessageFn) {
     if (isCallState(callObj.state, Constants.CALL_STATE.CONNECTED) ||
         isCallState(callObj.state, Constants.CALL_STATE.TRANSFERRED)) {
         if (isCallType(callObj.callType, Constants.CALL_TYPE.CONSULT)) {
@@ -147,13 +144,13 @@ function notifyStateChange(username, callObj, allParticipants, storage, sendMess
                    isCallType(callObj.callType, Constants.CALL_TYPE.ADD_PARTICIPANT)) {
             const initiator = callObj.fromContact?.id;
             if (initiator && storage[initiator]?.activeCalls) {
-                allParticipants = getAllParticipants(initiator, storage);
+                allParticipants = getAllParticipants(storage, initiator, userId);
                 allParticipants.add(initiator);
             }
         }
 
-        const usersToNotify = [...allParticipants].filter(userId => {
-            const userCall = storage[userId]?.activeCalls?.[callObj.callId];
+        const usersToNotify = [...allParticipants].filter(participantId => {
+            const userCall = storage[participantId]?.activeCalls?.[callObj.callId];
             return !userCall || userCall.state !== callObj.state;
         });
 
@@ -162,10 +159,10 @@ function notifyStateChange(username, callObj, allParticipants, storage, sendMess
                 ...callObj,
                 contact: callObj.toContact
             };
-            
+
             console.log(`${username} sending ${USER_MESSAGE.PARTICIPANT_CONNECTED} to ${usersToNotify.length} user(s): ${usersToNotify.join(', ')}`);
             console.log(`  - Call ${callObj.callId}: flipped contact from ${callObj.contact?.name} to ${callToSend.contact?.name}`);
-            
+
             sendMessageFn({
                 targetUsernames: usersToNotify,
                 eventType: USER_MESSAGE.PARTICIPANT_CONNECTED,
@@ -225,8 +222,8 @@ function notifyBargeIn(username, callObj, allParticipants, sendMessageFn) {
 /**
  * Process updates for an existing call (mute, hold, state changes, etc.)
  */
-function processExistingCallUpdate(username, callObj, existingCall, storage, sendMessageFn) {
-    const allParticipants = getAllParticipants(username, storage);
+function processExistingCallUpdate({ username, userId }, callObj, existingCall, storage, sendMessageFn) {
+    const allParticipants = getAllParticipants(storage, username, userId);
 
     // Check for supervisor barge-in
     if (!existingCall.callAttributes?.hasSupervisorBargedIn && callObj.callAttributes?.hasSupervisorBargedIn) {
@@ -250,8 +247,8 @@ function processExistingCallUpdate(username, callObj, existingCall, storage, sen
     }
     // Check for state change
     else if (existingCall.state !== callObj.state) {
-        notifyStateChange(username, callObj, allParticipants, storage, sendMessageFn);
-    }    
+        notifyStateChange(username, userId, callObj, allParticipants, storage, sendMessageFn);
+    }
 }
 
 /**
@@ -271,7 +268,16 @@ function processNewCall(username, callObj, storage, sendMessageFn) {
     const allCallIds = Object.keys(activeCalls);
     const isParticipantAdded = allCallIds.length > 1;
 
-    if (isParticipantAdded) {
+    // A fresh internal call (ag1's only active call) must notify the target directly.
+    // isParticipantAdded would be false in this case, so handle it separately.
+    const isInternalCall = isCallType(callObj.callType, Constants.CALL_TYPE.INTERNAL_CALL) && allCallIds.length === 1;
+    // Blind transfer: originalCallId marks it as a transfer leg, and allCallIds.length === 1
+    // (only parentCall remains) distinguishes it from a warm transfer where the new call IS stored (length > 1).
+    const isBlindTransfer = !!callObj.isBlindTransfer;
+
+    if (isParticipantAdded || isInternalCall || isBlindTransfer) {
+        // For non-MP orgs, we override the phoneNumber here as it is used by SF core to display the contents of the 'phoneNumber'
+        callObj.phoneNumber = callObj.fromContact.name || callObj.fromContact.phoneNumber;
         const eventType = getEventTypeForCall(callObj.callType);
         let sendActiveConferenceCalls = true;
 
@@ -282,7 +288,7 @@ function processNewCall(username, callObj, storage, sendMessageFn) {
             sendActiveConferenceCalls = false;
         }
 
-        const existingCallsOnly = sendActiveConferenceCalls 
+        const existingCallsOnly = sendActiveConferenceCalls
             ? Object.values(activeCalls).filter(call => call.callId !== callObj.callId)
             : [];
 
@@ -305,12 +311,12 @@ function processNewCall(username, callObj, storage, sendMessageFn) {
 /**
  * Main entry point: Process call update business logic
  */
-export function processCallUpdateBusinessLogic(username, callObj, existingCall, storage, sendMessageFn) {
+export function processCallUpdateBusinessLogic({ username, userId }, callObj, existingCall, storage, sendMessageFn) {
     try {
         if (!existingCall) {
             processNewCall(username, callObj, storage, sendMessageFn);
         } else {
-            processExistingCallUpdate(username, callObj, existingCall, storage, sendMessageFn);
+            processExistingCallUpdate({ username, userId }, callObj, existingCall, storage, sendMessageFn);
         }
     } catch (error) {
         console.error(`[processCallUpdateBusinessLogic] Error for user ${username}, call ${callObj.callId}:`, error);
