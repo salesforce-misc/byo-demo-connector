@@ -19,3 +19,7 @@ Open CTI is in maintenance mode and is scheduled for retirement in February 2028
    A sample application and Salesforce metadata for configuring a development org.
 9. [Service Connector API reference](https://developer.salesforce.com/docs/service/service-connector-api/overview)  
    Reference documentation for connector methods, events, capabilities, and SDK contracts.
+10. [Voice Toolkit API component reference](https://developer.salesforce.com/docs/component-library/bundle/lightning-service-cloud-voice-toolkit-api/documentation)  
+    Provides Lightning Web Components with access to Salesforce Voice call controls and real-time telephony events.
+11. [Lightning Message Service](https://developer.salesforce.com/docs/platform/lwc/guide/use-message-channel.html)  
+    Enables communication between Voice Extensions and components elsewhere in the Lightning application, including through the standard `ServiceCloudVoiceMessageChannel__c` channel.
