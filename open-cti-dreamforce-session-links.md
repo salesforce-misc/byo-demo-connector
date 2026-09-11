@@ -23,3 +23,4 @@ Open CTI is in maintenance mode and is scheduled for retirement in February 2028
     Provides Lightning Web Components with access to Salesforce Voice call controls and real-time telephony events.
 11. [Lightning Message Service](https://developer.salesforce.com/docs/platform/lwc/guide/use-message-channel.html)  
     Enables communication between Voice Extensions and components elsewhere in the Lightning application, including through the standard `ServiceCloudVoiceMessageChannel__c` channel.
+12. [Claim a Salesforce User](http://sfdc.co/cti) Claim a Salesforce User, and try Salesforce Voice.
